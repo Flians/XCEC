@@ -27,7 +27,7 @@ void simplify::clean_wire_buf(vector<node *> *miter) {
     for (int i=0; i < len; ++i)
     {
         node *pi = miter->at(i);
-        cout << pi->name << " "<< Str_Value[pi->cell] << endl;
+        // cout << pi->name << " "<< Str_Value[pi->cell] << endl;
         // clean_wire_buf(pi->outs);
 
         if (!(pi->outs)) {

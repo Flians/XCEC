@@ -61,7 +61,7 @@ struct node
     vector<node *> *outs;
     
     // constructor
-    node() : val(L), id(init_id++), vis(0), ins(NULL), outs(NULL) {}
+    node() : val(X), id(init_id++), vis(0), ins(NULL), outs(NULL) {}
     node(string _name, Gtype _cell = WIRE, Value _val = L, int _id = (init_id++)) : name(_name), cell(_cell), val(_val), id(_id), vis(0), ins(NULL), outs(NULL) {}
 
     // destructor
@@ -93,56 +93,70 @@ struct node
 
     /* operator overload */
     // AND
-    const Value operator&(const node &B)
+    node operator&(const node &B)
     {
+        node re;
         if (this->val == L || B.val == L)
         {
-            return L;
+            re.val = L;
         }
         else
         {
-            return max(this->val, B.val);
+            re.val = max(this->val, B.val);
         }
+        cout << this->val << " AND " <<  B.val << " = " << re.val << endl;
+        return re;
     }
 
     // OR
-    Value operator|(const node &B)
+    node operator|(const node &B)
     {
+        node re;
         if (this->val == H || B.val == H)
         {
-            return H;
+            re.val = H;
         }
         else
         {
-            return max(this->val, B.val);
+            re.val = max(this->val, B.val);
         }
+        cout << this->val << " OR " <<  B.val << " = " << re.val << endl;
+        return re;
     }
 
     // XOR
-    Value operator^(const node &B)
+    node operator^(const node &B)
     {
+        node re;
         if (this->val == H && B.val == H)
         {
-            return L;
+            re.val = L;
         }
         else
         {
-            return max(this->val, B.val);
+            re.val = max(this->val, B.val);
         }
+        cout << this->val << " XOR " <<  B.val << " = " << re.val << endl;
+        return re;
     }
 
     // not
-    Value operator~()
+    node operator~()
     {
+        node re;
         switch (this->val)
         {
         case L:
-            return H;
+            re.val = H;
+            break;
         case H:
-            return L;
+            re.val = L;
+            break;
         default:
-            return X;
+            re.val = X;
         }
+        cout << this->val << " not = " << re.val << endl;
+        return re;
     }
 
     bool operator==(const node &B)
