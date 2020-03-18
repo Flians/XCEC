@@ -121,46 +121,72 @@ inline Value EXOR(const Value &A, const Value &B) {
 }
 
 Value calculate(node *g) {
-    Value re = X;
+    node temp_g;
     if (g) {
+        temp_g.val =  g->ins->at(0)->val;
+        vector<node *>::iterator it_ = g->ins->begin() + 1;
+        vector<node *>::iterator it_end = g->ins->end();
         switch (g->cell)
         {
         case AND:
-            re = *(g->ins->at(0))&*(g->ins->at(1));
+            while (it_ != it_end)
+            {
+                temp_g = temp_g&*(*(it_++));
+            }
             break;
         case NAND:
-            re = ~(*(g->ins->at(0))&*(g->ins->at(1)));
+            while (it_ != it_end)
+            {
+                temp_g = temp_g&*(*(it_++));
+            }
+            temp_g = ~temp_g;
             break;
         case OR:
-            re = *(g->ins->at(0))|*(g->ins->at(1));
+            while (it_ != it_end)
+            {
+                temp_g = temp_g|*(*(it_++));
+            }
             break;
         case NOR:
-            re = ~(*(g->ins->at(0))|*(g->ins->at(1)));
+            while (it_ != it_end)
+            {
+                temp_g = temp_g|*(*(it_++));
+            }
+            temp_g = ~temp_g;
             break;
         case XOR:
-            re = *(g->ins->at(0))^*(g->ins->at(1));
+            while (it_ != it_end)
+            {
+                temp_g = temp_g^*(*(it_++));
+            }
             break;
         case NXOR:
-            re = ~(*(g->ins->at(0))^*(g->ins->at(1)));
+            while (it_ != it_end)
+            {
+                temp_g = temp_g^*(*(it_++));
+            }
+            temp_g = ~temp_g;
             break;
         case INV:
-            re = ~*(g->ins->at(0));
+            temp_g = ~temp_g;
             break;
         case BUF:
-            re = g->ins->at(0)->val;
             break;
         case _MUX:
-            re = MUX(g->ins->at(0)->val, g->ins->at(1)->val, g->ins->at(2)->val);
+            temp_g.val = MUX(temp_g.val, (*it_)->val, (*(it_+1))->val);
             break;
         case _DC:
-            re = DC(g->ins->at(0)->val, g->ins->at(1)->val);
+            temp_g.val = DC(temp_g.val, (*it_)->val);
             break;
         case _EXOR:
-            re = EXOR(g->ins->at(0)->val, g->ins->at(1)->val);
+            temp_g.val = EXOR(temp_g.val, (*it_)->val);
             break;
         default:
             break;
         }
+    } else {
+        cout << "The node g is empty in libhead.cpp: Value calculate(node *g)" << endl;
+        exit(-1);
     }
-    return re;
+    return temp_g.val;
 }

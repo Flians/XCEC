@@ -32,6 +32,13 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
     regex pattern("\\w+");
     while (getline(in, line))
     {
+        // the wire is more than one line
+        while (line.find(';')==line.npos) {
+            string tl;
+            if(!getline(in, tl))
+                return;
+            line += tl;
+        }
         string::const_iterator iterStart = line.begin();
         string::const_iterator iterEnd = line.end();
         string item;
@@ -39,7 +46,7 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
         {
             item = match[0];
             iterStart = match[0].second;
-            cout << item << endl;
+            // cout << item << endl;
             if (Value_Str.count(item))
             {
                 Gtype nt = Value_Str[item];
@@ -114,7 +121,7 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
                         {
                             port->ins = new vector<node *>[1];
                         }
-                        cout << "output port: " << port->name << endl;
+                        // cout << "output port: " << port->name << endl;
                         port->ins->push_back(g);
                     }
                     // input port
@@ -144,7 +151,7 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
                         {
                             port->outs = new vector<node *>[2];
                         }
-                        cout << "input port: " << port->name << endl;
+                        // cout << "input port: " << port->name << endl;
                         port->outs->push_back(g);
                     }
                     gates->push_back(g);
