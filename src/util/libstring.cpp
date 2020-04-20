@@ -62,7 +62,6 @@ string libstring::replace(const string &str, const string &src, const string &de
     string::size_type pos = str.find(src);
     while (pos != string::npos)
     {
-        cout << "replacexxx:" << pos_begin << " " << pos << "\n";
         ret.append(str.data() + pos_begin, pos - pos_begin);
         ret += dest;
         pos_begin = pos + 1;
@@ -73,4 +72,12 @@ string libstring::replace(const string &str, const string &src, const string &de
         ret.append(str.begin() + pos_begin, str.end());
     }
     return ret;
+}
+
+int libstring::startsWith(string s, string sub){
+        return s.find(sub)==0?1:0;
+}
+
+int libstring::endsWith(string s,string sub){
+        return s.rfind(sub)==(s.length()-sub.length())?1:0;
 }

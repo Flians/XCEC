@@ -1,5 +1,27 @@
 #include "parser.h"
 
+parser::parser(/* args */)
+{
+    this->constants = new vector<node *>[3];
+    for (Value val = L; val <= X; val = (Value)(val + 1))
+    {
+        node *cont = new node("1'b" + L, _CONSTANT, val);
+        this->constants->push_back(cont);
+    }
+    this->constants->at(2)->name = "1'bx";
+}
+
+parser::~parser()
+{
+    vector<node *>().swap(*this->constants);
+    cout << "The parser is destroyed!" << endl;
+}
+
+vector<node *> *parser::get_constants()
+{
+    return this->constants;
+}
+
 node *parser::find_node_by_name(vector<node *> *nodes, string name)
 {
     for (auto node : *nodes)
@@ -29,13 +51,17 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
 {
     string line;
     smatch match;
-    regex pattern("\\w+");
+    regex pattern("[^ \f\n\r\t\v,;\()]+");
     while (getline(in, line))
     {
+        // skip annotations
+        if (line.find("//") == 0)
+            continue;
         // the wire is more than one line
-        while (line.find(';')==line.npos) {
+        while (line.find(';') == line.npos)
+        {
             string tl;
-            if(!getline(in, tl))
+            if (!getline(in, tl))
                 return;
             line += tl;
         }
@@ -99,24 +125,24 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
                     {
                         item = match[0];
                         iterStart = match[0].second;
-                        node *port = find_node_by_name(wires, item);
-                        if (port)
+                        if (item[0] == '.')
                         {
-                            g->outs->push_back(port);
+                            regex_search(iterStart, iterEnd, match, pattern);
+                            item = match[0];
+                            iterStart = match[0].second;
+                            // cout << item << endl;
                         }
-                        else
+                        node *port = find_node_by_name(wires, item);
+                        if (!port)
                         {
                             port = find_node_by_name(POs, item);
-                            if (port)
-                            {
-                                g->outs->push_back(port);
-                            }
-                            else
+                            if (!port)
                             {
                                 cout << "There are some troubles in parser.cpp for output port: " << line << endl;
                                 exit(-1);
                             }
                         }
+                        g->outs->push_back(port);
                         if (!port->ins)
                         {
                             port->ins = new vector<node *>[1];
@@ -129,24 +155,41 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
                     {
                         item = match[0];
                         iterStart = match[0].second;
-                        node *port = find_node_by_name(wires, item);
-                        if (port)
+                        if (item[0] == '.')
                         {
-                            g->ins->push_back(port);
+                            regex_search(iterStart, iterEnd, match, pattern);
+                            item = match[0];
+                            iterStart = match[0].second;
+                            // cout << item << endl;
+                        }
+                        node *port;
+                        if (item.length() == 4 && libstring::startsWith(item, "1'b"))
+                        {
+                            switch (item[3])
+                            {
+                            case '0':
+                            case '1':
+                                port = this->constants->at(item[3] - '0');
+                                break;
+                            default:
+                                port = this->constants->at(2);
+                                break;
+                            }
                         }
                         else
                         {
-                            port = find_node_by_name(PIs, item);
-                            if (port)
+                            port = find_node_by_name(wires, item);
+                            if (!port)
                             {
-                                g->ins->push_back(port);
-                            }
-                            else
-                            {
-                                cout << "There are some troubles in parser.cpp for input port: " << line << endl;
-                                exit(-1);
+                                port = find_node_by_name(PIs, item);
+                                if (!port)
+                                {
+                                    cout << "There are some troubles in parser.cpp for input port: " << line << endl;
+                                    exit(-1);
+                                }
                             }
                         }
+                        g->ins->push_back(port);
                         if (!port->outs)
                         {
                             port->outs = new vector<node *>[2];

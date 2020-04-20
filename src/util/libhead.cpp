@@ -3,6 +3,7 @@
 /* initial */
 unsigned int init_id = 0;
 map<string, Gtype> Value_Str = {
+    {"constant", _CONSTANT},
     {"input", IN},
     {"output", OUT},
     {"wire", WIRE},
@@ -14,13 +15,13 @@ map<string, Gtype> Value_Str = {
     {"nxor", NXOR},
     {"not", INV},
     {"buf", BUF},
-    {"_MUX", _MUX},
+    {"_HMUX", _HMUX},
     {"_DC", _DC},
-    {"_EXOR", _EXOR},
-    {"constant", _CONSTANT}
+    {"_EXOR", _EXOR}
 };
 
 map<Gtype, string> Str_Value = {
+    {_CONSTANT, "constant"},
     {IN, "input"},
     {OUT, "output"},
     {WIRE, "wire"},
@@ -32,10 +33,9 @@ map<Gtype, string> Str_Value = {
     {NXOR, "nxor"},
     {INV, "not"},
     {BUF, "buf"},
-    {_MUX, "_MUX"},
+    {_HMUX, "_HMUX"},
     {_DC, "_DC"},
-    {_EXOR, "_EXOR"},
-    {_CONSTANT, "constant"}
+    {_EXOR, "_EXOR"}
 };
 
 /* Global operator overload */
@@ -100,7 +100,7 @@ inline Value DC(const Value &C, const Value &D)
     }
 }
 
-inline Value MUX(const Value &S, const Value &I0, const Value &I1)
+inline Value HMUX(const Value &S, const Value &I0, const Value &I1)
 {
     if (S==H)
     {
@@ -172,8 +172,8 @@ Value calculate(node *g) {
             break;
         case BUF:
             break;
-        case _MUX:
-            temp_g.val = MUX(temp_g.val, (*it_)->val, (*(it_+1))->val);
+        case _HMUX:
+            temp_g.val = HMUX(temp_g.val, (*it_)->val, (*(it_+1))->val);
             break;
         case _DC:
             temp_g.val = DC(temp_g.val, (*it_)->val);
