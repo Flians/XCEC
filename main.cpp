@@ -21,6 +21,8 @@ int main(int argc, char *argv[])
         /* simplify the graph */
         simplify sim;
         sim.clean_wire_buf(PIs);
+        // merge PIs and constants
+        PIs->insert(PIs->end(),verilog_parser.get_constants()->begin(),verilog_parser.get_constants()->end());
         /*
         cout << ">>> after: " << endl;
         verilog_parser.printG(miter);

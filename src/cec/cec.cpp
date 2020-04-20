@@ -36,11 +36,16 @@ bool cec::assign_PIs_value(vector<node *> *PIs, int i)
     }
     else
     {
-        for (Value val = L; val < X; val = (Value)(val + 1))
-        {
-            PIs->at(i)->val = val;
+        if (PIs->at(i)->cell == _CONSTANT) {
             if (!assign_PIs_value(PIs, i + 1))
                 return false;
+        } else {
+            for (Value val = L; val < X; val = (Value)(val + 1))
+            {
+                PIs->at(i)->val = val;
+                if (!assign_PIs_value(PIs, i + 1))
+                    return false;
+            }
         }
     }
     return true;

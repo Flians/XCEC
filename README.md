@@ -13,4 +13,5 @@ make
 
 `
 ./XCEC.exe ../test/golden.v ../test/revised.v ../output/output.txt
+./XCEC.exe ../test/case2/gf.v ../test/case2/rf.v ../output/output.txt
 `

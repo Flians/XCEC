@@ -10,6 +10,8 @@
 #include <regex>
 #include <algorithm>
 
+#include "./libstring.h"
+
 #define enumtoCharArr(val) #val
 
 using namespace std;
@@ -19,6 +21,7 @@ extern unsigned int init_id;
 // all cell types
 enum Gtype
 {
+    _CONSTANT,
     IN,
     OUT,
     WIRE,
@@ -30,10 +33,9 @@ enum Gtype
     NXOR,
     INV,
     BUF,
-    _MUX,
-    _DC,
-    _EXOR,
-    _CONSTANT,
+    _HMUX, // _HMUX \U$1 ( .O(\282 ), .I0(1'b1), .I1(\277 ), .S(\281 ));
+    _DC, // _DC \n6_5[9] ( .O(\108 ), .C(\96 ), .D(\107 ));
+    _EXOR
 };
 
 extern map<string, Gtype> Value_Str;
@@ -182,7 +184,7 @@ Value operator~(const Value &);
 Value DC(const Value &C, const Value &D);
 
 /* O=S?I1:I0 */
-Value MUX(const Value &S, const Value &I0, const Value &I1);
+Value HMUX(const Value &S, const Value &I0, const Value &I1);
 
 // exor
 Value EXOR(const Value &, const Value &);
