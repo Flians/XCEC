@@ -13,7 +13,23 @@ parser::parser(/* args */)
 
 parser::~parser()
 {
-    vector<node *>().swap(*this->constants);
+    if (this->constants)
+    {
+        for (auto &con : *this->constants)
+        {
+            if (con->outs)
+            {
+                for (auto &out : *con->outs)
+                {
+                    vector<node *>::iterator temp = find(out->ins->begin(), out->ins->end(), con);
+                    if (temp != out->ins->end())
+                        out->ins->erase(temp);
+                }
+            }
+            delete con;
+        }
+        vector<node *>().swap(*this->constants);
+    }
     cout << "The parser is destroyed!" << endl;
 }
 
@@ -31,7 +47,7 @@ node *parser::find_node_by_name(vector<node *> *nodes, string name)
             return node;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool parser::replace_node_by_name(vector<node *> *nodes, node *new_node)
@@ -54,8 +70,9 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
     regex pattern("[^ \f\n\r\t\v,;\()]+");
     while (getline(in, line))
     {
-        // skip annotations
-        if (line.find("//") == 0)
+        line = libstring::trim(line);
+        // skip annotations and empty line
+        if (line.find("//") == 0 || line.empty())
             continue;
         // the wire is more than one line
         while (line.find(';') == line.npos)
@@ -214,7 +231,7 @@ vector<node *> *parser::build_miter(vector<node *> *PIs_golden, vector<node *> *
     int or_len = POs_revised->size();
     if (ig_len != ir_len || og_len != or_len)
     {
-        perror("The golden Verilog has a different number of PIs and POs than the revised Verilog!");
+        cerr << "The golden Verilog has a different number of PIs and POs than the revised Verilog!" << endl;
         exit(-1);
     }
     // POs
@@ -223,24 +240,28 @@ vector<node *> *parser::build_miter(vector<node *> *PIs_golden, vector<node *> *
     // merge all inputs
     while (iter != PIs_golden->end())
     {
+        // cout << (*iter)->name << endl;
         node *pi = find_node_by_name(PIs_revised, (*iter)->name);
         if (!pi)
         {
-            perror("The input pi in the golden Verilog does not exist in the revised Verilog!");
+            cerr << "The input pi in the golden Verilog does not exist in the revised Verilog!" << endl;
             exit(-1);
         }
         else
         {
-            vector<node *>::iterator it = pi->outs->begin();
-            while (it != pi->outs->end())
+            if (pi->outs)
             {
-                if (!replace_node_by_name((*it)->ins, (*iter)))
+                vector<node *>::iterator it = pi->outs->begin();
+                while (it != pi->outs->end())
                 {
-                    perror("There may be some wrong!");
-                    exit(-1);
+                    if (!replace_node_by_name((*it)->ins, (*iter)))
+                    {
+                        cerr << "There may be some wrong!" << endl;
+                        exit(-1);
+                    }
+                    (*iter)->outs->push_back(*it);
+                    it++;
                 }
-                (*iter)->outs->push_back(*it);
-                it++;
             }
             delete pi;
         }
@@ -255,7 +276,7 @@ vector<node *> *parser::build_miter(vector<node *> *PIs_golden, vector<node *> *
         node *po = find_node_by_name(POs_revised, (*iter)->name);
         if (!po)
         {
-            perror("The output po in the golden Verilog does not exist in the revised Verilog!");
+            cerr << "The output po in the golden Verilog does not exist in the revised Verilog!" << endl;
             exit(-1);
         }
         else
@@ -284,7 +305,7 @@ void parser::parse(ifstream &golden, ifstream &revised, vector<node *> *&PIs, ve
 {
     if (!golden.is_open())
     {
-        perror("The golden can not be open!");
+        cerr << "The golden can not be open!" << endl;
         exit(-1);
     }
     if (!PIs)
@@ -296,7 +317,7 @@ void parser::parse(ifstream &golden, ifstream &revised, vector<node *> *&PIs, ve
 
     if (!revised.is_open())
     {
-        perror("The revised can not be open!");
+        cerr << "The revised can not be open!" << endl;
         exit(-1);
     }
     vector<node *> *PIs_revised = new vector<node *>[32];

@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <queue>
+#include <ctime>
 #include <regex>
 #include <algorithm>
 
@@ -30,11 +31,11 @@ enum Gtype
     OR,
     NOR,
     XOR,
-    NXOR,
+    XNOR,
     INV,
     BUF,
     _HMUX, // _HMUX \U$1 ( .O(\282 ), .I0(1'b1), .I1(\277 ), .S(\281 ));
-    _DC, // _DC \n6_5[9] ( .O(\108 ), .C(\96 ), .D(\107 ));
+    _DC,   // _DC \n6_5[9] ( .O(\108 ), .C(\96 ), .D(\107 ));
     _EXOR
 };
 
@@ -61,35 +62,35 @@ struct node
     int vis;
     vector<node *> *ins;
     vector<node *> *outs;
-    
+
     // constructor
-    node() : val(X), id(init_id++), vis(0), ins(NULL), outs(NULL) {}
-    node(string _name, Gtype _cell = WIRE, Value _val = L, int _id = (init_id++)) : name(_name), cell(_cell), val(_val), id(_id), vis(0), ins(NULL), outs(NULL) {}
+    node() : val(X), id(init_id++), vis(0), ins(nullptr), outs(nullptr) {}
+    node(string _name, Gtype _cell = WIRE, Value _val = L, int _id = (init_id++)) : name(_name), cell(_cell), val(_val), id(_id), vis(0), ins(nullptr), outs(nullptr) {}
 
     // destructor
     // delete this node and all edges connected to this node.
     ~node()
     {
-        cout << "~delete node: " << this->name << endl;
+        // cout << "~delete node: " << this->name << endl;
         if (this->ins)
         {
-            for (auto in : (*ins))
+            for (auto in : (*this->ins))
             {
                 vector<node *>::iterator temp = find(in->outs->begin(), in->outs->end(), this);
                 if (temp != in->outs->end())
                     in->outs->erase(temp);
             }
-            vector<node *>().swap(*ins);
+            vector<node *>().swap(*this->ins);
         }
         if (this->outs)
         {
-            for (auto out : (*outs))
+            for (auto out : (*this->outs))
             {
                 vector<node *>::iterator temp = find(out->ins->begin(), out->ins->end(), this);
                 if (temp != out->ins->end())
                     out->ins->erase(temp);
             }
-            vector<node *>().swap(*outs);
+            vector<node *>().swap(*this->outs);
         }
     }
 
@@ -106,7 +107,7 @@ struct node
         {
             re.val = max(this->val, B.val);
         }
-        cout << this->val << " AND " <<  B.val << " = " << re.val << endl;
+        // cout << this->val << " AND " << B.val << " = " << re.val << endl;
         return re;
     }
 
@@ -122,7 +123,7 @@ struct node
         {
             re.val = max(this->val, B.val);
         }
-        cout << this->val << " OR " <<  B.val << " = " << re.val << endl;
+        // cout << this->val << " OR " << B.val << " = " << re.val << endl;
         return re;
     }
 
@@ -138,7 +139,7 @@ struct node
         {
             re.val = max(this->val, B.val);
         }
-        cout << this->val << " XOR " <<  B.val << " = " << re.val << endl;
+        // cout << this->val << " XOR " << B.val << " = " << re.val << endl;
         return re;
     }
 
@@ -157,7 +158,7 @@ struct node
         default:
             re.val = X;
         }
-        cout << this->val << " not = " << re.val << endl;
+        // cout << this->val << " not = " << re.val << endl;
         return re;
     }
 

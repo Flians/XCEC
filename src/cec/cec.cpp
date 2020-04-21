@@ -36,10 +36,13 @@ bool cec::assign_PIs_value(vector<node *> *PIs, int i)
     }
     else
     {
-        if (PIs->at(i)->cell == _CONSTANT) {
+        if (PIs->at(i)->cell == _CONSTANT)
+        {
             if (!assign_PIs_value(PIs, i + 1))
                 return false;
-        } else {
+        }
+        else
+        {
             for (Value val = L; val < X; val = (Value)(val + 1))
             {
                 PIs->at(i)->val = val;
@@ -55,7 +58,7 @@ void cec::evaluate(vector<node *> *PIs)
 {
     if (!PIs || PIs->size() == 0)
     {
-        perror("The vector PIs is empty!");
+        cerr << "The vector PIs is empty!" << endl;
         exit(-1);
     }
     if (assign_PIs_value(PIs, 0))
@@ -71,28 +74,36 @@ bool cec::evaluate(vector<node *> nodes)
     vector<node *> qu;
     for (auto &g : nodes)
     {
-        for (auto &out : *(g->outs))
+        if (g->outs)
         {
-            ++out->vis;
-            if (out->vis == out->ins->size())
+            for (auto &out : *(g->outs))
             {
-                out->vis = 0;
-                out->val = calculate(out);
-                if (out->outs)
+                ++out->vis;
+                if (out->vis == out->ins->size())
                 {
-                    qu.push_back(out);
-                }
-                else if (out->cell == _EXOR)
-                {
-                    if (out->val == H)
-                        return false;
-                }
-                else
-                {
-                    perror((out->name + " Gate have no outputs!").c_str());
-                    exit(-1);
+                    out->vis = 0;
+                    out->val = calculate(out);
+                    // cout << out->name << " " << out->val << endl;
+                    if (out->outs)
+                    {
+                        qu.push_back(out);
+                    }
+                    else if (out->cell == _EXOR)
+                    {
+                        if (out->val == H)
+                            return false;
+                    }
+                    else
+                    {
+                        cerr << out->name << " Gate have no outputs!" << endl;
+                        exit(-1);
+                    }
                 }
             }
+        }
+        else
+        {
+            cout << "The outputs of the gate " << g->name << " are empty!" << endl;
         }
     }
     return evaluate(qu);
