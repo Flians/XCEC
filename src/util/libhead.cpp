@@ -12,7 +12,7 @@ map<string, Gtype> Value_Str = {
     {"or", OR},
     {"nor", NOR},
     {"xor", XOR},
-    {"nxor", NXOR},
+    {"xnor", XNOR},
     {"not", INV},
     {"buf", BUF},
     {"_HMUX", _HMUX},
@@ -30,7 +30,7 @@ map<Gtype, string> Str_Value = {
     {OR, "or"},
     {NOR, "nor"},
     {XOR, "xor"},
-    {NXOR, "nxor"},
+    {XNOR, "xnor"},
     {INV, "not"},
     {BUF, "buf"},
     {_HMUX, "_HMUX"},
@@ -160,7 +160,7 @@ Value calculate(node *g) {
                 temp_g = temp_g^*(*(it_++));
             }
             break;
-        case NXOR:
+        case XNOR:
             while (it_ != it_end)
             {
                 temp_g = temp_g^*(*(it_++));

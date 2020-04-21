@@ -33,7 +33,6 @@ void simplify::clean_wire_buf(vector<node *> *miter)
     for (int i = 0; i < len; ++i)
     {
         node *pi = miter->at(i);
-
         if (!(pi->outs) || pi->outs->size() == 0)
         {
             continue;
@@ -43,7 +42,7 @@ void simplify::clean_wire_buf(vector<node *> *miter)
         {
             if (pi->ins->size() != 1)
             {
-                perror((pi->name + " WIRE have none or more one inputs in simplify.clean_wire_buf!").c_str());
+                cerr << pi->name << " WIRE have none or more one inputs in simplify.clean_wire_buf!" << endl;
                 exit(-1);
             }
             node *tin = pi->ins->at(0);
@@ -68,7 +67,7 @@ void simplify::clean_wire_buf(vector<node *> *miter)
                 }
                 else
                 {
-                    perror(("There are some wrong in" + pi->name).c_str());
+                    cerr << "There are some wrong in" << pi->name << endl;
                     exit(-1);
                 }
                 ++it;

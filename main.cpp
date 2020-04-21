@@ -6,12 +6,14 @@ using namespace std;
 // cd build && cmake -G"Unix Makefiles && make" ../
 int main(int argc, char *argv[])
 {
+    clock_t startTime,endTime;
+    startTime = clock();
     if (argc >= 4)
     {
         /* parse Verilog files */
         parser verilog_parser;
-        vector<node *> *PIs = NULL;
-        vector<node *> *POs = NULL;
+        vector<node *> *PIs = nullptr;
+        vector<node *> *POs = nullptr;
         verilog_parser.parse(argv[1], argv[2], PIs, POs);
         /*
         cout << ">>> before: " << endl;
@@ -22,7 +24,12 @@ int main(int argc, char *argv[])
         simplify sim;
         sim.clean_wire_buf(PIs);
         // merge PIs and constants
-        PIs->insert(PIs->end(),verilog_parser.get_constants()->begin(),verilog_parser.get_constants()->end());
+        for (auto &con:*verilog_parser.get_constants()) {
+            if (con->outs) {
+                PIs->insert(PIs->end(), con);
+            }
+        }
+        // PIs->insert(PIs->end(),verilog_parser.get_constants()->begin(),verilog_parser.get_constants()->end());
         /*
         cout << ">>> after: " << endl;
         verilog_parser.printG(miter);
@@ -36,5 +43,7 @@ int main(int argc, char *argv[])
     {
         printf("Please input three parameters, like \"./xec <golden.v> <revised.v> <output>\".");
     }
+    cout << "The run time is: " <<(double)(endTime - startTime) / CLOCKS_PER_SEC << "s" << endl;
+    endTime = clock();
     return 0;
 }
