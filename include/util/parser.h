@@ -22,9 +22,12 @@ public:
     // parse the verilog file
     void parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates);
 
+    // parse the revised verilog file
+    void parse_revised(ifstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates);
+
     // build the miter for the Combinational Equivalence Checking (CEC)
     // POs is PIs_golden, and return POs
-    vector<node *> *build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden, vector<node *> *PIs_revised, vector<node *> *POs_revised);
+    void build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden, vector<node *> *PIs_revised, vector<node *> *POs_revised);
 
     // parse the verilog files, and return the PIs and POs of the miter
     void parse(ifstream &golden, ifstream &revised, vector<node *> *&PIs, vector<node *> *&POs);

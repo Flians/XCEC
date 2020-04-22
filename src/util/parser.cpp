@@ -110,7 +110,7 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
                     while (regex_search(iterStart, iterEnd, match, pattern))
                     {
                         item = match[0];
-                        POs->push_back(new node(item, OUT));
+                        POs->push_back(new node(item, _EXOR));
                         iterStart = match[0].second;
                     }
                     break;
@@ -223,7 +223,150 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
     }
 }
 
-vector<node *> *parser::build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden, vector<node *> *PIs_revised, vector<node *> *POs_revised)
+void parser::parse_revised(ifstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates)
+{
+    string line;
+    smatch match;
+    regex pattern("[^ \f\n\r\t\v,;\()]+");
+    while (getline(in, line))
+    {
+        line = libstring::trim(line);
+        // skip annotations and empty line
+        if (line.find("//") == 0 || line.empty())
+            continue;
+        // the sentence is more than one line
+        while (line.find(';') == line.npos)
+        {
+            string tl;
+            if (!getline(in, tl))
+                return;
+            line += tl;
+        }
+        string::const_iterator iterStart = line.begin();
+        string::const_iterator iterEnd = line.end();
+        string item;
+        if (regex_search(iterStart, iterEnd, match, pattern))
+        {
+            item = match[0];
+            iterStart = match[0].second;
+            // cout << item << endl;
+            if (Value_Str.count(item))
+            {
+                Gtype nt = Value_Str[item];
+                switch (nt)
+                {
+                case IN:
+                case OUT:
+                    break;
+                case WIRE:
+                {
+                    while (regex_search(iterStart, iterEnd, match, pattern))
+                    {
+                        item = match[0];
+                        if (!find_node_by_name(PIs, item) && !find_node_by_name(POs, item))
+                            wires->push_back(new node(item, WIRE));
+                        iterStart = match[0].second;
+                    }
+                    break;
+                }
+                default:
+                {
+                    node *g = new node;
+                    g->ins = new vector<node *>[2];
+                    g->outs = new vector<node *>[1];
+                    g->cell = nt;
+                    if (regex_search(iterStart, iterEnd, match, pattern))
+                    {
+                        g->name = match[0];
+                        iterStart = match[0].second;
+                    }
+                    // output port
+                    if (regex_search(iterStart, iterEnd, match, pattern))
+                    {
+                        item = match[0];
+                        iterStart = match[0].second;
+                        if (item[0] == '.')
+                        {
+                            regex_search(iterStart, iterEnd, match, pattern);
+                            item = match[0];
+                            iterStart = match[0].second;
+                            // cout << item << endl;
+                        }
+                        node *port = find_node_by_name(wires, item);
+                        if (!port)
+                        {
+                            port = find_node_by_name(POs, item);
+                            if (!port)
+                            {
+                                cout << "There are some troubles in parser.cpp for output port: " << line << endl;
+                                exit(-1);
+                            }
+                        }
+                        g->outs->push_back(port);
+                        if (!port->ins)
+                        {
+                            port->ins = new vector<node *>[1];
+                        }
+                        // cout << "output port: " << port->name << endl;
+                        port->ins->push_back(g);
+                    }
+                    // input port
+                    while (regex_search(iterStart, iterEnd, match, pattern))
+                    {
+                        item = match[0];
+                        iterStart = match[0].second;
+                        if (item[0] == '.')
+                        {
+                            regex_search(iterStart, iterEnd, match, pattern);
+                            item = match[0];
+                            iterStart = match[0].second;
+                            // cout << item << endl;
+                        }
+                        node *port;
+                        if (item.length() == 4 && libstring::startsWith(item, "1'b"))
+                        {
+                            switch (item[3])
+                            {
+                            case '0':
+                            case '1':
+                                port = this->constants->at(item[3] - '0');
+                                break;
+                            default:
+                                port = this->constants->at(2);
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            port = find_node_by_name(wires, item);
+                            if (!port)
+                            {
+                                port = find_node_by_name(PIs, item);
+                                if (!port)
+                                {
+                                    cout << "There are some troubles in parser.cpp for input port: " << line << endl;
+                                    exit(-1);
+                                }
+                            }
+                        }
+                        g->ins->push_back(port);
+                        if (!port->outs)
+                        {
+                            port->outs = new vector<node *>[2];
+                        }
+                        // cout << "input port: " << port->name << endl;
+                        port->outs->push_back(g);
+                    }
+                    gates->push_back(g);
+                    break;
+                }
+                }
+            }
+        }
+    }
+}
+
+void parser::build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden, vector<node *> *PIs_revised, vector<node *> *POs_revised)
 {
     int ig_len = PIs_golden->size();
     int ir_len = PIs_revised->size();
@@ -234,8 +377,6 @@ vector<node *> *parser::build_miter(vector<node *> *PIs_golden, vector<node *> *
         cerr << "The golden Verilog has a different number of PIs and POs than the revised Verilog!" << endl;
         exit(-1);
     }
-    // POs
-    vector<node *> *POs = new vector<node *>[og_len];
     vector<node *>::iterator iter = PIs_golden->begin();
     // merge all inputs
     while (iter != PIs_golden->end())
@@ -281,24 +422,16 @@ vector<node *> *parser::build_miter(vector<node *> *PIs_golden, vector<node *> *
         }
         else
         {
-            node *exor_ = new node("exor_" + to_string(i++), _EXOR);
-            exor_->ins = new vector<node *>[2];
-            exor_->ins->push_back(*iter);
-            exor_->ins->push_back(po);
-            (*iter)->outs = new vector<node *>[1];
-            (*iter)->outs->push_back(exor_);
-            // change the type of this node from OUT into WIRE
-            (*iter)->cell = WIRE;
-            po->outs = new vector<node *>[1];
-            po->outs->push_back(exor_);
-            po->cell = WIRE;
-            POs->push_back(exor_);
+            (*iter)->cell = _EXOR;
+            for (auto &tg:*po->ins) {
+                (*iter)->ins->push_back(tg);
+                tg->outs->push_back((*iter));
+            }
+            delete po;
         }
         iter++;
     }
-    vector<node *>().swap(*POs_golden);
     vector<node *>().swap(*POs_revised);
-    return POs;
 }
 
 void parser::parse(ifstream &golden, ifstream &revised, vector<node *> *&PIs, vector<node *> *&POs)
@@ -310,23 +443,27 @@ void parser::parse(ifstream &golden, ifstream &revised, vector<node *> *&PIs, ve
     }
     if (!PIs)
         PIs = new vector<node *>[32];
-    vector<node *> *POs_golden = new vector<node *>[32];
-    vector<node *> *wires_golden = new vector<node *>[32];
-    vector<node *> *gates_golden = new vector<node *>[64];
-    parse_verilog(golden, PIs, POs_golden, wires_golden, gates_golden);
+    if (!POs)
+        POs = new vector<node *>[32];
+    vector<node *> *wires_golden = new vector<node *>[128];
+    vector<node *> *gates_golden = new vector<node *>[2048];
+    parse_verilog(golden, PIs, POs, wires_golden, gates_golden);
 
     if (!revised.is_open())
     {
         cerr << "The revised can not be open!" << endl;
         exit(-1);
     }
+    vector<node *> *wires_revised = new vector<node *>[128];
+    vector<node *> *gates_revised = new vector<node *>[2048];
+    /*
     vector<node *> *PIs_revised = new vector<node *>[32];
     vector<node *> *POs_revised = new vector<node *>[32];
-    vector<node *> *wires_revised = new vector<node *>[32];
-    vector<node *> *gates_revised = new vector<node *>[64];
     parse_verilog(revised, PIs_revised, POs_revised, wires_revised, gates_revised);
-
-    POs = build_miter(PIs, POs_golden, PIs_revised, POs_revised);
+    build_miter(PIs, POs, PIs_revised, POs_revised);
+    */
+   
+    parse_revised(revised, PIs, POs, wires_revised, gates_revised);
 }
 
 void parser::parse(const string &path_golden, const string &path_revised, vector<node *> *&PIs, vector<node *> *&POs)

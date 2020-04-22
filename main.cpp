@@ -6,7 +6,7 @@ using namespace std;
 // cd build && cmake -G"Unix Makefiles && make" ../
 int main(int argc, char *argv[])
 {
-    clock_t startTime,endTime;
+    clock_t startTime, endTime;
     startTime = clock();
     if (argc >= 4)
     {
@@ -24,8 +24,10 @@ int main(int argc, char *argv[])
         simplify sim;
         sim.clean_wire_buf(PIs);
         // merge PIs and constants
-        for (auto &con:*verilog_parser.get_constants()) {
-            if (con->outs) {
+        for (auto &con : *verilog_parser.get_constants())
+        {
+            if (con->outs)
+            {
                 PIs->insert(PIs->end(), con);
             }
         }
@@ -43,7 +45,7 @@ int main(int argc, char *argv[])
     {
         printf("Please input three parameters, like \"./xec <golden.v> <revised.v> <output>\".");
     }
-    cout << "The run time is: " <<(double)(endTime - startTime) / CLOCKS_PER_SEC << "s" << endl;
     endTime = clock();
+    cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
     return 0;
 }
