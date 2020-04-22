@@ -83,7 +83,7 @@ bool cec::evaluate(vector<node *> nodes)
                 {
                     out->vis = 0;
                     out->val = calculate(out);
-                    // cout << out->name << " " << out->val << endl;
+                    cout << out->name << " " << out->val << endl;
                     if (out->outs)
                     {
                         qu.push_back(out);
