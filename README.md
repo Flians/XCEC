@@ -1,4 +1,4 @@
-# xcec
+# XCEC
 
 A three-valued logic equivalence checking approach based on FSM
 
@@ -12,6 +12,7 @@ make
 
 ## run
 
-`
+``` shell
+cd build
 ./XCEC.exe ../test/case2/gf.v ../test/case2/rf.v ../output/output_2.txt
-`
+```
