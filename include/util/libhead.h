@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <queue>
 #include <ctime>
 #include <regex>
@@ -164,7 +165,7 @@ struct node
 
     bool operator==(const node &B)
     {
-        return this->name == B.name;
+        return this->id == B.id;
     }
 };
 
@@ -191,5 +192,15 @@ Value HMUX(const Value &S, const Value &I0, const Value &I1);
 Value EXOR(const Value &, const Value &);
 
 Value calculate(node *g);
+
+template <typename T> vector<T> unique_element_in_vector(vector<T> v){
+    typename vector<T>::iterator vector_iterator;
+    sort(v.begin(),v.end());
+    vector_iterator = unique(v.begin(),v.end());
+    if(vector_iterator != v.end()){
+        v.erase(vector_iterator,v.end());
+    }
+    return v;
+}
 
 #endif
