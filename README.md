@@ -1,5 +1,6 @@
 # xcec
-wait ...
+
+A three-valued logic equivalence checking approach based on FSM
 
 ## build
 

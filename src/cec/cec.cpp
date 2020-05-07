@@ -54,7 +54,7 @@ bool cec::assign_PIs_value(vector<node *> *PIs, int i)
     return true;
 }
 
-void cec::evaluate(vector<node *> *PIs)
+void cec::evaluate_from_PIs_to_POs(vector<node *> *PIs)
 {
     if (!PIs || PIs->size() == 0)
     {
@@ -106,5 +106,9 @@ bool cec::evaluate(vector<node *> nodes)
             cout << "The outputs of the gate " << g->name << " are empty!" << endl;
         }
     }
-    return evaluate(qu);
+    return evaluate(unique_element_in_vector(qu));
+}
+
+void cec::evaluate_from_POs_to_PIs(vector<node *> *POs) {
+    
 }

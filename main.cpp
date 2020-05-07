@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
         /* evaluate the graph */
         cec cec_(argv[3]);
-        cec_.evaluate(PIs);
+        cec_.evaluate_from_PIs_to_POs(PIs);
     }
     else
     {
