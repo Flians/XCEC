@@ -12,6 +12,7 @@
 #include <regex>
 #include <algorithm>
 
+#include "z3++.h"
 #include "./libstring.h"
 
 #define enumtoCharArr(val) #val

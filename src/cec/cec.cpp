@@ -112,3 +112,23 @@ bool cec::evaluate(vector<node *> nodes)
 void cec::evaluate_from_POs_to_PIs(vector<node *> *POs) {
     
 }
+
+void cec::evaluate_by_z3(vector<node *> *POs) {
+    z3::context logic;
+    z3::expr x = logic.bv_const("x", 2);
+    z3::expr y = logic.bv_const("y", 2);
+    z3::expr_vector exps(logic);
+    exps.push_back(x);
+    exps.push_back(y);
+
+    z3::optimize z3_opt(logic);
+    z3_opt.add(z3::mk_and(exps));
+
+    z3::check_result sat = z3_opt.check();
+    
+    switch (sat) {
+    case z3::check_result::unsat:   std::cout << "de-Morgan is valid\n"; break;
+    case z3::check_result::sat:     std::cout << "de-Morgan is not valid\n"; break;
+    case z3::check_result::unknown: std::cout << "unknown\n"; break;
+    }
+}

@@ -21,6 +21,8 @@ public:
     void evaluate_from_PIs_to_POs(vector<node *> *PIs);
     // evaluate from POs to PIs
     void evaluate_from_POs_to_PIs(vector<node *> *POs);
+    // evaluate using z3
+    static void evaluate_by_z3(vector<node *> *POs);
 };
 
 #endif

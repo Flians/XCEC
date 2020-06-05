@@ -7,7 +7,7 @@ A three-valued logic equivalence checking approach based on FSM
 ``` shell
 mkdir build && cd build
 cmake ..
-make
+make install
 ```
 
 ## run
