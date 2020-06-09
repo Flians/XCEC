@@ -87,3 +87,90 @@ void simplify::clean_wire_buf(vector<node *> *miter)
         }
     }
 }
+
+void simplify::id_reassign(vector<node *> *PIs)
+{
+    if (PIs->empty())
+    {
+        cout << "PIs is empty in simplify.id_reassign" << endl;
+        return;
+    }
+    map<node *, bool> visit;
+    queue<node *> bfs_record;
+    int i = 0;
+    for (auto pi : (*PIs))
+    {
+        visit[pi] = true;
+        if (pi->name.find("clk") != string::npos && !bfs_record.empty())
+        {
+            pi->id = 0;
+            bfs_record.front()->id = i++;
+            swap(PIs->at(0), pi);
+        }
+        else
+        {
+            pi->id = i++;
+        }
+        bfs_record.push(pi);
+    }
+    while (!bfs_record.empty())
+    {
+        node *item = bfs_record.front();
+        if (item->outs)
+        {
+            for (auto out : (*item->outs))
+            {
+                if (visit.count(out) == 0)
+                {
+                    visit[out] = true;
+                    out->id = i++;
+                    bfs_record.push(out);
+                }
+            }
+        }
+        bfs_record.pop();
+    }
+    init_id = i;
+    visit.clear();
+}
+
+
+vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs)
+{
+    vector<vector<node *> *> *layers = new vector<vector<node *> *>;
+    if (PIs->empty())
+    {
+        cout << "PIs is empty in simplify.layer_assignment" << endl;
+        return layers;
+    }
+    this->id_reassign(PIs);
+    layers->push_back(PIs);
+    int i = 0;
+    vector<int> visit(init_id, 0);
+    vector<int> logic_depth(init_id, 0);
+    // layer assignment, and calculate the logic depth of each node
+    while (i < layers->size())
+    {
+        vector<node *> *layer = new vector<node *>;
+        for (int j = 0; j < layers->at(i)->size(); j++)
+        {
+            if (layers->at(i)->at(j)->outs)
+            {
+                for (auto &out:(*layers->at(i)->at(j)->outs)) {
+                    visit[out->id]++;
+                    logic_depth[out->id] = max(logic_depth[layers->at(i)->at(j)->id] + 1, logic_depth[out->id]);
+                    if (out->ins->size() == visit[out->id])
+                        layer->push_back(out);
+                }
+            }
+        }
+        if (!layer->empty())
+        {
+            layers->push_back(layer);
+        }
+        i++;
+    }
+    vector<int>().swap(visit);
+    vector<int>().swap(logic_depth);
+    return layers;
+}
