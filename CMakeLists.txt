@@ -11,16 +11,25 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+#find OpenSMT library
+get_filename_component(CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/" ABSOLUTE)
+
+find_package(opensmt REQUIRED)
+
+#find GMP
+get_filename_component(CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/" ABSOLUTE)
+
+find_package(GMP REQUIRED)
+
+option(PRODUCE_PROOF "Produce proof" OFF)
+
 #find Z3
 ## otool -L ./build/XCEC 
 ## install_name_tool -change libz3.dylib ./lib/libz3.dylib ./build/XCEC 
 #get_filename_component(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/" ABSOLUTE)
 #find_package(Z3 REQUIRED)
-
-#find Boolector
-#get_filename_component(CMAKE_MODULE_PATH
-#    "${CMAKE_CURRENT_LIST_DIR}/cmake/" ABSOLUTE)
-#find_package(Boolector)
 
 # Check platforms
 if (CMAKE_HOST_WIN32)
@@ -80,7 +89,8 @@ if(WINDOWS)
         target_link_libraries (${PROJECT_NAME} z3 boolector)
     endif()
 else()
-    target_link_libraries (${PROJECT_NAME} boolector z3)
+    target_link_libraries (${PROJECT_NAME} boolector z3 ${OPENSMT_LIBRARY} ${GMP_LIBRARIES} ${GMPXX_LIBRARIES})
+    target_include_directories(${PROJECT_NAME} PUBLIC ${GMP_INCLUDE_DIR})
 endif()
 
 if(WINDOWS)

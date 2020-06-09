@@ -22,7 +22,9 @@ public:
     // evaluate from POs to PIs
     void evaluate_from_POs_to_PIs(vector<node *> *POs);
     // evaluate using z3
-    static void evaluate_by_z3(vector<node *> *POs);
+    static void evaluate_by_z3(vector<node *> *PIs);
+    // evaluate using opensmt
+    static void evaluate_by_opensmt(vector<node *> *PIs);
 };
 
 #endif

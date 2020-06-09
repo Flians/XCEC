@@ -109,26 +109,35 @@ bool cec::evaluate(vector<node *> nodes)
     return evaluate(unique_element_in_vector(qu));
 }
 
-void cec::evaluate_from_POs_to_PIs(vector<node *> *POs) {
-    
+void cec::evaluate_from_POs_to_PIs(vector<node *> *POs)
+{
 }
 
-void cec::evaluate_by_z3(vector<node *> *POs) {
-    z3::context logic;
-    z3::expr x = logic.bv_const("x", 2);
-    z3::expr y = logic.bv_const("y", 2);
-    z3::expr_vector exps(logic);
-    exps.push_back(x);
-    exps.push_back(y);
+void cec::evaluate_by_z3(vector<node *> *PIs)
+{
+    std::cout << "de-Morgan example\n";
 
-    z3::optimize z3_opt(logic);
-    z3_opt.add(z3::mk_and(exps));
+    z3::context c;
 
-    z3::check_result sat = z3_opt.check();
-    
-    switch (sat) {
-    case z3::check_result::unsat:   std::cout << "de-Morgan is valid\n"; break;
-    case z3::check_result::sat:     std::cout << "de-Morgan is not valid\n"; break;
-    case z3::check_result::unknown: std::cout << "unknown\n"; break;
+    z3::expr x = c.bool_const("x");
+    z3::expr y = c.bool_const("y");
+    z3::expr conjecture = (!(x && y)) == (!x || !y);
+
+    z3::solver s(c);
+    // adding the negation of the conjecture as a constraint.
+    s.add(!conjecture);
+    std::cout << s << "\n";
+    std::cout << s.to_smt2() << "\n";
+    switch (s.check())
+    {
+    case z3::unsat:
+        std::cout << "de-Morgan is valid\n";
+        break;
+    case z3::sat:
+        std::cout << "de-Morgan is not valid\n";
+        break;
+    case z3::unknown:
+        std::cout << "unknown\n";
+        break;
     }
 }
