@@ -2,12 +2,13 @@
 #include "cec/simplify.h"
 #include "cec/cec.h"
 
+#include "cec/test-bv.cc"
+
 using namespace std;
 
 // cd build && cmake -G"Unix Makefiles && make" ../
 int main(int argc, char *argv[])
 {
-    cec::evaluate_by_z3(NULL);
     clock_t startTime, endTime;
     startTime = clock();
     if (argc >= 4)
@@ -33,6 +34,7 @@ int main(int argc, char *argv[])
                 PIs->insert(PIs->end(), con);
             }
         }
+        vector<vector<node *> *> *layers = sim.layer_assignment(PIs);
         // PIs->insert(PIs->end(),verilog_parser.get_constants()->begin(),verilog_parser.get_constants()->end());
         /*
         cout << ">>> after: " << endl;
@@ -42,6 +44,7 @@ int main(int argc, char *argv[])
         /* evaluate the graph */
         cec cec_(argv[3]);
         cec_.evaluate_from_PIs_to_POs(PIs);
+        // cec_.evaluate_by_opensmt(layers);
     }
     else
     {

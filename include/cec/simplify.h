@@ -16,6 +16,12 @@ public:
 
     // clean all wires and bufs from PIs to POs
     void clean_wire_buf(vector<node *> *);
+
+    // reassign id of each node
+    void id_reassign(vector<node *> *PIs);
+
+    // layer assigment according to the logic depth, and achieve path balancing
+    vector<vector<node *> *> *layer_assignment(vector<node *> *PIs);
 };
 
 #endif
