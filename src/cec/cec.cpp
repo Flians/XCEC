@@ -115,100 +115,26 @@ void cec::evaluate_from_POs_to_PIs(vector<node *> *POs)
 
 void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
 {
-    cout << "evaluate by z3" << endl;
-    z3::context logic;
-    vector<z3::expr> nodes;
-    for (int i = 0; i < init_id; i++)
-    {
-        z3::expr v = logic.bv_val(to_string(i).c_str(), 2);
-        nodes[i] = v;
-    }
-
-    for (auto &node: (*layers->at(0))) {
-        if (node->cell==_CONSTANT) {
-            nodes[node->id] = logic.bv_const(node->name.c_str(), node->val);
-        }
-    }
-
-    for (int i = 1; i < layers->size(); i++)
-    {
-        vector<node *> *layer = layers->at(i);
-        for (int j = 0; j < layer->size(); j++)
-        {
-            z3::expr_vector inputs(logic);
-            // ayer->at(j)->ins->at(0) is clk
-            for (int k = 0; k < layer->at(j)->ins->size(); k++)
-            {
-                inputs.push_back(nodes[layer->at(j)->ins->at(k)->id]);
-            }
-            z3::expr res(logic);
-            switch (layer->at(j)->cell)
-            {
-            case AND:
-                res = z3::mk_and(inputs);
-                break;
-            case NAND:
-                res = z3::mk_and(inputs);
-                break;
-            case OR:
-                res = z3::mk_and(inputs);
-                break;
-            case NOR:
-                res = z3::mk_and(inputs);
-                break;
-            case XOR:
-                res = z3::mk_and(inputs);
-                break;
-            case XNOR:
-                res = z3::mk_and(inputs);
-                break;
-            case INV:
-                res = z3::mk_and(inputs);
-                break;
-            case _HMUX:
-                res = z3::mk_and(inputs);
-                break;
-            case _DC:
-                res = z3::mk_and(inputs);
-                break;
-            default:
-                if (inputs.size() == 0)
-                {
-                    cerr << "The inputs is empty! in jec.evaluate_opensmt!" << endl;
-                    exit(-1);
-                }
-                res = inputs[0];
-                break;
-            }
-            if (layer->at(j)->outs)
-            {
-                for (auto &out : (*layer->at(j)->outs))
-                {
-                    nodes[out->id] = res;
-                }
-            }
-        }
-    }
-
-    z3::expr_vector outputs(logic);
-    for (auto &output : (*layers->back()))
-    {
-        outputs.push_back(nodes[output->id]);
-    }
-    z3::expr result = z3::mk_and(outputs);
-    z3::solver s(logic);
-    s.add(!result);
-    cout << "Running check!" << endl;
-    z3::check_result r = s.check();
-
-    if (r == z3::sat)
-        this->fout << "EQ" << endl;
-    else if (r == z3::unsat)
-        this->fout << "NEQ" << endl;
-    else if (r == z3::unknown)
-        this->fout << "unknown" << endl;
-    else
-        this->fout << "error" << endl;
+    std::cout << "enumeration sort example\n";
+    z3::context ctx;
+    const char * enum_names[] = { "a", "b", "c" };
+    z3::func_decl_vector enum_consts(ctx);
+    z3::func_decl_vector enum_testers(ctx);
+    z3::sort s = ctx.enumeration_sort("enumT", 3, enum_names, enum_consts, enum_testers);
+    // enum_consts[0] is a func_decl of arity 0.
+    // we convert it to an expression using the operator()
+    z3::expr a = enum_consts[0]();
+    z3::expr b = enum_consts[1]();
+    z3::expr x = ctx.constant("x", s);
+    z3::expr test = (x==a) && (x==b);
+    std::cout << "1: " << test << std::endl;
+    z3::tactic qe(ctx, "ctx-solver-simplify");
+    z3::goal g(ctx);
+    g.add(test);
+    z3::expr res(ctx);
+    z3::apply_result result_of_elimination = qe.apply(g);
+    z3::goal result_goal = result_of_elimination[0];
+    std::cout << "2: " << result_goal.as_expr() << std::endl;
 }
 
 void cec::evaluate_by_opensmt(vector<vector<node *> *> *layers) {
