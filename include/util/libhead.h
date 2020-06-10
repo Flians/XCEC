@@ -1,21 +1,21 @@
 #ifndef _LIBHEAD_H_
 #define _LIBHEAD_H_
 
-#include <iostream>
+#include <algorithm>
+#include <ctime>
 #include <fstream>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <regex>
+#include <set>
 #include <string>
 #include <vector>
-#include <map>
-#include <set>
-#include <queue>
-#include <ctime>
-#include <regex>
-#include <algorithm>
 
-#include <z3/z3++.h>
-#include <opensmt/opensmt2.h>
+#include "libstring.h"
 #include <opensmt/BVLogic.h>
-#include "./libstring.h"
+#include <opensmt/opensmt2.h>
+#include <z3/z3++.h>
 
 #define enumtoCharArr(val) #val
 
@@ -198,14 +198,30 @@ Value EXOR(const Value &, const Value &);
 
 Value calculate(node *g);
 
-template <typename T> vector<T> unique_element_in_vector(vector<T> v){
+template <typename T>
+vector<T> unique_element_in_vector(vector<T> v)
+{
     typename vector<T>::iterator vector_iterator;
-    sort(v.begin(),v.end());
-    vector_iterator = unique(v.begin(),v.end());
-    if(vector_iterator != v.end()){
-        v.erase(vector_iterator,v.end());
+    sort(v.begin(), v.end());
+    vector_iterator = unique(v.begin(), v.end());
+    if (vector_iterator != v.end())
+    {
+        v.erase(vector_iterator, v.end());
     }
     return v;
 }
-
+extern z3::context logic;
+extern z3::expr z3_zero;
+extern z3::expr z3_one;
+extern z3::expr z3_x;
+z3::expr z3_mk_and(const z3::expr &, const z3::expr &);
+z3::expr z3_mk_and(vector<z3::expr> &);
+z3::expr z3_mk_or(const z3::expr &, const z3::expr &);
+z3::expr z3_mk_or(vector<z3::expr> &);
+z3::expr z3_mk_xor(const z3::expr &, const z3::expr &);
+z3::expr z3_mk_xor(vector<z3::expr> &);
+z3::expr z3_mk_not(const z3::expr &);
+z3::expr z3_mk_DC(const z3::expr &C, const z3::expr &D);
+z3::expr z3_mk_HMUX(const z3::expr &S, const z3::expr &I0, const z3::expr &I1);
+z3::expr z3_mk_exor(const z3::expr &, const z3::expr &);
 #endif

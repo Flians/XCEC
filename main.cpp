@@ -7,7 +7,6 @@ using namespace std;
 // cd build && cmake -G"Unix Makefiles && make" ../
 int main(int argc, char *argv[])
 {
-    cec::evaluate_by_z3(nullptr);
     clock_t startTime, endTime;
     startTime = clock();
     if (argc >= 4)
@@ -42,8 +41,8 @@ int main(int argc, char *argv[])
 
         /* evaluate the graph */
         cec cec_(argv[3]);
-        cec_.evaluate_from_PIs_to_POs(PIs);
-        // cec_.evaluate_by_opensmt(layers);
+        // cec_.evaluate_from_PIs_to_POs(PIs);
+        cec_.evaluate_by_z3(layers);
     }
     else
     {

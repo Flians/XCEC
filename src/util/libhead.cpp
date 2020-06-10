@@ -17,8 +17,7 @@ map<string, Gtype> Value_Str = {
     {"buf", BUF},
     {"_HMUX", _HMUX},
     {"_DC", _DC},
-    {"_EXOR", _EXOR}
-};
+    {"_EXOR", _EXOR}};
 
 map<Gtype, string> Str_Value = {
     {_CONSTANT, "constant"},
@@ -35,14 +34,12 @@ map<Gtype, string> Str_Value = {
     {BUF, "buf"},
     {_HMUX, "_HMUX"},
     {_DC, "_DC"},
-    {_EXOR, "_EXOR"}
-};
+    {_EXOR, "_EXOR"}};
 
 map<Value, string> Const_Str = {
     {L, "1'b0"},
     {H, "1'b1"},
-    {X, "1'bx"}
-};
+    {X, "1'bx"}};
 
 /* Global operator overload */
 Value operator&(const Value &A, const Value &B)
@@ -108,28 +105,34 @@ inline Value DC(const Value &C, const Value &D)
 
 inline Value HMUX(const Value &S, const Value &I0, const Value &I1)
 {
-    if (S==H)
+    if (S == H)
     {
         return I0 == I1 ? I0 : X;
-    } else
+    }
+    else
     {
-        return S==L?I0:I1;
+        return S == L ? I0 : I1;
     }
 }
 
-inline Value EXOR(const Value &A, const Value &B) {
-    if (A==X || A==B) {
+inline Value EXOR(const Value &A, const Value &B)
+{
+    if (A == X || A == B)
+    {
         return L;
-    } else
+    }
+    else
     {
         return H;
     }
 }
 
-Value calculate(node *g) {
+Value calculate(node *g)
+{
     node temp_g;
-    if (g) {
-        temp_g.val =  g->ins->at(0)->val;
+    if (g)
+    {
+        temp_g.val = g->ins->at(0)->val;
         vector<node *>::iterator it_ = g->ins->begin() + 1;
         vector<node *>::iterator it_end = g->ins->end();
         switch (g->cell)
@@ -137,39 +140,39 @@ Value calculate(node *g) {
         case AND:
             while (it_ != it_end)
             {
-                temp_g = temp_g&*(*(it_++));
+                temp_g = temp_g & *(*(it_++));
             }
             break;
         case NAND:
             while (it_ != it_end)
             {
-                temp_g = temp_g&*(*(it_++));
+                temp_g = temp_g & *(*(it_++));
             }
             temp_g = ~temp_g;
             break;
         case OR:
             while (it_ != it_end)
             {
-                temp_g = temp_g|*(*(it_++));
+                temp_g = temp_g | *(*(it_++));
             }
             break;
         case NOR:
             while (it_ != it_end)
             {
-                temp_g = temp_g|*(*(it_++));
+                temp_g = temp_g | *(*(it_++));
             }
             temp_g = ~temp_g;
             break;
         case XOR:
             while (it_ != it_end)
             {
-                temp_g = temp_g^*(*(it_++));
+                temp_g = temp_g ^ *(*(it_++));
             }
             break;
         case XNOR:
             while (it_ != it_end)
             {
-                temp_g = temp_g^*(*(it_++));
+                temp_g = temp_g ^ *(*(it_++));
             }
             temp_g = ~temp_g;
             break;
@@ -179,7 +182,7 @@ Value calculate(node *g) {
         case BUF:
             break;
         case _HMUX:
-            temp_g.val = HMUX(temp_g.val, (*it_)->val, (*(it_+1))->val);
+            temp_g.val = HMUX(temp_g.val, (*it_)->val, (*(it_ + 1))->val);
             break;
         case _DC:
             temp_g.val = DC(temp_g.val, (*it_)->val);
@@ -190,9 +193,86 @@ Value calculate(node *g) {
         default:
             break;
         }
-    } else {
+    }
+    else
+    {
         cout << "The node g is empty in libhead.cpp: Value calculate(node *g)" << endl;
         exit(-1);
     }
     return temp_g.val;
+}
+
+z3::context logic;
+z3::expr z3_zero = logic.bv_val(0, 2);
+z3::expr z3_one = logic.bv_val(1, 2);
+z3::expr z3_x = logic.bv_val(2, 2);
+
+z3::expr z3_mk_and(const z3::expr &A, const z3::expr &B)
+{
+    return z3::ite(A == z3_zero || B == z3_zero, z3_zero, z3::max(A, B));
+}
+
+z3::expr z3_mk_and(vector<z3::expr> &exprs)
+{
+    z3::expr res = exprs[0];
+    vector<z3::expr>::iterator it_ = exprs.begin() + 1;
+    vector<z3::expr>::iterator it_end = exprs.end();
+    while (it_ != it_end)
+    {
+        res = z3_mk_and(res, *(it_++));
+    }
+    return res;
+}
+
+z3::expr z3_mk_or(const z3::expr &A, const z3::expr &B)
+{
+    return z3::ite(A == z3_one || B == z3_one, z3_one, z3::max(A, B));
+}
+
+z3::expr z3_mk_or(vector<z3::expr> &exprs)
+{
+    z3::expr res = exprs[0];
+    vector<z3::expr>::iterator it_ = exprs.begin() + 1;
+    vector<z3::expr>::iterator it_end = exprs.end();
+    while (it_ != it_end)
+    {
+        res = z3_mk_or(res, *(it_++));
+    }
+    return res;
+}
+
+z3::expr z3_mk_xor(const z3::expr &A, const z3::expr &B)
+{
+    return z3::ite(A == z3_one && B == z3_one, z3_zero, z3::max(A, B));
+}
+
+z3::expr z3_mk_xor(vector<z3::expr> &exprs)
+{
+    z3::expr res = exprs[0];
+    vector<z3::expr>::iterator it_ = exprs.begin() + 1;
+    vector<z3::expr>::iterator it_end = exprs.end();
+    while (it_ != it_end)
+    {
+        res = z3_mk_xor(res, *(it_++));
+    }
+    return res;
+}
+
+z3::expr z3_mk_not(const z3::expr &A)
+{
+    return z3::ite(A == z3_zero, z3_one, z3::ite(A == z3_one, z3_zero, z3_x));
+}
+
+z3::expr z3_mk_DC(const z3::expr &C, const z3::expr &D)
+{
+    return z3::ite(D == z3_zero, C, z3_x);
+}
+
+z3::expr z3_mk_HMUX(const z3::expr &S, const z3::expr &I0, const z3::expr &I1)
+{
+    return z3::ite(S == z3_one, z3::ite(I0 == I1, I0, z3_x), z3::ite(S == z3_zero, I0, I1));
+}
+
+z3::expr z3_mk_exor(const z3::expr &A, const z3::expr &B){
+    return z3::ite(A== X || A==B, z3_zero, z3_one);
 }
