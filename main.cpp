@@ -2,8 +2,6 @@
 #include "cec/simplify.h"
 #include "cec/cec.h"
 
-#include "cec/test-bv.cc"
-
 using namespace std;
 
 // cd build && cmake -G"Unix Makefiles && make" ../

@@ -10,9 +10,9 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/XCEC",
             "args": [
-                "./test/golden/gf_c1908.v",
-                "./test/golden/gf_c1908.v",
-                "./test/output/output_c1908.txt"
+                "./test/golden/gf.v",
+                "./test/revise/rf.v",
+                "./test/output/output.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

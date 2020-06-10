@@ -115,26 +115,26 @@ void cec::evaluate_from_POs_to_PIs(vector<node *> *POs)
 
 void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
 {
-    std::cout << "enumeration sort example\n";
-    z3::context ctx;
-    const char * enum_names[] = { "a", "b", "c" };
-    z3::func_decl_vector enum_consts(ctx);
-    z3::func_decl_vector enum_testers(ctx);
-    z3::sort s = ctx.enumeration_sort("enumT", 3, enum_names, enum_consts, enum_testers);
-    // enum_consts[0] is a func_decl of arity 0.
-    // we convert it to an expression using the operator()
-    z3::expr a = enum_consts[0]();
-    z3::expr b = enum_consts[1]();
-    z3::expr x = ctx.constant("x", s);
-    z3::expr test = (x==a) && (x==b);
-    std::cout << "1: " << test << std::endl;
-    z3::tactic qe(ctx, "ctx-solver-simplify");
-    z3::goal g(ctx);
-    g.add(test);
-    z3::expr res(ctx);
-    z3::apply_result result_of_elimination = qe.apply(g);
-    z3::goal result_goal = result_of_elimination[0];
-    std::cout << "2: " << result_goal.as_expr() << std::endl;
+    z3::context c;
+    z3::expr x = c.int_const("x");
+    z3::expr y = c.int_const("y");
+    z3::solver s(c);
+
+    s.add(x >= 1);
+    s.add(y < x + 3);
+    if (s.check() == z3::unsat) {
+        std::cout << "QE" << "\n";
+    }
+    else {
+        std::cout << "NQE" << "\n";
+        z3::model m = s.get_model();
+        // traversing the model
+        for (unsigned i = 0; i < m.size(); i++) {
+            z3::func_decl v = m[i];
+            assert(v.arity() == 0);
+            std::cout << v.name() << " = " << m.get_const_interp(v) << "\n";
+        }
+    }
 }
 
 void cec::evaluate_by_opensmt(vector<vector<node *> *> *layers) {
