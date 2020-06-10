@@ -9,6 +9,7 @@ using namespace std;
 // cd build && cmake -G"Unix Makefiles && make" ../
 int main(int argc, char *argv[])
 {
+    cec::evaluate_by_z3(nullptr);
     clock_t startTime, endTime;
     startTime = clock();
     if (argc >= 4)
