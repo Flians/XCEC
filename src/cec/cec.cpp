@@ -114,25 +114,105 @@ void cec::evaluate_from_POs_to_PIs(vector<node *> *POs)
 }
 
 void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
-{
-    z3::context c;
-    z3::expr x = c.int_const("x");
-    z3::expr y = c.int_const("y");
-    z3::solver s(c);
+{   
+    vector<z3::expr> nodes;
+    for (int i = 0; i < init_id; i++)
+    {
+        z3::expr exp(logic);
+        nodes.push_back(exp);
+    }
+    for (auto &node: (*layers->at(0))) {
+        if (node->cell==_CONSTANT) {
+            nodes[node->id] = logic.bv_val(node->val, 2);
+        } else {
+            nodes[node->id] = logic.bv_const(node->name.c_str(), 2);
+        }
+    }
+    
+    for (int i = 1; i < layers->size(); i++)
+    {
+        vector<node *> *layer = layers->at(i);
+        for (int j = 0; j < layer->size(); j++)
+        {
+            vector<z3::expr> inputs;
+            for (int k = 0; k < layer->at(j)->ins->size(); k++)
+            {
+                inputs.push_back(nodes[layer->at(j)->ins->at(k)->id]);
+            }
+            z3::expr res(logic);
+            switch (layer->at(j)->cell)
+            {
+            case AND:
+                res = z3_mk_and(inputs);
+                break;
+            case NAND:
+                res = z3_mk_not(z3_mk_and(inputs));
+                break;
+            case OR:
+                res = z3_mk_or(inputs);
+                break;
+            case NOR:
+                res = z3_mk_not(z3_mk_or(inputs));
+                break;
+            case XOR:
+                res = z3_mk_xor(inputs);
+                break;
+            case XNOR:
+                res = z3_mk_not(z3_mk_xor(inputs));
+                break;
+            case INV:
+                res = z3_mk_not(inputs[0]);
+                break;
+            case _HMUX:
+                res = z3_mk_HMUX(inputs[0], inputs[1], inputs[2]);
+                break;
+            case _DC:
+                res = z3_mk_DC(inputs[0], inputs[1]);
+                break;
+            case _EXOR:
+                res = z3_mk_exor(inputs[0], inputs[1]);
+                break;
+            default:
+                if (inputs.size() == 0)
+                {
+                    cerr << "The inputs is empty! in jec.evaluate_z3!" << endl;
+                    exit(-1);
+                }
+                res = inputs[0];
+                break;
+            }
+            if (layer->at(j)->outs)
+            {
+                for (auto &out : (*layer->at(j)->outs))
+                {
+                    nodes[out->id] = res;
+                }
+            } else {
+                nodes[layer->at(j)->id] = res;
+            }
+        }
+    }
 
-    s.add(x >= 1);
-    s.add(y < x + 3);
+    z3::expr result = z3_zero;
+    for (auto &output : (*layers->back()))
+    {
+        result = z3_mk_or(result, nodes[output->id]);
+    }
+
+    z3::solver s(logic);
+    s.add(result != z3_zero);
+    std::cout << "conjecture 2:\n" << result << "\n";
     if (s.check() == z3::unsat) {
-        std::cout << "QE" << "\n";
+        this->fout << "QE" << "\n";
     }
     else {
-        std::cout << "NQE" << "\n";
+        this->fout << "NQE" << "\n";
         z3::model m = s.get_model();
         // traversing the model
         for (unsigned i = 0; i < m.size(); i++) {
             z3::func_decl v = m[i];
             assert(v.arity() == 0);
-            std::cout << v.name() << " = " << m.get_const_interp(v) << "\n";
+            this->fout << v.name() << " = " << m.get_const_interp(v) << "\n";
         }
     }
 }
