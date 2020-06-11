@@ -181,15 +181,7 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
                 res = inputs[0];
                 break;
             }
-            if (layer->at(j)->outs)
-            {
-                for (auto &out : (*layer->at(j)->outs))
-                {
-                    nodes[out->id] = res;
-                }
-            } else {
-                nodes[layer->at(j)->id] = res;
-            }
+            nodes[layer->at(j)->id] = res;
         }
     }
 
@@ -201,18 +193,18 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
 
     z3::solver s(logic);
     s.add(result != z3_zero);
-    std::cout << "conjecture 2:\n" << result << "\n";
     if (s.check() == z3::unsat) {
         this->fout << "QE" << "\n";
     }
     else {
         this->fout << "NQE" << "\n";
         z3::model m = s.get_model();
+        z3::set_param("pp.decimal", true);
         // traversing the model
         for (unsigned i = 0; i < m.size(); i++) {
             z3::func_decl v = m[i];
-            assert(v.arity() == 0);
-            this->fout << v.name() << " = " << m.get_const_interp(v) << "\n";
+            // assert(v.arity() == 0);
+            this->fout << v.name() << " " << m.get_const_interp(v).get_numeral_int() << "\n";
         }
     }
 }
