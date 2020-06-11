@@ -172,6 +172,26 @@ struct node
     {
         return this->id == B.id;
     }
+
+    bool operator<(const node &B)
+    {
+        if (this->outs)
+        {
+            if (B.outs)
+            {
+                return this->outs->size() < B.outs->size();
+            }
+            return false;
+        }
+        else
+        {
+            if (B.outs)
+            {
+                return true;
+            }
+            return this->id < B.id;
+        }
+    }
 };
 
 /* Global operator overload */

@@ -472,6 +472,7 @@ void parser::parse(const string &path_golden, const string &path_revised, vector
     parse(golden, revised, PIs, POs);
     golden.close();
     revised.close();
+    cout << "The parsing process is over!" << endl;
 }
 
 void parser::printG(vector<node *> *nodes)
