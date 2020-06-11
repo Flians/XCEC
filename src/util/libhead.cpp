@@ -273,6 +273,17 @@ z3::expr z3_mk_HMUX(const z3::expr &S, const z3::expr &I0, const z3::expr &I1)
     return z3::ite(S == z3_one, z3::ite(I0 == I1, I0, z3_x), z3::ite(S == z3_zero, I0, I1));
 }
 
-z3::expr z3_mk_exor(const z3::expr &A, const z3::expr &B){
-    return z3::ite(A== X || A==B, z3_zero, z3_one);
+z3::expr z3_mk_exor(const z3::expr &A, const z3::expr &B)
+{
+    return z3::ite(A == X || A == B, z3_zero, z3_one);
+}
+
+void cleanVP(vector<node *> *vecPtr)
+{
+    vector<node *>::iterator it = vecPtr->begin();
+    for (; it != vecPtr->end();)
+    {
+        delete * it;
+        it = vecPtr->erase(it);
+    }
 }

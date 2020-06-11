@@ -75,7 +75,7 @@ struct node
     // delete this node and all edges connected to this node.
     ~node()
     {
-        // cout << "~delete node: " << this->name << endl;
+        cout << "~delete node: " << this->name << endl;
         if (this->ins)
         {
             for (auto in : (*this->ins))
@@ -242,4 +242,6 @@ z3::expr z3_mk_not(const z3::expr &);
 z3::expr z3_mk_DC(const z3::expr &C, const z3::expr &D);
 z3::expr z3_mk_HMUX(const z3::expr &S, const z3::expr &I0, const z3::expr &I1);
 z3::expr z3_mk_exor(const z3::expr &, const z3::expr &);
+
+extern void cleanVP(vector<node *> *vp);
 #endif

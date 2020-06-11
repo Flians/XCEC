@@ -7,10 +7,10 @@ using namespace std;
 // cd build && cmake -G"Unix Makefiles && make" ../
 int main(int argc, char *argv[])
 {
-    clock_t startTime, endTime;
-    startTime = clock();
     if (argc >= 4)
     {
+        clock_t startTime, endTime;
+        startTime = clock();
         /* parse Verilog files */
         parser verilog_parser;
         vector<node *> *PIs = nullptr;
@@ -46,12 +46,16 @@ int main(int argc, char *argv[])
         cec cec_(argv[3]);
         // cec_.evaluate_from_PIs_to_POs(PIs);
         cec_.evaluate_by_z3(layers);
+        endTime = clock();
+        cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
+        /* free up space */
+        for (auto &item : *layers)
+            cleanVP(item);
+        vector<vector<node *> *>().swap(*layers);
     }
     else
     {
         printf("Please input three parameters, like \"./xec <golden.v> <revised.v> <output>\".");
     }
-    endTime = clock();
-    cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
     return 0;
 }
