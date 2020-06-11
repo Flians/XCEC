@@ -11,26 +11,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-#find OpenSMT library
-get_filename_component(CMAKE_MODULE_PATH
-    "${CMAKE_CURRENT_LIST_DIR}/cmake/" ABSOLUTE)
-
-find_package(opensmt REQUIRED)
-
-#find GMP
-get_filename_component(CMAKE_MODULE_PATH
-    "${CMAKE_CURRENT_LIST_DIR}/cmake/" ABSOLUTE)
-
-find_package(GMP REQUIRED)
-
-option(PRODUCE_PROOF "Produce proof" OFF)
-
-#find Z3
-## otool -L ./build/XCEC 
-## install_name_tool -change libz3.dylib ./lib/libz3.dylib ./build/XCEC 
-#get_filename_component(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/" ABSOLUTE)
-#find_package(Z3 REQUIRED)
-
 # Check platforms
 if (CMAKE_HOST_WIN32)
     set(WINDOWS 1)
@@ -84,13 +64,12 @@ set(XCEC_ALL_SRCS main.cpp ${SOURCE_FILES})
 add_executable(${PROJECT_NAME} ${XCEC_ALL_SRCS})
 if(WINDOWS)
     if(CMAKE_CL_64)
-        target_link_libraries (${PROJECT_NAME} z3 boolector)
+        target_link_libraries (${PROJECT_NAME} z3)
     else()
-        target_link_libraries (${PROJECT_NAME} z3 boolector)
+        target_link_libraries (${PROJECT_NAME} z3)
     endif()
 else()
-    target_link_libraries (${PROJECT_NAME} boolector z3 ${OPENSMT_LIBRARY} ${GMP_LIBRARIES} ${GMPXX_LIBRARIES})
-    target_include_directories(${PROJECT_NAME} PUBLIC ${GMP_INCLUDE_DIR})
+    target_link_libraries (${PROJECT_NAME} z3 )
 endif()
 
 if(WINDOWS)
@@ -119,6 +98,8 @@ if(WINDOWS)
 elseif(LINUX)
     install (FILES "${PROJECT_SOURCE_DIR}/lib/linux/libz3.so" DESTINATION lib)
 elseif(MACOS)
+    # otool -L ./build/XCEC 
+    # install_name_tool -change libz3.dylib ./lib/libz3.dylib ./build/XCEC 
     message("install z3 lib")
     install (FILES "${PROJECT_SOURCE_DIR}/lib/macos/libz3.dylib" DESTINATION lib)
 endif()

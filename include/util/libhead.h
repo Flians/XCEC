@@ -13,8 +13,6 @@
 #include <vector>
 
 #include "libstring.h"
-#include <opensmt/BVLogic.h>
-#include <opensmt/opensmt2.h>
 #include <z3/z3++.h>
 
 #define enumtoCharArr(val) #val
