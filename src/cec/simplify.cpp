@@ -143,7 +143,6 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs)
         cout << "PIs is empty in simplify.layer_assignment" << endl;
         return layers;
     }
-    this->id_reassign(PIs);
     layers->push_back(PIs);
     int i = 0;
     vector<int> visit(init_id, 0);
@@ -173,4 +172,103 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs)
     vector<int>().swap(visit);
     vector<int>().swap(logic_depth);
     return layers;
+}
+
+void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> *> *layers)
+{
+    if (!dupl->outs)
+    {
+        cerr << "The inputs is empty! in jec.deduplicate!" << endl;
+        exit(-1);
+    }
+    for (auto &out : (*dupl->outs))
+    {
+        // grandson.ins.push(son)
+        out->ins->push_back(keep);
+        // son.outs.push(grandson)
+        keep->outs->push_back(out);
+    }
+    layers->at(i + 1)->erase(find(layers->at(i + 1)->begin(), layers->at(i + 1)->end(), dupl));
+    delete dupl;
+}
+
+void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
+{
+    if (!layers || layers->size() == 0)
+    {
+        cerr << "The layers is empty in simplify.reduce_repeat_nodes!" << endl;
+        exit(-1);
+    }
+    int reduce = 0;
+    for (int i = 0; i < layers->size() - 2; i++)
+    {
+        for (auto &item : (*layers->at(i)))
+        {
+            if (item->outs && item->outs->size() > 0)
+            {
+                map<Gtype, vector<node *>> record;
+                for (int j = 0; j < item->outs->size(); j++)
+                {
+                    if (record.count(item->outs->at(j)->cell))
+                    {
+                        record[item->outs->at(j)->cell].push_back(item->outs->at(j));
+                    }
+                    else
+                    {
+                        vector<node *> nodes;
+                        nodes.push_back(item->outs->at(j));
+                        record.insert(make_pair(item->outs->at(j)->cell, nodes));
+                    }
+                }
+                for (auto &it : record)
+                {
+                    if (it.second.size() > 1)
+                    {
+                        if (it.first == BUF || it.first == INV)
+                        {
+                            for (int d = 1; d < it.second.size(); ++d)
+                            {
+                                this->deduplicate(i, it.second.at(0), it.second.at(d), layers);
+                                reduce++;
+                            }
+                        }
+                        else
+                        {
+                            for (int si = 0; si < it.second.size(); si++)
+                            {
+                                for (int ri = si + 1; ri < it.second.size(); ri++)
+                                {
+                                    if (it.second.at(si)->ins->size() == it.second.at(ri)->ins->size())
+                                    {
+                                        bool flag = true;
+                                        for (int ii = 0; ii < it.second.at(si)->ins->size(); ii++)
+                                        {
+                                            if (it.second.at(si)->ins->at(ii)->id != it.second.at(ri)->ins->at(ii)->id)
+                                            {
+                                                flag = false;
+                                                break;
+                                            }
+                                        }
+                                        if (flag)
+                                        {
+                                            this->deduplicate(i, it.second.at(si), it.second.at(ri), layers);
+                                            it.second.erase(it.second.begin() + ri);
+                                            reduce++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    it.second.clear();
+                }
+                record.clear();
+            }
+        }
+        if (layers->at(i)->empty()) {
+            layers->erase(layers->begin()+i);
+            i--;
+        }
+    }
+    cout << "The number of INV, BUF, and others reduction is " << reduce << endl;
 }
