@@ -22,6 +22,12 @@ public:
 
     // layer assigment according to the logic depth, and achieve path balancing
     vector<vector<node *> *> *layer_assignment(vector<node *> *PIs);
+    
+    // delete duplicate node
+    void deduplicate(int i, node *keep, node *dupl, vector<vector<node *> *> *layers);
+
+    // reduce the number of INV, BUF and others
+    void reduce_repeat_nodes(vector<vector<node *> *> *layers);
 };
 
 #endif

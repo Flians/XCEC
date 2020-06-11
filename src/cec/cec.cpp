@@ -194,10 +194,10 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
     z3::solver s(logic);
     s.add(result != z3_zero);
     if (s.check() == z3::unsat) {
-        this->fout << "QE" << "\n";
+        this->fout << "EQ" << "\n";
     }
     else {
-        this->fout << "NQE" << "\n";
+        this->fout << "NEQ" << "\n";
         z3::model m = s.get_model();
         z3::set_param("pp.decimal", true);
         // traversing the model
