@@ -106,6 +106,3 @@ endif()
 
 #install (TARGETS ${PROJECT_NAME} DESTINATION bin)
 #install (DIRECTORY "${PROJECT_SOURCE_DIR}/include" DESTINATION include)
-
-include(CTest)
-enable_testing()
