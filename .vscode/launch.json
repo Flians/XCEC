@@ -10,8 +10,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/XCEC",
             "args": [
-                "./test/golden/gf.v",
-                "./test/revise/rf.v",
+                "./test/cases/case1/gf.v",
+                "./test/cases/case1/rf.v",
                 "./test/output/output.txt"
             ],
             "stopAtEntry": false,

@@ -171,6 +171,7 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs)
     }
     vector<int>().swap(visit);
     vector<int>().swap(logic_depth);
+    cout << "The layer assignment is over!" << endl;
     return layers;
 }
 
@@ -178,7 +179,7 @@ void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> 
 {
     if (!dupl->outs)
     {
-        cerr << "The inputs is empty! in jec.deduplicate!" << endl;
+        cerr << "The inputs is empty! in cec.deduplicate!" << endl;
         exit(-1);
     }
     for (auto &out : (*dupl->outs))
@@ -188,7 +189,7 @@ void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> 
         // son.outs.push(grandson)
         keep->outs->push_back(out);
     }
-    layers->at(i + 1)->erase(find(layers->at(i + 1)->begin(), layers->at(i + 1)->end(), dupl));
+    layers->at(i)->erase(find(layers->at(i)->begin(), layers->at(i)->end(), dupl));
     delete dupl;
 }
 
@@ -198,6 +199,13 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
     {
         cerr << "The layers is empty in simplify.reduce_repeat_nodes!" << endl;
         exit(-1);
+    }
+    vector<int> level(init_id, 0);
+    for (int i = 0; i < layers->size(); i++)
+    {
+        for (auto &node : (*layers->at(i))) {
+            level[node->id] = i;
+        }
     }
     int reduce = 0;
     for (int i = 0; i < layers->size() - 2; i++)
@@ -224,11 +232,12 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
                 {
                     if (it.second.size() > 1)
                     {
+                        sort(it.second.begin(), it.second.end());
                         if (it.first == BUF || it.first == INV)
                         {
                             for (int d = 1; d < it.second.size(); ++d)
                             {
-                                this->deduplicate(i, it.second.at(0), it.second.at(d), layers);
+                                this->deduplicate(level[it.second.at(d)->id], it.second.at(0), it.second.at(d), layers);
                                 reduce++;
                             }
                         }
@@ -251,7 +260,7 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
                                         }
                                         if (flag)
                                         {
-                                            this->deduplicate(i, it.second.at(si), it.second.at(ri), layers);
+                                            this->deduplicate(level[it.second.at(ri)->id], it.second.at(si), it.second.at(ri), layers);
                                             it.second.erase(it.second.begin() + ri);
                                             reduce++;
                                         }
@@ -270,5 +279,6 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
             i--;
         }
     }
+    vector<int>().swap(level);
     cout << "The number of INV, BUF, and others reduction is " << reduce << endl;
 }
