@@ -75,7 +75,7 @@ struct node
     // delete this node and all edges connected to this node.
     ~node()
     {
-        cout << "~delete node: " << this->name << endl;
+        // cout << "~delete node: " << this->name << endl;
         if (this->ins)
         {
             for (auto in : (*this->ins))
