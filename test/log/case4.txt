@@ -1,0 +1,4 @@
+The parsing process is over!
+The layer assignment is over!
+The number of INV, BUF, and others reduction is 38
+Assertion failed: (a.m_ctx == b.m_ctx), function check_context, file /Users/flynn/vsProjects/XCEC/include/z3/z3++.h, line 410.
