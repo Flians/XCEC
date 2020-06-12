@@ -114,21 +114,25 @@ void cec::evaluate_from_POs_to_PIs(vector<node *> *POs)
 }
 
 void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
-{   
+{
     vector<z3::expr> nodes;
     for (int i = 0; i < init_id; i++)
     {
         z3::expr exp(logic);
         nodes.push_back(exp);
     }
-    for (auto &node: (*layers->at(0))) {
-        if (node->cell==_CONSTANT) {
+    for (auto &node : (*layers->at(0)))
+    {
+        if (node->cell == _CONSTANT)
+        {
             nodes[node->id] = logic.bv_val(node->val, 2);
-        } else {
+        }
+        else
+        {
             nodes[node->id] = logic.bv_const(node->name.c_str(), 2);
         }
     }
-    
+
     for (int i = 1; i < layers->size(); i++)
     {
         vector<node *> *layer = layers->at(i);
@@ -193,18 +197,22 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
 
     z3::solver s(logic);
     s.add(result != z3_zero);
-    if (s.check() == z3::unsat) {
-        this->fout << "EQ" << "\n";
+    std::cout << s.to_smt2() << "\n";
+    if (s.check() == z3::unsat)
+    {
+        this->fout << "EQ" << endl;
     }
-    else {
-        this->fout << "NEQ" << "\n";
+    else
+    {
+        this->fout << "NEQ" << endl;
         z3::model m = s.get_model();
-        z3::set_param("pp.decimal", true);
         // traversing the model
-        for (unsigned i = 0; i < m.size(); i++) {
+        for (unsigned i = 0; i < m.size(); i++)
+        {
             z3::func_decl v = m[i];
             // assert(v.arity() == 0);
             this->fout << v.name() << " " << m.get_const_interp(v).get_numeral_int() << "\n";
         }
     }
+    vector<z3::expr>().swap(nodes);
 }
