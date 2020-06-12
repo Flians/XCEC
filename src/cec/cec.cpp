@@ -135,6 +135,8 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
 
     for (int i = 1; i < layers->size(); i++)
     {
+        if (i == 62)
+            cout << i << endl;
         vector<node *> *layer = layers->at(i);
         for (int j = 0; j < layer->size(); j++)
         {
