@@ -295,9 +295,6 @@ void parser::parse_revised(ifstream &in, vector<node *> *PIs, vector<node *> *PO
                         if (!port)
                         {
                             port = find_node_by_name(POs, item);
-                            cout << port->name << endl;
-                            if (port->name == "\\o[0]")
-                                cout << port->ins->size() << endl;
                             if (!port)
                             {
                                 cout << "There are some troubles in parser.cpp for output port: " << line << endl;

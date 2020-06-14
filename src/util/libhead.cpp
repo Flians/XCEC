@@ -283,7 +283,27 @@ void cleanVP(vector<node *> *vecPtr)
     vector<node *>::iterator it = vecPtr->begin();
     for (; it != vecPtr->end();)
     {
-        delete * it;
+        delete *it;
         it = vecPtr->erase(it);
     }
+}
+
+/**
+ * Configure Z3 backend
+ * 
+ * @param priority: pareto, box, lex
+ * @param timeout millisecond
+ */
+z3::params config_z3(string priority, unsigned timeout)
+{
+    z3::params z3_param(logic);
+    // http://smtlib.cs.uiowa.edu/logics-all.shtml
+    logic.set("logic", "QF_BV");
+
+    //z3_param.set(":opt.solution_prefix", "intermediate_result");
+    //z3_param.set(":opt.dump_models", true);
+    // z3_param.set(":opt.pb.compile_equality", true);
+    // z3_param.set(":opt.priority", priority.c_str());
+    z3_param.set(":timeout", timeout);
+    return z3_param;
 }

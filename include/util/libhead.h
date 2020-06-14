@@ -228,10 +228,12 @@ vector<T> unique_element_in_vector(vector<T> v)
     }
     return v;
 }
+
 extern z3::context logic;
 extern z3::expr z3_zero;
 extern z3::expr z3_one;
 extern z3::expr z3_x;
+z3::params config_z3(string priority, unsigned timeout);
 z3::expr z3_mk_and(const z3::expr &, const z3::expr &);
 z3::expr z3_mk_and(vector<z3::expr> &);
 z3::expr z3_mk_or(const z3::expr &, const z3::expr &);

@@ -197,17 +197,26 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
         result = z3_mk_or(result, nodes[output->id]);
     }
 
-    z3::solver s(logic);
-    s.add(result != z3_zero);
-    std::cout << s.to_smt2() << "\n";
-    if (s.check() == z3::unsat)
+    
+    z3::solver z3_opt(logic);
+    z3_opt.set(config_z3("lex", 1800000));
+    z3_opt.add(result != z3_zero);
+    // std::cout << z3_opt.to_smt2() << "\n";
+    
+/*
+    z3::optimize z3_opt(logic);
+    z3_opt.set(config_z3("lex", 1800000));
+    z3_opt.add(result != z3_zero); 
+*/
+    z3::check_result sat = z3_opt.check();
+    if (sat == z3::unsat)
     {
         this->fout << "EQ" << endl;
     }
     else
     {
         this->fout << "NEQ" << endl;
-        z3::model m = s.get_model();
+        z3::model m = z3_opt.get_model();
         // traversing the model
         for (unsigned i = 0; i < m.size(); i++)
         {
