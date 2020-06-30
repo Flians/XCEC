@@ -5,7 +5,31 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(lldb) launch",
+            "name": "gdb_ubuntu_Attach",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/XCEC",
+            "args": [
+                "./test/cases/case1/gf.v",
+                "./test/cases/case1/rf.v",
+                "./test/output/output_case1.txt"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "build_mac"
+        },
+        {
+            "name": "lldb_mac_launch",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/XCEC",
@@ -29,7 +53,7 @@
             "preLaunchTask": "build_mac"
         },
         {
-            "name": "(gdb) launch",
+            "name": "gdb_win_launch",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/XCEC.exe",

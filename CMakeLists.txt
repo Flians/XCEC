@@ -10,6 +10,7 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # Check platforms
 if (CMAKE_HOST_WIN32)
@@ -36,6 +37,8 @@ elseif(LINUX)
 elseif(MACOS)
     link_directories("${PROJECT_SOURCE_DIR}/lib/macos") 
 endif()
+
+find_package(Threads REQUIRED)
 
 
 # the function is used to add all header files
@@ -69,7 +72,7 @@ if(WINDOWS)
         target_link_libraries (${PROJECT_NAME} z3)
     endif()
 else()
-    target_link_libraries (${PROJECT_NAME} libz3.a)
+    target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} libz3.a)
 endif()
 
 if(WINDOWS)
