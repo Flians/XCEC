@@ -69,7 +69,7 @@ if(WINDOWS)
         target_link_libraries (${PROJECT_NAME} z3)
     endif()
 else()
-    target_link_libraries (${PROJECT_NAME} z3 )
+    target_link_libraries (${PROJECT_NAME} libz3.a)
 endif()
 
 if(WINDOWS)
@@ -100,9 +100,8 @@ elseif(LINUX)
 elseif(MACOS)
     # otool -L ./build/XCEC 
     # install_name_tool -change libz3.dylib ./lib/libz3.dylib ./build/XCEC 
-    message("install z3 lib")
     install (FILES "${PROJECT_SOURCE_DIR}/lib/macos/libz3.dylib" DESTINATION lib)
 endif()
 
-#install (TARGETS ${PROJECT_NAME} DESTINATION bin)
-#install (DIRECTORY "${PROJECT_SOURCE_DIR}/include" DESTINATION include)
+install (TARGETS ${PROJECT_NAME} DESTINATION bin)
+install (DIRECTORY "${PROJECT_SOURCE_DIR}/include" DESTINATION include)
