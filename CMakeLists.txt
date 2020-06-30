@@ -18,7 +18,6 @@ elseif(CMAKE_HOST_APPLE)
     set(MACOS 1)
 elseif(CMAKE_HOST_UNIX)
     set(LINUX 1)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
 endif()
 
 # Set RPATH
@@ -32,16 +31,15 @@ endif()
 # Add search path for lib files
 if(WINDOWS)
     MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib/win")
-    link_directories("${PROJECT_SOURCE_DIR}/lib/win") 
+    link_directories(${PROJECT_SOURCE_DIR}/lib/win/)
 elseif(LINUX)
     MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib/linux")
-    link_directories("${PROJECT_SOURCE_DIR}/lib/linux")
+    link_directories(${PROJECT_SOURCE_DIR}/lib/linux/)
     find_package(Threads REQUIRED)
 elseif(MACOS)
     MESSAGE("link_directories: ${CMAKE_SOURCE_DIR}/lib/macos")
-    link_directories("${CMAKE_SOURCE_DIR}/lib/macos") 
+    link_directories("${CMAKE_SOURCE_DIR}/lib/macos/")
 endif()
-
 
 # the function is used to add all header files
 function(include_sub_directories_recursively root_dir)
@@ -80,9 +78,9 @@ elseif(LINUX)
     # target_link_libraries (${PROJECT_NAME} -lz3)
 elseif(MACOS)
     # static library
-    target_link_libraries (${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/macos/libz3.a)
+    # target_link_libraries (${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/macos/libz3.a)
     # shared library
-    # target_link_libraries (${PROJECT_NAME} -lz3)
+    target_link_libraries (${PROJECT_NAME} z3)
 endif()
 
 if(WINDOWS)
