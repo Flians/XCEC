@@ -8,4 +8,4 @@ fi
 
 cd build
 cmake ..
-make install
+make
