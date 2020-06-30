@@ -109,6 +109,7 @@ if(WINDOWS)
     install (FILES "${PROJECT_SOURCE_DIR}/lib/win/z3.dll" DESTINATION bin)
     endif()
 elseif(LINUX)
+    # ldd ./build/XCEC
     install (FILES "${PROJECT_SOURCE_DIR}/lib/linux/libz3.so" DESTINATION lib)
 elseif(MACOS)
     # otool -L ./build/XCEC 
