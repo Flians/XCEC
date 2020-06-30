@@ -35,10 +35,11 @@ if(WINDOWS)
 elseif(LINUX)
     MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib/linux")
     link_directories(${PROJECT_SOURCE_DIR}/lib/linux/)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
 elseif(MACOS)
     MESSAGE("link_directories: ${CMAKE_SOURCE_DIR}/lib/macos")
-    link_directories("${CMAKE_SOURCE_DIR}/lib/macos/")
+    link_directories(${CMAKE_SOURCE_DIR}/lib/macos/)
 endif()
 
 # the function is used to add all header files
@@ -73,14 +74,14 @@ if(WINDOWS)
     endif()
 elseif(LINUX)
     # static library
-    target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_SOURCE_DIR}/lib/linux/libz3.a)
+    # target_link_libraries (${PROJECT_NAME} PRIVATE Threads::Threads ${CMAKE_SOURCE_DIR}/lib/linux/libz3.a)
     # shared library
-    # target_link_libraries (${PROJECT_NAME} -lz3)
+    target_link_libraries (${PROJECT_NAME} -lz3)
 elseif(MACOS)
     # static library
     # target_link_libraries (${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/macos/libz3.a)
     # shared library
-    target_link_libraries (${PROJECT_NAME} z3)
+    target_link_libraries (${PROJECT_NAME} -lz3)
 endif()
 
 if(WINDOWS)
