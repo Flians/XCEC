@@ -203,9 +203,9 @@ Value calculate(node *g)
 }
 
 z3::context logic;
-z3::expr z3_zero = logic.bv_val(0, 2);
-z3::expr z3_one = logic.bv_val(1, 2);
-z3::expr z3_x = logic.bv_val(2, 2);
+z3::expr z3_zero = logic.bv_val((unsigned)0, 2);
+z3::expr z3_one = logic.bv_val((unsigned)1, 2);
+z3::expr z3_x = logic.bv_val((unsigned)2, 2);
 
 z3::expr z3_mk_and(const z3::expr &A, const z3::expr &B)
 {

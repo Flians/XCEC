@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
         vector<node *> *POs = nullptr;
         verilog_parser.parse(argv[1], argv[2], PIs, POs);
         endTime = clock();
-        cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
+        cout << "The parsing time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
         
         /*
         cout << ">>> before: " << endl;
