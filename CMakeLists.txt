@@ -10,7 +10,6 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # Check platforms
 if (CMAKE_HOST_WIN32)
@@ -19,6 +18,7 @@ elseif(CMAKE_HOST_APPLE)
     set(MACOS 1)
 elseif(CMAKE_HOST_UNIX)
     set(LINUX 1)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
 endif()
 
 # Set RPATH
@@ -35,13 +35,12 @@ if(WINDOWS)
     link_directories("${PROJECT_SOURCE_DIR}/lib/win") 
 elseif(LINUX)
     MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib/linux")
-    link_directories("${PROJECT_SOURCE_DIR}/lib/linux") 
+    link_directories("${PROJECT_SOURCE_DIR}/lib/linux")
+    find_package(Threads REQUIRED)
 elseif(MACOS)
     MESSAGE("link_directories: ${CMAKE_SOURCE_DIR}/lib/macos")
     link_directories("${CMAKE_SOURCE_DIR}/lib/macos") 
 endif()
-
-find_package(Threads REQUIRED)
 
 
 # the function is used to add all header files
