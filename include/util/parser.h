@@ -20,10 +20,10 @@ public:
     bool replace_node_by_name(vector<node *> *nodes, node *new_node);
 
     // parse the verilog file
-    void parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates);
+    void parse_verilog(stringstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates);
 
     // parse the revised verilog file
-    void parse_revised(ifstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates);
+    void parse_revised(stringstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates);
 
     // build the miter for the Combinational Equivalence Checking (CEC)
     // POs is PIs_golden, and return POs

@@ -62,7 +62,7 @@ bool parser::replace_node_by_name(vector<node *> *nodes, node *new_node)
     return false;
 }
 
-void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates)
+void parser::parse_verilog(stringstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates)
 {
     string line;
     smatch match;
@@ -222,7 +222,7 @@ void parser::parse_verilog(ifstream &in, vector<node *> *PIs, vector<node *> *PO
     }
 }
 
-void parser::parse_revised(ifstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates)
+void parser::parse_revised(stringstream &in, vector<node *> *PIs, vector<node *> *POs, vector<node *> *wires, vector<node *> *gates)
 {
     string line;
     smatch match;
@@ -441,42 +441,38 @@ void parser::parse(ifstream &golden, ifstream &revised, vector<node *> *&PIs, ve
         cerr << "The golden can not be open!" << endl;
         exit(-1);
     }
-    /*
+    
     string buffer;
     buffer.resize(golden.seekg(0, std::ios::end).tellg());
     golden.seekg(0, std::ios::beg).read(&buffer[0], static_cast<std::streamsize>(buffer.size()));
     stringstream f_input;
 	f_input.str(buffer);
-    */
+    
     if (!PIs)
         PIs = new vector<node *>[32];
     if (!POs)
         POs = new vector<node *>[32];
     vector<node *> *wires_golden = new vector<node *>[128];
     vector<node *> *gates_golden = new vector<node *>[2048];
-    parse_verilog(golden, PIs, POs, wires_golden, gates_golden);
-    /*
+    parse_verilog(f_input, PIs, POs, wires_golden, gates_golden);
     buffer.clear();
-    f_input.str("");
-    */
+    f_input.clear();
 
     if (!revised.is_open())
     {
         cerr << "The revised can not be open!" << endl;
         exit(-1);
     }
-    /*
+    
     buffer.resize(revised.seekg(0, std::ios::end).tellg());
     revised.seekg(0, std::ios::beg).read(&buffer[0], static_cast<std::streamsize>(buffer.size()));
 	f_input.str(buffer);
-    */
+    
     vector<node *> *wires_revised = new vector<node *>[128];
     vector<node *> *gates_revised = new vector<node *>[2048];
-    parse_revised(revised, PIs, POs, wires_revised, gates_revised);
-    /*
+    parse_revised(f_input, PIs, POs, wires_revised, gates_revised);
     buffer.clear();
-    f_input.str("");
-    */
+    f_input.clear();
 }
 
 void parser::parse(const string &path_golden, const string &path_revised, vector<node *> *&PIs, vector<node *> *&POs)
