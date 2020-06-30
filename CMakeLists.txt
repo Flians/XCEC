@@ -31,11 +31,14 @@ endif()
 
 # Add search path for lib files
 if(WINDOWS)
+    MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib/win")
     link_directories("${PROJECT_SOURCE_DIR}/lib/win") 
 elseif(LINUX)
+    MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib/linux")
     link_directories("${PROJECT_SOURCE_DIR}/lib/linux") 
 elseif(MACOS)
-    link_directories("${PROJECT_SOURCE_DIR}/lib/macos") 
+    MESSAGE("link_directories: ${CMAKE_SOURCE_DIR}/lib/macos")
+    link_directories("${CMAKE_SOURCE_DIR}/lib/macos") 
 endif()
 
 find_package(Threads REQUIRED)
@@ -71,8 +74,16 @@ if(WINDOWS)
     else()
         target_link_libraries (${PROJECT_NAME} z3)
     endif()
-else()
-    target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} libz3.a)
+elseif(LINUX)
+    # static library
+    target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_SOURCE_DIR}/lib/linux/libz3.a)
+    # shared library
+    # target_link_libraries (${PROJECT_NAME} -lz3)
+elseif(MACOS)
+    # static library
+    target_link_libraries (${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/macos/libz3.a)
+    # shared library
+    # target_link_libraries (${PROJECT_NAME} -lz3)
 endif()
 
 if(WINDOWS)
