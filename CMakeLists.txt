@@ -1,15 +1,18 @@
 cmake_minimum_required(VERSION 3.1)
 project(XCEC VERSION 0.1.0)
 
-#set(CMAKE_BUILD_TYPE Debug)
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-message("Build type: " ${CMAKE_BUILD_TYPE})
-
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+#set(CMAKE_BUILD_TYPE Debug)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+else()
+    SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb")  
+    SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall") 
+endif()
+message("Build type: " ${CMAKE_BUILD_TYPE})
 
 # Check platforms
 if (CMAKE_HOST_WIN32)
