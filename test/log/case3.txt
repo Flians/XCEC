@@ -1,5 +1,71 @@
 The parsing process is over!
-The parsing time is: 7.88338 S
+The parsing time is: 8.11643 S
 The layer assignment is over!
 The number of INV, BUF, and others reduction is 1030
-libc++abi.dylib: terminating with uncaught exception of type z3::exception
+counterexample:
+\c[13] -> #b11
+\d[3] -> #b10
+\d[1] -> #b11
+\c[12] -> #b00
+\b[14] -> #b00
+\a[6] -> #b00
+\d[14] -> #b00
+\a[9] -> #b00
+\c[5] -> #b00
+\b[11] -> #b01
+\a[12] -> #b10
+\c[3] -> #b01
+\d[12] -> #b00
+\b[15] -> #b10
+\a[11] -> #b00
+\b[0] -> #b01
+\b[9] -> #b01
+\a[5] -> #b01
+\a[15] -> #b10
+\c[11] -> #b10
+\a[4] -> #b00
+\a[0] -> #b01
+\d[9] -> #b00
+\a[2] -> #b01
+\b[4] -> #b11
+\d[15] -> #b00
+\b[5] -> #b01
+\c[15] -> #b00
+\d[8] -> #b11
+\d[4] -> #b10
+\b[1] -> #b11
+\b[7] -> #b00
+\d[5] -> #b10
+\d[6] -> #b01
+\c[6] -> #b00
+\a[3] -> #b10
+\c[10] -> #b01
+\c[4] -> #b00
+\b[2] -> #b11
+\b[3] -> #b01
+\c[2] -> #b00
+\d[2] -> #b11
+\d[13] -> #b00
+\c[14] -> #b00
+\c[7] -> #b10
+\d[0] -> #b11
+\b[12] -> #b10
+\a[7] -> #b00
+\b[13] -> #b10
+\b[10] -> #b00
+\c[9] -> #b00
+\a[13] -> #b11
+\d[11] -> #b11
+\a[1] -> #b11
+\d[10] -> #b00
+\a[10] -> #b01
+\d[7] -> #b01
+\a[14] -> #b00
+\b[6] -> #b00
+\c[1] -> #b01
+\b[8] -> #b00
+\c[8] -> #b00
+\a[8] -> #b00
+\c[0] -> #b00
+
+The run time is: 135.56 S

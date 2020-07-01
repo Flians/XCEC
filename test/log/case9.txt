@@ -1,5 +1,103 @@
 The parsing process is over!
-The parsing time is: 40.746 S
+The parsing time is: 42.7153 S
 The layer assignment is over!
 The number of INV, BUF, and others reduction is 33
-libc++abi.dylib: terminating with uncaught exception of type z3::exception
+counterexample:
+RIb4c6770_44 -> #b01
+RIa167300_16 -> #b00
+RIb4bf7e0_70 -> #b01
+RIb4bf948_67 -> #b01
+RIb4c3200_48 -> #b01
+RIa167738_7 -> #b00
+RIa166dd8_27 -> #b01
+RIb4c2e40_56 -> #b01
+RIb4c3098_51 -> #b01
+RIa166d60_28 -> #b00
+RIb4c6a40_38 -> #b01
+RIb4bfab0_64 -> #b00
+RIb4c3368_45 -> #b01
+RIb4c6b30_36 -> #b01
+RIa1673f0_14 -> #b01
+RIa167558_11 -> #b00
+RIa167a08_1 -> #b11
+RIa167120_20 -> #b01
+RIb4c2dc8_57 -> #b01
+RIb4c2be8_61 -> #b01
+RIa166ec8_25 -> #b01
+RIb4c6ba8_35 -> #b01
+RIb4bfa38_65 -> #b01
+RIa167990_2 -> #b00
+RIb4bf9c0_66 -> #b00
+RIb4c6c20_34 -> #b01
+RIb4c32f0_46 -> #b01
+RIa1678a0_4 -> #b00
+RIa166fb8_23 -> #b01
+RIa166c70_30 -> #b01
+RIb4c67e8_43 -> #b01
+RIb4bf858_69 -> #b01
+RIb4c2eb8_55 -> #b01
+RIa166e50_26 -> #b00
+RIb4c68d8_41 -> #b01
+RIa167468_13 -> #b00
+RIb4c3188_49 -> #b01
+RIb4bf8d0_68 -> #b00
+RIb4ca3e8_33 -> #b01
+RIa1674e0_12 -> #b00
+RIb4bf600_74 -> #b00
+RIa166ce8_29 -> #b00
+RIb4ca460_32 -> #b00
+RIb4bf3a8_79 -> #b00
+RIb4bf150_84 -> #b01
+RIa167210_18 -> #b00
+RIb4befe8_87 -> #b01
+RIb4bf060_86 -> #b00
+RIb4bee80_90 -> #b00
+RIb4c2cd8_59 -> #b01
+RIb4c3020_52 -> #b01
+RIb4bf498_77 -> #b10
+RIb4c2fa8_53 -> #b01
+RIb4bbfa0_96 -> #b01
+RIb4bf510_76 -> #b01
+RIb4bf330_80 -> #b00
+RIb4c6ab8_37 -> #b01
+RIa167378_15 -> #b01
+RIb4bf240_82 -> #b01
+RIb4bc090_94 -> #b01
+RIb4c69c8_39 -> #b01
+RIb4c2af8_63 -> #b01
+RIb4bf6f0_72 -> #b01
+RIb4bef70_88 -> #b00
+RIa1676c0_8 -> #b00
+RIa167918_3 -> #b00
+RIa167828_5 -> #b01
+RIb4c2c60_60 -> #b01
+RIb4bc180_92 -> #b01
+RIb4bc018_95 -> #b11
+RIb4bf1c8_83 -> #b01
+RIa167288_17 -> #b01
+RIb4c3110_50 -> #b01
+RIb4bc108_93 -> #b00
+RIb4c3278_47 -> #b01
+RIa1677b0_6 -> #b00
+RIa1670a8_21 -> #b01
+RIb4c6860_42 -> #b01
+RIa167198_19 -> #b01
+RIb4bf420_78 -> #b01
+RIb4bc1f8_91 -> #b00
+RIb4c2b70_62 -> #b01
+RIa1675d0_10 -> #b01
+RIa167030_22 -> #b01
+RIa166f40_24 -> #b01
+RIb4bf678_73 -> #b01
+RIa167648_9 -> #b00
+RIb4c6950_40 -> #b01
+RIb4c2f30_54 -> #b01
+RIb4bf588_75 -> #b00
+RIb4c2d50_58 -> #b01
+RIb4ca4d8_31 -> #b00
+RIb4bf2b8_81 -> #b00
+RIb4bf768_71 -> #b01
+RIb4beef8_89 -> #b00
+RIb4bf0d8_85 -> #b00
+
+The run time is: 669.091 S
