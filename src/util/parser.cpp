@@ -410,7 +410,6 @@ void parser::build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden,
     vector<node *>().swap(*PIs_revised);
     // merge all outputs
     iter = POs_golden->begin();
-    int i = 0;
     while (iter != POs_golden->end())
     {
         node *po = find_node_by_name(POs_revised, (*iter)->name);
@@ -489,7 +488,6 @@ void parser::printG(vector<node *> *nodes)
 {
     if (!nodes || nodes->size() == 0)
         return;
-    int len = nodes->size();
     vector<node *>::iterator pi = nodes->begin();
     while (pi != nodes->end())
     {

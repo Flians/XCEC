@@ -1,12 +1,15 @@
 #include "util/parser.h"
 #include "cec/simplify.h"
 #include "cec/cec.h"
+#include "testOp.h"
 
 using namespace std;
 
 // cd build && cmake -G"Unix Makefiles && make" ../
 int main(int argc, char *argv[])
 {
+    testOp::test();
+    
     if (argc >= 4)
     {
         clock_t startTime, endTime;
@@ -48,7 +51,7 @@ int main(int argc, char *argv[])
         /* evaluate the graph */
         cec cec_(argv[3]);
         // cec_.evaluate_from_PIs_to_POs(PIs);
-        cec_.evaluate_by_z3(layers);
+        // cec_.evaluate_by_z3(layers);
         endTime = clock();
         cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
         /* free up space */

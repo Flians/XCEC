@@ -7,12 +7,12 @@ map<string, Gtype> Value_Str = {
     {"input", IN},
     {"output", OUT},
     {"wire", WIRE},
-    {"and", AND},
-    {"nand", NAND},
-    {"or", OR},
-    {"nor", NOR},
-    {"xor", XOR},
-    {"xnor", XNOR},
+    {"and", _AND},
+    {"nand", _NAND},
+    {"or", _OR},
+    {"nor", _NOR},
+    {"xor", _XOR},
+    {"xnor", _XNOR},
     {"not", INV},
     {"buf", BUF},
     {"_HMUX", _HMUX},
@@ -24,12 +24,12 @@ map<Gtype, string> Str_Value = {
     {IN, "input"},
     {OUT, "output"},
     {WIRE, "wire"},
-    {AND, "and"},
-    {NAND, "nand"},
-    {OR, "or"},
-    {NOR, "nor"},
-    {XOR, "xor"},
-    {XNOR, "xnor"},
+    {_AND, "and"},
+    {_NAND, "nand"},
+    {_OR, "or"},
+    {_NOR, "nor"},
+    {_XOR, "xor"},
+    {_XNOR, "xnor"},
     {INV, "not"},
     {BUF, "buf"},
     {_HMUX, "_HMUX"},
@@ -137,39 +137,39 @@ Value calculate(node *g)
         vector<node *>::iterator it_end = g->ins->end();
         switch (g->cell)
         {
-        case AND:
+        case _AND:
             while (it_ != it_end)
             {
                 temp_g = temp_g & *(*(it_++));
             }
             break;
-        case NAND:
+        case _NAND:
             while (it_ != it_end)
             {
                 temp_g = temp_g & *(*(it_++));
             }
             temp_g = ~temp_g;
             break;
-        case OR:
+        case _OR:
             while (it_ != it_end)
             {
                 temp_g = temp_g | *(*(it_++));
             }
             break;
-        case NOR:
+        case _NOR:
             while (it_ != it_end)
             {
                 temp_g = temp_g | *(*(it_++));
             }
             temp_g = ~temp_g;
             break;
-        case XOR:
+        case _XOR:
             while (it_ != it_end)
             {
                 temp_g = temp_g ^ *(*(it_++));
             }
             break;
-        case XNOR:
+        case _XNOR:
             while (it_ != it_end)
             {
                 temp_g = temp_g ^ *(*(it_++));
@@ -206,10 +206,12 @@ z3::context logic;
 z3::expr z3_zero = logic.bv_val((unsigned)0, 2);
 z3::expr z3_one = logic.bv_val((unsigned)1, 2);
 z3::expr z3_x = logic.bv_val((unsigned)2, 2);
+z3::expr z3_three = logic.bv_val((unsigned)3, 2);
 
 z3::expr z3_mk_and(const z3::expr &A, const z3::expr &B)
 {
     return z3::ite(A == z3_zero || B == z3_zero, z3_zero, z3::max(A, B));
+    // return Z3_mk_ite(logic, Z3_mk_eq(logic, Z3_mk_bvxor(logic, A, B), z3_three), z3_x, A & B);
 }
 
 z3::expr z3_mk_and(vector<z3::expr> &exprs)
@@ -226,7 +228,8 @@ z3::expr z3_mk_and(vector<z3::expr> &exprs)
 
 z3::expr z3_mk_or(const z3::expr &A, const z3::expr &B)
 {
-    return z3::ite(A == z3_one || B == z3_one, z3_one, z3::max(A, B));
+    // return z3::ite(A == z3_one || B == z3_one, z3_one, z3::max(A, B));
+    return z3::ite(A ^ B == z3_three, z3_one, A | B);
 }
 
 z3::expr z3_mk_or(vector<z3::expr> &exprs)
@@ -243,7 +246,8 @@ z3::expr z3_mk_or(vector<z3::expr> &exprs)
 
 z3::expr z3_mk_xor(const z3::expr &A, const z3::expr &B)
 {
-    return z3::ite(A == z3_one && B == z3_one, z3_zero, z3::max(A, B));
+    // return z3::ite(A == z3_one && B == z3_one, z3_zero, z3::max(A, B));
+    return z3::ite(A & B == z3_one, z3_zero, z3::max(A, B));
 }
 
 z3::expr z3_mk_xor(vector<z3::expr> &exprs)
@@ -260,7 +264,8 @@ z3::expr z3_mk_xor(vector<z3::expr> &exprs)
 
 z3::expr z3_mk_not(const z3::expr &A)
 {
-    return z3::ite(A == z3_zero, z3_one, z3::ite(A == z3_one, z3_zero, z3_x));
+    // return z3::ite(A == z3_zero, z3_one, z3::ite(A == z3_one, z3_zero, z3_x));
+    return z3::ite(A == z3_x, z3_x, A^z3_one);
 }
 
 z3::expr z3_mk_DC(const z3::expr &C, const z3::expr &D)
@@ -270,7 +275,7 @@ z3::expr z3_mk_DC(const z3::expr &C, const z3::expr &D)
 
 z3::expr z3_mk_HMUX(const z3::expr &S, const z3::expr &I0, const z3::expr &I1)
 {
-    return z3::ite(S == z3_one, z3::ite(I0 == I1, I0, z3_x), z3::ite(S == z3_zero, I0, I1));
+    return z3::ite(S == z3_x, z3::ite(I0 == I1, I0, z3_x), z3::ite(S == z3_zero, I0, I1));
 }
 
 z3::expr z3_mk_exor(const z3::expr &A, const z3::expr &B)
