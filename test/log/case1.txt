@@ -1,26 +1,6 @@
-\O[19]
-\O[18]
-\O[17]
-\O[16]
-\O[15]
-\O[14]
-\O[13]
-\O[12]
-\O[11]
-\O[10]
-\O[9]
-\O[8]
-\O[7]
-\O[6]
-\O[5]
-\O[4]
-\O[3]
-\O[2]
-\O[1]
-\O[0]
 The parsing process is over!
-The run time is: 0.349761 S
+The parsing time is: 0.34329 S
 The layer assignment is over!
 The number of INV, BUF, and others reduction is 98
-The run time is: 1787.64 S
+The run time is: 22.982 S
 The parser is destroyed!

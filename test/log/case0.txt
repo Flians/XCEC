@@ -1,5 +1,6 @@
 The parsing process is over!
+The parsing time is: 0.001811 S
 The layer assignment is over!
 The number of INV, BUF, and others reduction is 3
+The run time is: 0.021128 S
 The parser is destroyed!
-The run time is: 0.019667 S

@@ -1,4 +1,5 @@
 The parsing process is over!
+The parsing time is: 13.1693 S
 The layer assignment is over!
-The number of INV, BUF, and others reduction is 38
-Assertion failed: (a.m_ctx == b.m_ctx), function check_context, file /Users/flynn/vsProjects/XCEC/include/z3/z3++.h, line 410.
+The number of INV, BUF, and others reduction is 1061
+libc++abi.dylib: terminating with uncaught exception of type z3::exception

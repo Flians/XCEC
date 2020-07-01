@@ -1,3 +1,5 @@
 The parsing process is over!
+The parsing time is: 7.88338 S
 The layer assignment is over!
 The number of INV, BUF, and others reduction is 1030
+libc++abi.dylib: terminating with uncaught exception of type z3::exception
