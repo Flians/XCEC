@@ -14,6 +14,8 @@
 
 #include "libstring.h"
 #include <z3/z3++.h>
+#include <stp/c_interface.h>
+
 
 #define enumtoCharArr(val) #val
 
@@ -28,12 +30,12 @@ enum Gtype
     IN,
     OUT,
     WIRE,
-    AND,
-    NAND,
-    OR,
-    NOR,
-    XOR,
-    XNOR,
+    _AND,
+    _NAND,
+    _OR,
+    _NOR,
+    _XOR,
+    _XNOR,
     INV,
     BUF,
     _HMUX, // _HMUX \U$1 ( .O(\282 ), .I0(1'b1), .I1(\277 ), .S(\281 ));
@@ -233,6 +235,7 @@ extern z3::context logic;
 extern z3::expr z3_zero;
 extern z3::expr z3_one;
 extern z3::expr z3_x;
+extern z3::expr z3_three;
 z3::params config_z3(string priority, unsigned timeout);
 z3::expr z3_mk_and(const z3::expr &, const z3::expr &);
 z3::expr z3_mk_and(vector<z3::expr> &);

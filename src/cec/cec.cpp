@@ -146,22 +146,22 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
             z3::expr res(logic);
             switch (layer->at(j)->cell)
             {
-            case AND:
+            case _AND:
                 res = z3_mk_and(inputs);
                 break;
-            case NAND:
+            case _NAND:
                 res = z3_mk_not(z3_mk_and(inputs));
                 break;
-            case OR:
+            case _OR:
                 res = z3_mk_or(inputs);
                 break;
-            case NOR:
+            case _NOR:
                 res = z3_mk_not(z3_mk_or(inputs));
                 break;
-            case XOR:
+            case _XOR:
                 res = z3_mk_xor(inputs);
                 break;
-            case XNOR:
+            case _XNOR:
                 res = z3_mk_not(z3_mk_xor(inputs));
                 break;
             case INV:
@@ -195,10 +195,10 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
         result = z3_mk_or(result, nodes[output->id]);
     }
 
-    z3::solver z3_opt(logic);    
+    z3::solver z3_opt(logic);
     // z3::optimize z3_opt(logic);
     z3_opt.set(config_z3("lex", 1600000));
-    z3_opt.add(result != z3_zero); 
+    z3_opt.add(result != z3_zero);
 
     z3::check_result sat = z3_opt.check();
     if (sat == z3::unsat)
@@ -218,4 +218,8 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
         }
     }
     vector<z3::expr>().swap(nodes);
+}
+
+void cec::evaluate_by_stp(vector<vector<node *> *> *layers)
+{
 }

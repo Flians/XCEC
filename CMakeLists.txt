@@ -23,6 +23,9 @@ elseif(CMAKE_HOST_UNIX)
     set(LINUX 1)
 endif()
 
+#find STP
+# find_package(STP REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/cmake/STP)
+
 # Set RPATH
 if(WINDOWS)
 else()
@@ -84,7 +87,7 @@ elseif(MACOS)
     # static library
     # target_link_libraries (${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/macos/libz3.a)
     # shared library
-    target_link_libraries (${PROJECT_NAME} -lz3)
+    target_link_libraries (${PROJECT_NAME} -lz3 -lstp)
 endif()
 
 if(WINDOWS)
