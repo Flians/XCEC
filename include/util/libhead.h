@@ -231,22 +231,23 @@ vector<T> unique_element_in_vector(vector<T> v)
     return v;
 }
 
-extern z3::context logic;
-extern z3::expr z3_zero;
-extern z3::expr z3_one;
-extern z3::expr z3_x;
-extern z3::expr z3_three;
+extern Z3_context logic;
+extern Z3_sort bv_sort;
+extern Z3_ast z3_zero;
+extern Z3_ast z3_one;
+extern Z3_ast z3_x;
+extern Z3_ast z3_three;
 z3::params config_z3(string priority, unsigned timeout);
-z3::expr z3_mk_and(const z3::expr &, const z3::expr &);
-z3::expr z3_mk_and(vector<z3::expr> &);
-z3::expr z3_mk_or(const z3::expr &, const z3::expr &);
-z3::expr z3_mk_or(vector<z3::expr> &);
-z3::expr z3_mk_xor(const z3::expr &, const z3::expr &);
-z3::expr z3_mk_xor(vector<z3::expr> &);
-z3::expr z3_mk_not(const z3::expr &);
-z3::expr z3_mk_DC(const z3::expr &C, const z3::expr &D);
-z3::expr z3_mk_HMUX(const z3::expr &S, const z3::expr &I0, const z3::expr &I1);
-z3::expr z3_mk_exor(const z3::expr &, const z3::expr &);
+Z3_ast z3_mk_and(const Z3_ast &, const Z3_ast &);
+Z3_ast z3_mk_and(vector<Z3_ast> &);
+Z3_ast z3_mk_or(const Z3_ast &, const Z3_ast &);
+Z3_ast z3_mk_or(vector<Z3_ast> &);
+Z3_ast z3_mk_xor(const Z3_ast &, const Z3_ast &);
+Z3_ast z3_mk_xor(vector<Z3_ast> &);
+Z3_ast z3_mk_not(const Z3_ast &);
+Z3_ast z3_mk_DC(const Z3_ast &C, const Z3_ast &D);
+Z3_ast z3_mk_HMUX(const Z3_ast &S, const Z3_ast &I0, const Z3_ast &I1);
+Z3_ast z3_mk_exor(const Z3_ast &, const Z3_ast &);
 
 extern void cleanVP(vector<node *> *vp);
 #endif

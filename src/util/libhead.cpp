@@ -202,23 +202,49 @@ Value calculate(node *g)
     return temp_g.val;
 }
 
-z3::context logic;
-z3::expr z3_zero = logic.bv_val((unsigned)0, 2);
-z3::expr z3_one = logic.bv_val((unsigned)1, 2);
-z3::expr z3_x = logic.bv_val((unsigned)2, 2);
-z3::expr z3_three = logic.bv_val((unsigned)3, 2);
-
-z3::expr z3_mk_and(const z3::expr &A, const z3::expr &B)
+/**
+   \brief Simpler error handler.
+ */
+void error_handler(Z3_context c, Z3_error_code e)
 {
-    return z3::ite(A == z3_zero || B == z3_zero, z3_zero, z3::max(A, B));
-    // return Z3_mk_ite(logic, Z3_mk_eq(logic, Z3_mk_bvxor(logic, A, B), z3_three), z3_x, A & B);
+    printf("Error code: %d\n", e);
+    fprintf(stderr, "BUG: %s.\n", "incorrect use of Z3");
+    exit(1);
 }
 
-z3::expr z3_mk_and(vector<z3::expr> &exprs)
+Z3_context mk_context()
 {
-    z3::expr res = exprs[0];
-    vector<z3::expr>::iterator it_ = exprs.begin() + 1;
-    vector<z3::expr>::iterator it_end = exprs.end();
+    Z3_config cfg;
+    Z3_context ctx;
+    cfg = Z3_mk_config();
+    Z3_set_param_value(cfg, "model", "true");
+
+    ctx = Z3_mk_context(cfg);
+    Z3_set_error_handler(ctx, error_handler);
+
+    Z3_del_config(cfg);
+    return ctx;
+}
+
+Z3_context logic = mk_context();
+Z3_sort bv_sort = Z3_mk_bv_sort(logic, 2);
+
+Z3_ast z3_zero = Z3_mk_unsigned_int(logic, 0, bv_sort);
+Z3_ast z3_one = Z3_mk_unsigned_int(logic, 1, bv_sort);
+Z3_ast z3_x = Z3_mk_unsigned_int(logic, 2, bv_sort);
+Z3_ast z3_three = Z3_mk_unsigned_int(logic, 3, bv_sort);
+
+Z3_ast z3_mk_and(const Z3_ast &A, const Z3_ast &B)
+{
+    // return z3::ite(A == z3_zero || B == z3_zero, z3_zero, z3::max(A, B));
+    return Z3_mk_ite(logic, Z3_mk_eq(logic, Z3_mk_bvxor(logic, A, B), z3_three), z3_x, Z3_mk_bvand(logic, A, B));
+}
+
+Z3_ast z3_mk_and(vector<Z3_ast> &exprs)
+{
+    Z3_ast res = exprs[0];
+    vector<Z3_ast>::iterator it_ = exprs.begin() + 1;
+    vector<Z3_ast>::iterator it_end = exprs.end();
     while (it_ != it_end)
     {
         res = z3_mk_and(res, *(it_++));
@@ -226,17 +252,17 @@ z3::expr z3_mk_and(vector<z3::expr> &exprs)
     return res;
 }
 
-z3::expr z3_mk_or(const z3::expr &A, const z3::expr &B)
+Z3_ast z3_mk_or(const Z3_ast &A, const Z3_ast &B)
 {
     // return z3::ite(A == z3_one || B == z3_one, z3_one, z3::max(A, B));
-    return z3::ite(A ^ B == z3_three, z3_one, A | B);
+    return Z3_mk_ite(logic, Z3_mk_eq(logic, Z3_mk_bvxor(logic, A, B), z3_three), z3_one, Z3_mk_bvor(logic, A, B));
 }
 
-z3::expr z3_mk_or(vector<z3::expr> &exprs)
+Z3_ast z3_mk_or(vector<Z3_ast> &exprs)
 {
-    z3::expr res = exprs[0];
-    vector<z3::expr>::iterator it_ = exprs.begin() + 1;
-    vector<z3::expr>::iterator it_end = exprs.end();
+    Z3_ast res = exprs[0];
+    vector<Z3_ast>::iterator it_ = exprs.begin() + 1;
+    vector<Z3_ast>::iterator it_end = exprs.end();
     while (it_ != it_end)
     {
         res = z3_mk_or(res, *(it_++));
@@ -244,17 +270,17 @@ z3::expr z3_mk_or(vector<z3::expr> &exprs)
     return res;
 }
 
-z3::expr z3_mk_xor(const z3::expr &A, const z3::expr &B)
+Z3_ast z3_mk_xor(const Z3_ast &A, const Z3_ast &B)
 {
     // return z3::ite(A == z3_one && B == z3_one, z3_zero, z3::max(A, B));
-    return z3::ite(A & B == z3_one, z3_zero, z3::max(A, B));
+    return Z3_mk_ite(logic, Z3_mk_eq(logic, Z3_mk_bvand(logic, A, B), z3_one), z3_zero, Z3_mk_ite(logic, Z3_mk_bvuge(logic, A, B), A, B));
 }
 
-z3::expr z3_mk_xor(vector<z3::expr> &exprs)
+Z3_ast z3_mk_xor(vector<Z3_ast> &exprs)
 {
-    z3::expr res = exprs[0];
-    vector<z3::expr>::iterator it_ = exprs.begin() + 1;
-    vector<z3::expr>::iterator it_end = exprs.end();
+    Z3_ast res = exprs[0];
+    vector<Z3_ast>::iterator it_ = exprs.begin() + 1;
+    vector<Z3_ast>::iterator it_end = exprs.end();
     while (it_ != it_end)
     {
         res = z3_mk_xor(res, *(it_++));
@@ -262,25 +288,33 @@ z3::expr z3_mk_xor(vector<z3::expr> &exprs)
     return res;
 }
 
-z3::expr z3_mk_not(const z3::expr &A)
+Z3_ast z3_mk_not(const Z3_ast &A)
 {
     // return z3::ite(A == z3_zero, z3_one, z3::ite(A == z3_one, z3_zero, z3_x));
-    return z3::ite(A == z3_x, z3_x, A^z3_one);
+    // return z3::ite(A == z3_x, z3_x, A ^ z3_one);
+    return Z3_mk_ite(logic, Z3_mk_eq(logic, A, z3_x), z3_x, Z3_mk_bvxor(logic, A, z3_one));
 }
 
-z3::expr z3_mk_DC(const z3::expr &C, const z3::expr &D)
+Z3_ast z3_mk_DC(const Z3_ast &C, const Z3_ast &D)
 {
-    return z3::ite(D == z3_zero, C, z3_x);
+    // return z3::ite(D == z3_zero, C, z3_x);
+    return Z3_mk_ite(logic, Z3_mk_eq(logic, D, z3_zero), C, z3_x);
 }
 
-z3::expr z3_mk_HMUX(const z3::expr &S, const z3::expr &I0, const z3::expr &I1)
+Z3_ast z3_mk_HMUX(const Z3_ast &S, const Z3_ast &I0, const Z3_ast &I1)
 {
-    return z3::ite(S == z3_x, z3::ite(I0 == I1, I0, z3_x), z3::ite(S == z3_zero, I0, I1));
+    // return z3::ite(S == z3_x, z3::ite(I0 == I1, I0, z3_x), z3::ite(S == z3_zero, I0, I1));
+    return Z3_mk_ite(logic, Z3_mk_eq(logic, S, z3_x),
+                     Z3_mk_ite(logic, Z3_mk_eq(logic, I0, I1), I0, z3_x),
+                     Z3_mk_ite(logic, Z3_mk_eq(logic, S, z3_zero), I0, I1));
 }
 
-z3::expr z3_mk_exor(const z3::expr &A, const z3::expr &B)
+Z3_ast z3_mk_exor(const Z3_ast &A, const Z3_ast &B)
 {
-    return z3::ite(A == X || A == B, z3_zero, z3_one);
+    // return z3::ite(A == z3_x || A == B, z3_zero, z3_one);
+    Z3_ast args[2] = {Z3_mk_eq(logic, A, z3_x), Z3_mk_eq(logic, A, B)};
+    // return Z3_mk_ite(logic, Z3_mk_or(logic, 2, args), z3_zero, z3_one);
+    return Z3_mk_not(logic, Z3_mk_or(logic, 2, args));
 }
 
 void cleanVP(vector<node *> *vecPtr)
@@ -299,7 +333,7 @@ void cleanVP(vector<node *> *vecPtr)
  * @param priority: pareto, box, lex
  * @param timeout millisecond
  */
-z3::params config_z3(string priority, unsigned timeout)
+z3::params config_z3(z3::context logic, string priority, unsigned timeout)
 {
     z3::params z3_param(logic);
     // http://smtlib.cs.uiowa.edu/logics-all.shtml

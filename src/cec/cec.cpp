@@ -115,21 +115,16 @@ void cec::evaluate_from_POs_to_PIs(vector<node *> *POs)
 
 void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
 {
-    vector<z3::expr> nodes;
-    for (int i = 0; i < init_id; i++)
-    {
-        z3::expr exp(logic);
-        nodes.push_back(exp);
-    }
+    vector<Z3_ast> nodes(init_id);
     for (auto &node : (*layers->at(0)))
     {
         if (node->cell == _CONSTANT)
         {
-            nodes[node->id] = logic.bv_val(node->val, 2);
+            nodes[node->id] = Z3_mk_unsigned_int(logic, node->val, bv_sort);
         }
         else
         {
-            nodes[node->id] = logic.bv_const(node->name.c_str(), 2);
+            nodes[node->id] = Z3_mk_const(logic, Z3_mk_string_symbol(logic, node->name.c_str()), bv_sort);
         }
     }
 
@@ -138,12 +133,12 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
         vector<node *> *layer = layers->at(i);
         for (int j = 0; j < layer->size(); j++)
         {
-            vector<z3::expr> inputs;
+            vector<Z3_ast> inputs(layer->at(j)->ins->size());
             for (int k = 0; k < layer->at(j)->ins->size(); k++)
             {
-                inputs.push_back(nodes[layer->at(j)->ins->at(k)->id]);
+                inputs[k] = nodes[layer->at(j)->ins->at(k)->id];
             }
-            z3::expr res(logic);
+            Z3_ast res;
             switch (layer->at(j)->cell)
             {
             case _AND:
@@ -188,36 +183,54 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
             nodes[layer->at(j)->id] = res;
         }
     }
-
-    z3::expr result = z3_zero;
+    int i = 0;
+    Z3_ast args[layers->back()->size()];
     for (auto &output : (*layers->back()))
     {
-        result = z3_mk_or(result, nodes[output->id]);
+        args[i++] = nodes[output->id];
     }
+    Z3_ast result = Z3_mk_or(logic, layers->back()->size(), args);
+    // printf("term: %s\n", Z3_ast_to_string(logic, result));
 
-    z3::solver z3_opt(logic);
-    // z3::optimize z3_opt(logic);
-    z3_opt.set(config_z3("lex", 1600000));
-    z3_opt.add(result != z3_zero);
+    Z3_solver z3_sol = Z3_mk_solver(logic);
+    Z3_solver_inc_ref(logic, z3_sol);
+    Z3_solver_assert(logic, z3_sol, result);
 
-    z3::check_result sat = z3_opt.check();
-    if (sat == z3::unsat)
+    Z3_model m = 0;
+    switch (Z3_solver_check(logic, z3_sol))
     {
+    case Z3_L_FALSE:
         this->fout << "EQ" << endl;
-    }
-    else
-    {
+        break;
+    case Z3_L_UNDEF:
+        /* Z3 failed to prove/disprove f. */
+        printf("unknown\n");
+    case Z3_L_TRUE:
+        /* disproved */
         this->fout << "NEQ" << endl;
-        z3::model m = z3_opt.get_model();
-        // traversing the model
-        for (unsigned i = 0; i < m.size(); i++)
+        m = Z3_solver_get_model(logic, z3_sol);
+        if (m)
         {
-            z3::func_decl v = m[i];
-            // assert(v.arity() == 0);
-            this->fout << v.name() << " " << m.get_const_interp(v).get_numeral_int() << "\n";
+            Z3_model_inc_ref(logic, m);
+            /* the model returned by Z3 is a counterexample */
+            printf("counterexample:\n%s\n", Z3_model_to_string(logic, m));
+            unsigned num_consts = Z3_model_get_num_consts(logic, m);
+            unsigned num_funcs = Z3_model_get_num_funcs(logic, m);
+            unsigned nums = num_consts + num_funcs;
+            // traversing the model
+            for (unsigned i = 0; i < nums; i++)
+            {
+                Z3_func_decl v = static_cast<unsigned>(i) < num_consts ? Z3_model_get_const_decl(logic, m, i) : Z3_model_get_func_decl(logic, m, i - num_consts);
+                // assert(v.arity() == 0);
+                this->fout << Z3_get_decl_name(logic, v) << " " << Z3_model_get_const_interp(logic, m, v) << "\n";
+            }
         }
+        break;
     }
-    vector<z3::expr>().swap(nodes);
+    if (m)
+        Z3_model_dec_ref(logic, m);
+    vector<Z3_ast>().swap(nodes);
+    Z3_solver_dec_ref(logic, z3_sol);
 }
 
 void cec::evaluate_by_stp(vector<vector<node *> *> *layers)

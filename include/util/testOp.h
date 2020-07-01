@@ -8,8 +8,8 @@ public:
     testOp(/* args */);
     ~testOp();
 
-    static void prove(z3::expr conjecture);
-    static void prove(z3::expr left, z3::expr right, int op = 0);
+    static void prove(Z3_ast conjecture);
+    static void prove(Z3_ast left, Z3_ast right, int op = 0);
 
     static void test();
 

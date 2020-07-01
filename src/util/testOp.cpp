@@ -8,52 +8,97 @@ testOp::~testOp()
 {
 }
 
-void testOp::prove(z3::expr conjecture)
+void testOp::prove(Z3_ast f)
 {
-    z3::context &c = conjecture.ctx();
-    z3::solver s(c);
-    s.add(!conjecture);
-    // std::cout << "conjecture:\n" << conjecture << "\n";
-    if (s.check() == z3::unsat)
-    {
-        std::cout << "proved" << std::endl;
+    Z3_solver s = Z3_mk_solver(logic);
+    Z3_solver_inc_ref(logic, s);
+    Z3_model m = 0;
+    /* save the current state of the context */
+    Z3_solver_push(logic, s);
+
+    Z3_ast not_f = Z3_mk_not(logic, f);
+    Z3_solver_assert(logic, s, not_f);
+
+    printf("term: %s\n", Z3_ast_to_string(logic, not_f));
+
+    switch (Z3_solver_check(logic, s)) {
+    case Z3_L_FALSE:
+        /* proved */
+        printf("valid\n");
+        break;
+    case Z3_L_UNDEF:
+        /* Z3 failed to prove/disprove f. */
+        printf("unknown\n");
+        m = Z3_solver_get_model(logic, s);
+        if (m != 0) {
+            Z3_model_inc_ref(logic, m);
+            /* m should be viewed as a potential counterexample. */
+            printf("potential counterexample:\n%s\n", Z3_model_to_string(logic, m));
+        }
+        break;
+    case Z3_L_TRUE:
+        /* disproved */
+        printf("invalid\n");
+        m = Z3_solver_get_model(logic, s);
+        if (m) {
+            Z3_model_inc_ref(logic, m);
+            /* the model returned by Z3 is a counterexample */
+            printf("counterexample:\n%s\n", Z3_model_to_string(logic, m));
+        }
+        break;
     }
-    else
-    {
-        std::cout << "failed to prove" << std::endl;
-        std::cout << "counterexample:\n"
-                  << s.get_model() << std::endl;
-    }
+    if (m) Z3_model_dec_ref(logic, m);
+
+    /* restore scope */
+    Z3_solver_pop(logic, s, 1);
+
+    Z3_solver_dec_ref(logic, s);
 }
 
-void testOp::prove(z3::expr left, z3::expr right, int op)
+void testOp::prove(Z3_ast left, Z3_ast right, int op)
 {
-    z3::context &c = left.ctx();
-    z3::solver s(c);
-    z3::expr conjecture(c);
-    switch (op)
-    {
-    case 0:
-        conjecture = (left == right);
-        break;
+    Z3_solver s = Z3_mk_solver(logic);
+    Z3_solver_inc_ref(logic, s);
 
-    default:
-        conjecture = (left == right);
+    Z3_model m = 0;
+    /* save the current state of the context */
+    Z3_solver_push(logic, s);
+
+    Z3_ast not_f = Z3_mk_not(logic, Z3_mk_eq(logic, left, right));
+    Z3_solver_assert(logic, s, not_f);
+
+    switch (Z3_solver_check(logic, s)) {
+    case Z3_L_FALSE:
+        /* proved */
+        printf("valid\n");
+        break;
+    case Z3_L_UNDEF:
+        /* Z3 failed to prove/disprove f. */
+        printf("unknown\n");
+        m = Z3_solver_get_model(logic, s);
+        if (m != 0) {
+            Z3_model_inc_ref(logic, m);
+            /* m should be viewed as a potential counterexample. */
+            printf("potential counterexample:\n%s\n", Z3_model_to_string(logic, m));
+        }
+        break;
+    case Z3_L_TRUE:
+        /* disproved */
+        printf("invalid\n");
+        m = Z3_solver_get_model(logic, s);
+        if (m) {
+            Z3_model_inc_ref(logic, m);
+            /* the model returned by Z3 is a counterexample */
+            printf("counterexample:\n%s\n", Z3_model_to_string(logic, m));
+        }
         break;
     }
-    s.add(!conjecture);
-    std::cout << "conjecture:\n"
-              << conjecture << "\n";
-    if (s.check() == z3::unsat)
-    {
-        std::cout << "proved" << std::endl;
-    }
-    else
-    {
-        std::cout << "failed to prove" << std::endl;
-        std::cout << "counterexample:\n"
-                  << s.get_model().eval(left) << std::endl;
-    }
+    if (m) Z3_model_dec_ref(logic, m);
+
+    /* restore scope */
+    Z3_solver_pop(logic, s, 1);
+
+    Z3_solver_dec_ref(logic, s);
 }
 
 void testOp::test()
@@ -97,89 +142,92 @@ void testOp::test_NAND()
 }
 void testOp::test_OR()
 {
-    prove(z3_mk_or(z3_zero, z3_zero) == z3_zero);
-    prove(z3_mk_or(z3_zero, z3_one) == z3_one);
-    prove(z3_mk_or(z3_zero, z3_x) == z3_x);
-    prove(z3_mk_or(z3_one, z3_zero) == z3_one);
-    prove(z3_mk_or(z3_one, z3_one) == z3_one);
-    prove(z3_mk_or(z3_one, z3_x) == z3_one);
-    prove(z3_mk_or(z3_x, z3_zero) == z3_x);
-    prove(z3_mk_or(z3_x, z3_one) == z3_one);
-    prove(z3_mk_or(z3_x, z3_x) == z3_x);
+    prove(z3_mk_or(z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_or(z3_zero, z3_one), z3_one);
+    prove(z3_mk_or(z3_zero, z3_x), z3_x);
+    prove(z3_mk_or(z3_one, z3_zero), z3_one);
+    prove(z3_mk_or(z3_one, z3_one), z3_one);
+    prove(z3_mk_or(z3_one, z3_x), z3_one);
+    prove(z3_mk_or(z3_x, z3_zero), z3_x);
+    prove(z3_mk_or(z3_x, z3_one), z3_one);
+    prove(z3_mk_or(z3_x, z3_x), z3_x);
 }
 void testOp::test_NOR() {}
 void testOp::test_XOR()
 {
-    prove(z3_mk_xor(z3_zero, z3_zero) == z3_zero);
-    prove(z3_mk_xor(z3_zero, z3_one) == z3_one);
-    prove(z3_mk_xor(z3_zero, z3_x) == z3_x);
-    prove(z3_mk_xor(z3_one, z3_zero) == z3_one);
-    prove(z3_mk_xor(z3_one, z3_one) == z3_zero);
-    prove(z3_mk_xor(z3_one, z3_x) == z3_x);
-    prove(z3_mk_xor(z3_x, z3_zero) == z3_x);
-    prove(z3_mk_xor(z3_x, z3_one) == z3_x);
-    prove(z3_mk_xor(z3_x, z3_x) == z3_x);
+    prove(z3_mk_xor(z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_xor(z3_zero, z3_one), z3_one);
+    prove(z3_mk_xor(z3_zero, z3_x), z3_x);
+    prove(z3_mk_xor(z3_one, z3_zero), z3_one);
+    prove(z3_mk_xor(z3_one, z3_one), z3_zero);
+    prove(z3_mk_xor(z3_one, z3_x), z3_x);
+    prove(z3_mk_xor(z3_x, z3_zero), z3_x);
+    prove(z3_mk_xor(z3_x, z3_one), z3_x);
+    prove(z3_mk_xor(z3_x, z3_x), z3_x);
 }
 void testOp::test_XNOR() {}
 void testOp::test_INV()
 {
-    prove(z3_mk_not(z3_zero) == z3_one);
-    prove(z3_mk_not(z3_one) == z3_zero);
-    prove(z3_mk_not(z3_x) == z3_x);
+    prove(z3_mk_not(z3_zero), z3_one);
+    prove(z3_mk_not(z3_one), z3_zero);
+    prove(z3_mk_not(z3_x), z3_x);
 }
 void testOp::test_DC()
 {
-    prove(z3_mk_DC(z3_zero, z3_zero) == z3_zero);
-    prove(z3_mk_DC(z3_zero, z3_one) == z3_zero);
-    prove(z3_mk_DC(z3_zero, z3_x) == z3_x);
-    prove(z3_mk_DC(z3_one, z3_zero) == z3_zero);
-    prove(z3_mk_DC(z3_one, z3_one) == z3_one);
-    prove(z3_mk_DC(z3_one, z3_x) == z3_x);
-    prove(z3_mk_DC(z3_x, z3_zero) == z3_x);
-    prove(z3_mk_DC(z3_x, z3_one) == z3_x);
-    prove(z3_mk_DC(z3_x, z3_x) == z3_x);
+    prove(z3_mk_DC(z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_DC(z3_zero, z3_one), z3_x);
+    prove(z3_mk_DC(z3_zero, z3_x), z3_x);
+    prove(z3_mk_DC(z3_one, z3_zero), z3_one);
+    prove(z3_mk_DC(z3_one, z3_one), z3_x);
+    prove(z3_mk_DC(z3_one, z3_x), z3_x);
+    prove(z3_mk_DC(z3_x, z3_zero), z3_x);
+    prove(z3_mk_DC(z3_x, z3_one), z3_x);
+    prove(z3_mk_DC(z3_x, z3_x), z3_x);
 }
 void testOp::test_HMUX()
 {
-    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_zero) == z3_zero);
-    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_one) == z3_zero);
-    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_x) == z3_zero);
-    prove(z3_mk_HMUX(z3_zero, z3_one, z3_zero) == z3_one);
-    prove(z3_mk_HMUX(z3_zero, z3_one, z3_one) == z3_one);
-    prove(z3_mk_HMUX(z3_zero, z3_one, z3_x) == z3_one);
-    prove(z3_mk_HMUX(z3_zero, z3_x, z3_zero) == z3_x);
-    prove(z3_mk_HMUX(z3_zero, z3_x, z3_one) == z3_x);
-    prove(z3_mk_HMUX(z3_zero, z3_x, z3_x) == z3_x);
+    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_one), z3_zero);
+    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_x), z3_zero);
+    prove(z3_mk_HMUX(z3_zero, z3_one, z3_zero), z3_one);
+    prove(z3_mk_HMUX(z3_zero, z3_one, z3_one), z3_one);
+    prove(z3_mk_HMUX(z3_zero, z3_one, z3_x), z3_one);
+    prove(z3_mk_HMUX(z3_zero, z3_x, z3_zero), z3_x);
+    prove(z3_mk_HMUX(z3_zero, z3_x, z3_one), z3_x);
+    prove(z3_mk_HMUX(z3_zero, z3_x, z3_x), z3_x);
 
-    prove(z3_mk_HMUX(z3_one, z3_zero, z3_zero) == z3_zero);
-    prove(z3_mk_HMUX(z3_one, z3_zero, z3_one) == z3_one);
-    prove(z3_mk_HMUX(z3_one, z3_zero, z3_x) == z3_x);
-    prove(z3_mk_HMUX(z3_one, z3_one, z3_zero) == z3_zero);
-    prove(z3_mk_HMUX(z3_one, z3_one, z3_one) == z3_one);
-    prove(z3_mk_HMUX(z3_one, z3_one, z3_x) == z3_x);
-    prove(z3_mk_HMUX(z3_one, z3_x, z3_zero) == z3_zero);
-    prove(z3_mk_HMUX(z3_one, z3_x, z3_one) == z3_one);
-    prove(z3_mk_HMUX(z3_one, z3_x, z3_x) == z3_x);
+    prove(z3_mk_HMUX(z3_one, z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_HMUX(z3_one, z3_zero, z3_one), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_zero, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_one, z3_one, z3_zero), z3_zero);
+    prove(z3_mk_HMUX(z3_one, z3_one, z3_one), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_one, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_one, z3_x, z3_zero), z3_zero);
+    prove(z3_mk_HMUX(z3_one, z3_x, z3_one), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_x, z3_x), z3_x);
 
-    prove(z3_mk_HMUX(z3_x, z3_zero, z3_zero) == z3_zero);
-    prove(z3_mk_HMUX(z3_x, z3_zero, z3_one) == z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_zero, z3_x) == z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_one, z3_zero) == z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_one, z3_one) == z3_one);
-    prove(z3_mk_HMUX(z3_x, z3_one, z3_x) == z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_x, z3_zero) == z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_x, z3_one) == z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_x, z3_x) == z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_HMUX(z3_x, z3_zero, z3_one), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_zero, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_one, z3_zero), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_one, z3_one), z3_one);
+    prove(z3_mk_HMUX(z3_x, z3_one, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_x, z3_zero), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_x, z3_one), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_x, z3_x), z3_x);
 }
 void testOp::test_EXOR()
 {
-    prove(z3_mk_exor(z3_zero, z3_zero) == z3_zero);
-    prove(z3_mk_exor(z3_zero, z3_one) == z3_one);
-    prove(z3_mk_exor(z3_zero, z3_x) == z3_one);
-    prove(z3_mk_exor(z3_one, z3_zero) == z3_one);
-    prove(z3_mk_exor(z3_one, z3_one) == z3_zero);
-    prove(z3_mk_exor(z3_one, z3_x) == z3_one);
-    prove(z3_mk_exor(z3_x, z3_zero) == z3_zero);
-    prove(z3_mk_exor(z3_x, z3_one) == z3_zero);
-    prove(z3_mk_exor(z3_x, z3_x) == z3_zero);
+    Z3_ast args[] = {z3_mk_exor(z3_zero, z3_one)};
+    prove(Z3_mk_or(logic, 1, args));
+
+    prove(Z3_mk_not(logic, z3_mk_exor(z3_zero, z3_zero)));
+    prove(z3_mk_exor(z3_zero, z3_one));
+    prove(z3_mk_exor(z3_zero, z3_x));
+    prove(z3_mk_exor(z3_one, z3_zero));
+    prove(Z3_mk_not(logic, z3_mk_exor(z3_one, z3_one)));
+    prove(z3_mk_exor(z3_one, z3_x));
+    prove(Z3_mk_not(logic, z3_mk_exor(z3_x, z3_zero)));
+    prove(Z3_mk_not(logic, z3_mk_exor(z3_x, z3_one)));
+    prove(Z3_mk_not(logic, z3_mk_exor(z3_x, z3_x)));
 }

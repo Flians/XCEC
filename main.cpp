@@ -8,8 +8,7 @@ using namespace std;
 // cd build && cmake -G"Unix Makefiles && make" ../
 int main(int argc, char *argv[])
 {
-    testOp::test();
-    
+    // testOp::test();
     if (argc >= 4)
     {
         clock_t startTime, endTime;
@@ -51,7 +50,7 @@ int main(int argc, char *argv[])
         /* evaluate the graph */
         cec cec_(argv[3]);
         // cec_.evaluate_from_PIs_to_POs(PIs);
-        // cec_.evaluate_by_z3(layers);
+        cec_.evaluate_by_z3(layers);
         endTime = clock();
         cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
         /* free up space */
@@ -63,5 +62,7 @@ int main(int argc, char *argv[])
     {
         printf("Please input three parameters, like \"./xec <golden.v> <revised.v> <output>\".");
     }
+    
+    Z3_del_context(logic);
     return 0;
 }
