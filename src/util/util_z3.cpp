@@ -373,7 +373,7 @@ void check(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *f
     }
     if (result != expected_result)
     {
-        printf("unexpected result");
+        printf("unexpected result\n");
     }
     if (m) {
         Z3_model_dec_ref(logic, m);
