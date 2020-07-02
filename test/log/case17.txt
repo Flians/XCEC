@@ -1,5 +1,7 @@
 The parsing process is over!
-The parsing time is: 22.4018 S
+The parsing time is: 20.8198 S
 The layer assignment is over!
-The number of INV, BUF, and others reduction is 4704
-The inputs is empty! in jec.evaluate_z3!
+The preprocess time is: 21.0138 S
+unexpected result
+The run time is: 63.4793 S
+The parser is destroyed!
