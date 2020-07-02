@@ -1,4 +1,4 @@
 The parsing process is over!
-The parsing time is: 1001.89 S
+The parsing time is: 39.513 S
 The layer assignment is over!
-The number of INV, BUF, and others reduction is 11703
+The number of INV, BUF, and others reduction is 11693

@@ -1,11 +1,6 @@
 The parsing process is over!
-The parsing time is: 0.00241 S
+The parsing time is: 0.000688 S
 The layer assignment is over!
 The number of INV, BUF, and others reduction is 3
-counterexample:
-b -> #b01
-a -> #b01
-in -> #b11
-
-The run time is: 0.020937 S
+unexpected resultThe run time is: 0.023106 S
 The parser is destroyed!
