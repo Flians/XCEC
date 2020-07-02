@@ -2,20 +2,16 @@
 #define _LIBHEAD_H_
 
 #include <algorithm>
-#include <ctime>
-#include <fstream>
 #include <iostream>
-#include <map>
-#include <queue>
+#include <fstream>
 #include <regex>
+#include <ctime>
+#include <queue>
 #include <set>
-#include <string>
-#include <vector>
+#include <map>
 
+#include "util_z3.h"
 #include "libstring.h"
-#include <z3/z3++.h>
-#include <stp/c_interface.h>
-
 
 #define enumtoCharArr(val) #val
 
@@ -230,24 +226,6 @@ vector<T> unique_element_in_vector(vector<T> v)
     }
     return v;
 }
-
-extern Z3_context logic;
-extern Z3_sort bv_sort;
-extern Z3_ast z3_zero;
-extern Z3_ast z3_one;
-extern Z3_ast z3_x;
-extern Z3_ast z3_three;
-z3::params config_z3(string priority, unsigned timeout);
-Z3_ast z3_mk_and(const Z3_ast &, const Z3_ast &);
-Z3_ast z3_mk_and(vector<Z3_ast> &);
-Z3_ast z3_mk_or(const Z3_ast &, const Z3_ast &);
-Z3_ast z3_mk_or(vector<Z3_ast> &);
-Z3_ast z3_mk_xor(const Z3_ast &, const Z3_ast &);
-Z3_ast z3_mk_xor(vector<Z3_ast> &);
-Z3_ast z3_mk_not(const Z3_ast &);
-Z3_ast z3_mk_DC(const Z3_ast &C, const Z3_ast &D);
-Z3_ast z3_mk_HMUX(const Z3_ast &S, const Z3_ast &I0, const Z3_ast &I1);
-Z3_ast z3_mk_exor(const Z3_ast &, const Z3_ast &);
 
 extern void cleanVP(vector<node *> *vp);
 #endif

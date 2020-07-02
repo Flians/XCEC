@@ -25,7 +25,6 @@ parser::~parser()
                         out->ins->erase(temp);
                 }
             }
-            delete con;
         }
         vector<node *>().swap(*this->constants);
     }

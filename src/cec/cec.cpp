@@ -213,7 +213,7 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
         {
             Z3_model_inc_ref(logic, m);
             /* the model returned by Z3 is a counterexample */
-            printf("counterexample:\n%s\n", Z3_model_to_string(logic, m));
+            // printf("counterexample:\n%s\n", Z3_model_to_string(logic, m));
             unsigned num_consts = Z3_model_get_num_consts(logic, m);
             unsigned num_funcs = Z3_model_get_num_funcs(logic, m);
             unsigned nums = num_consts + num_funcs;
