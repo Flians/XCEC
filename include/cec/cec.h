@@ -6,7 +6,8 @@
 class cec
 {
 private:
-    ofstream fout;
+    FILE *fout;
+    // ofstream fout;
 
     // assign values to the i-th element in the PIs
     bool assign_PIs_value(vector<node *> *PIs, int i);
@@ -17,6 +18,7 @@ public:
     cec(const string &path_output);
     ~cec();
     void print_PIs_value(vector<node *> *PIs, ofstream &output);
+    void print_PIs_value(vector<node *> *PIs, FILE *fout);
     // evaluate from PIs to POs
     void evaluate_from_PIs_to_POs(vector<node *> *PIs);
     // evaluate from POs to PIs

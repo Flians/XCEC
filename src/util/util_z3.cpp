@@ -5,7 +5,7 @@
  */
 inline void error_handler(Z3_context c, Z3_error_code e)
 {
-    cerr << "Error code: " <<  e << "\nBUG: incorrect use of Z3." << endl;
+    cerr << "Error code: " << e << "\nBUG: incorrect use of Z3." << endl;
     exit(1);
 }
 
@@ -128,9 +128,10 @@ Z3_ast z3_mk_exor(const Z3_ast &A, const Z3_ast &B)
 /**
    \brief Display a symbol in the given output stream.
 */
-void display_symbol(Z3_context c, FILE * out, Z3_symbol s)
+void display_symbol(Z3_context c, FILE *out, Z3_symbol s)
 {
-    switch (Z3_get_symbol_kind(c, s)) {
+    switch (Z3_get_symbol_kind(c, s))
+    {
     case Z3_INT_SYMBOL:
         fprintf(out, "#%d", Z3_get_symbol_int(c, s));
         break;
@@ -145,9 +146,10 @@ void display_symbol(Z3_context c, FILE * out, Z3_symbol s)
 /**
    \brief Display the given type.
 */
-void display_sort(Z3_context c, FILE * out, Z3_sort ty)
+void display_sort(Z3_context c, FILE *out, Z3_sort ty)
 {
-    switch (Z3_get_sort_kind(c, ty)) {
+    switch (Z3_get_sort_kind(c, ty))
+    {
     case Z3_UNINTERPRETED_SORT:
         display_symbol(c, out, Z3_get_sort_name(c, ty));
         break;
@@ -173,16 +175,18 @@ void display_sort(Z3_context c, FILE * out, Z3_sort ty)
     case Z3_DATATYPE_SORT:
         if (Z3_get_datatype_sort_num_constructors(c, ty) != 1)
         {
-            fprintf(out, "%s", Z3_sort_to_string(c,ty));
+            fprintf(out, "%s", Z3_sort_to_string(c, ty));
             break;
         }
         {
             unsigned num_fields = Z3_get_tuple_sort_num_fields(c, ty);
             unsigned i;
             fprintf(out, "(");
-            for (i = 0; i < num_fields; i++) {
+            for (i = 0; i < num_fields; i++)
+            {
                 Z3_func_decl field = Z3_get_tuple_sort_field_decl(c, ty, i);
-                if (i > 0) {
+                if (i > 0)
+                {
                     fprintf(out, ", ");
                 }
                 display_sort(c, out, Z3_get_range(c, field));
@@ -203,27 +207,35 @@ void display_sort(Z3_context c, FILE * out, Z3_sort ty)
 
    This function demonstrates how to use the API to navigate terms.
 */
-void display_ast(Z3_context c, FILE * out, Z3_ast v)
+void display_ast(Z3_context c, FILE *out, Z3_ast v)
 {
-    switch (Z3_get_ast_kind(c, v)) {
-    case Z3_NUMERAL_AST: {
+    switch (Z3_get_ast_kind(c, v))
+    {
+    case Z3_NUMERAL_AST:
+    {
         Z3_sort t;
         fprintf(out, "%s", Z3_get_numeral_string(c, v));
         t = Z3_get_sort(c, v);
+        /*
         fprintf(out, ":");
         display_sort(c, out, t);
+        */
         break;
     }
-    case Z3_APP_AST: {
+    case Z3_APP_AST:
+    {
         unsigned i;
         Z3_app app = Z3_to_app(c, v);
         unsigned num_fields = Z3_get_app_num_args(c, app);
         Z3_func_decl d = Z3_get_app_decl(c, app);
         fprintf(out, "%s", Z3_func_decl_to_string(c, d));
-        if (num_fields > 0) {
+        if (num_fields > 0)
+        {
             fprintf(out, "[");
-            for (i = 0; i < num_fields; i++) {
-                if (i > 0) {
+            for (i = 0; i < num_fields; i++)
+            {
+                if (i > 0)
+                {
                     fprintf(out, ", ");
                 }
                 display_ast(c, out, Z3_get_app_arg(c, app, i));
@@ -232,7 +244,8 @@ void display_ast(Z3_context c, FILE * out, Z3_ast v)
         }
         break;
     }
-    case Z3_QUANTIFIER_AST: {
+    case Z3_QUANTIFIER_AST:
+    {
         fprintf(out, "quantifier");
         ;
     }
@@ -244,14 +257,15 @@ void display_ast(Z3_context c, FILE * out, Z3_ast v)
 /**
    \brief Custom function interpretations pretty printer.
 */
-void display_function_interpretations(Z3_context c, FILE * out, Z3_model m)
+void display_function_interpretations(Z3_context c, FILE *out, Z3_model m)
 {
     unsigned num_functions, i;
 
     fprintf(out, "function interpretations:\n");
 
     num_functions = Z3_model_get_num_funcs(c, m);
-    for (i = 0; i < num_functions; i++) {
+    for (i = 0; i < num_functions; i++)
+    {
         Z3_func_decl fdecl;
         Z3_symbol name;
         Z3_ast func_else;
@@ -265,18 +279,22 @@ void display_function_interpretations(Z3_context c, FILE * out, Z3_model m)
         display_symbol(c, out, name);
         fprintf(out, " = {");
         if (finterp)
-          num_entries = Z3_func_interp_get_num_entries(c, finterp);
-        for (j = 0; j < num_entries; j++) {
+            num_entries = Z3_func_interp_get_num_entries(c, finterp);
+        for (j = 0; j < num_entries; j++)
+        {
             unsigned num_args, k;
             Z3_func_entry fentry = Z3_func_interp_get_entry(c, finterp, j);
             Z3_func_entry_inc_ref(c, fentry);
-            if (j > 0) {
+            if (j > 0)
+            {
                 fprintf(out, ", ");
             }
             num_args = Z3_func_entry_get_num_args(c, fentry);
             fprintf(out, "(");
-            for (k = 0; k < num_args; k++) {
-                if (k > 0) {
+            for (k = 0; k < num_args; k++)
+            {
+                if (k > 0)
+                {
                     fprintf(out, ", ");
                 }
                 display_ast(c, out, Z3_func_entry_get_arg(c, fentry, k));
@@ -286,7 +304,8 @@ void display_function_interpretations(Z3_context c, FILE * out, Z3_model m)
             fprintf(out, ")");
             Z3_func_entry_dec_ref(c, fentry);
         }
-        if (num_entries > 0) {
+        if (num_entries > 0)
+        {
             fprintf(out, ", ");
         }
         fprintf(out, "(else|->");
@@ -300,22 +319,24 @@ void display_function_interpretations(Z3_context c, FILE * out, Z3_model m)
 /**
    \brief Custom model pretty printer.
 */
-void display_model(Z3_context c, FILE * out, Z3_model m)
+void display_model(Z3_context c, FILE *out, Z3_model m)
 {
     unsigned num_constants;
     unsigned i;
 
-    if (!m) return;
+    if (!m)
+        return;
 
     num_constants = Z3_model_get_num_consts(c, m);
-    for (i = 0; i < num_constants; i++) {
+    for (i = 0; i < num_constants; i++)
+    {
         Z3_symbol name;
         Z3_func_decl cnst = Z3_model_get_const_decl(c, m, i);
         Z3_ast a, v;
         bool ok;
         name = Z3_get_decl_name(c, cnst);
         display_symbol(c, out, name);
-        fprintf(out, " = ");
+        fprintf(out, " ");
         a = Z3_mk_app(c, cnst, 0, 0);
         v = a;
         ok = Z3_model_eval(c, m, a, 1, &v);
@@ -323,10 +344,41 @@ void display_model(Z3_context c, FILE * out, Z3_model m)
         display_ast(c, out, v);
         fprintf(out, "\n");
     }
-    display_function_interpretations(c, out, m);
 }
 
-
+void check(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *fout)
+{
+    Z3_model m = 0;
+    Z3_lbool result = Z3_solver_check(logic, z3_sol);
+    switch (result)
+    {
+    case Z3_L_FALSE:
+        fprintf(fout, "EQ\n");
+        // fout << "EQ" << endl;
+        break;
+    case Z3_L_UNDEF:
+        /* Z3 failed to prove/disprove f. */
+        printf(">>> unknown <<<\n");
+    case Z3_L_TRUE:
+        /* disproved */
+        fprintf(fout, "NEQ\n");
+        // fout << "NEQ" << endl;
+        m = Z3_solver_get_model(logic, z3_sol);
+        if (m)
+        {
+            Z3_model_inc_ref(logic, m);
+            display_model(logic, fout, m);
+        }
+        break;
+    }
+    if (result != expected_result)
+    {
+        printf("unexpected result");
+    }
+    if (m) {
+        Z3_model_dec_ref(logic, m);
+    }
+}
 
 /**
  * Configure Z3 backend for C++ API

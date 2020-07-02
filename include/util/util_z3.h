@@ -40,25 +40,30 @@ Z3_ast z3_mk_exor(const Z3_ast &, const Z3_ast &);
 /**
    \brief Display a symbol in the given output stream.
 */
-void display_symbol(Z3_context c, FILE * out, Z3_symbol s);
+void display_symbol(Z3_context c, FILE *out, Z3_symbol s);
 /**
    \brief Display the given type.
 */
-void display_sort(Z3_context c, FILE * out, Z3_sort ty);
+void display_sort(Z3_context c, FILE *out, Z3_sort ty);
 /**
    \brief Custom ast pretty printer.
 
    This function demonstrates how to use the API to navigate terms.
 */
-void display_ast(Z3_context c, FILE * out, Z3_ast v);
+void display_ast(Z3_context c, FILE *out, Z3_ast v);
 /**
    \brief Custom function interpretations pretty printer.
 */
-void display_function_interpretations(Z3_context c, FILE * out, Z3_model m);
+void display_function_interpretations(Z3_context c, FILE *out, Z3_model m);
 /**
    \brief Custom model pretty printer.
 */
-void display_model(Z3_context c, FILE * out, Z3_model m);
+void display_model(Z3_context c, FILE *out, Z3_model m);
+/**
+   \brief Check whether the logical context is satisfiable, and compare the result with the expected result.
+   If the context is satisfiable, then display the model.
+*/
+void check(Z3_context ctx, Z3_solver s, Z3_lbool expected_result);
 
 // Configure Z3 backend for C++ API
 z3::params config_z3(string priority, unsigned timeout);

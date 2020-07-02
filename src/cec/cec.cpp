@@ -6,13 +6,17 @@ cec::cec(/* args */)
 
 cec::cec(const string &path_output)
 {
-    this->fout.open(path_output, ios::out);
+    this->fout = fopen(path_output.c_str(), "w");
+    // this->fout.open(path_output, ios::out);
 }
 
 cec::~cec()
 {
+    fclose(this->fout);
+    /*
     this->fout.flush();
     this->fout.close();
+    */
 }
 
 void cec::print_PIs_value(vector<node *> *PIs, ofstream &output)
@@ -22,6 +26,12 @@ void cec::print_PIs_value(vector<node *> *PIs, ofstream &output)
         output << pi->name << " " << pi->val << endl;
     }
 }
+void cec::print_PIs_value(vector<node *> *PIs, FILE *output) {
+    for (auto pi : *PIs)
+    {
+        fprintf(output, "%s %d", pi->name.c_str(), pi->val);
+    }
+}
 
 bool cec::assign_PIs_value(vector<node *> *PIs, int i)
 {
@@ -29,7 +39,8 @@ bool cec::assign_PIs_value(vector<node *> *PIs, int i)
     {
         if (!evaluate(*PIs))
         {
-            this->fout << "NEQ" << endl;
+            // this->fout << "NEQ" << endl;
+            fprintf(this->fout, "NEQ\n");
             print_PIs_value(PIs, this->fout);
             return false;
         }
@@ -63,7 +74,8 @@ void cec::evaluate_from_PIs_to_POs(vector<node *> *PIs)
     }
     if (assign_PIs_value(PIs, 0))
     {
-        this->fout << "EQ" << endl;
+        // this->fout << "EQ" << endl;
+        fprintf(this->fout, "EQ\n");
     }
 }
 
@@ -191,45 +203,13 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
     }
     Z3_ast result = Z3_mk_or(logic, layers->back()->size(), args);
     // printf("term: %s\n", Z3_ast_to_string(logic, result));
+    vector<Z3_ast>().swap(nodes);
 
     Z3_solver z3_sol = Z3_mk_solver(logic);
     Z3_solver_inc_ref(logic, z3_sol);
     Z3_solver_assert(logic, z3_sol, result);
-
-    Z3_model m = 0;
-    switch (Z3_solver_check(logic, z3_sol))
-    {
-    case Z3_L_FALSE:
-        this->fout << "EQ" << endl;
-        break;
-    case Z3_L_UNDEF:
-        /* Z3 failed to prove/disprove f. */
-        printf("unknown\n");
-    case Z3_L_TRUE:
-        /* disproved */
-        this->fout << "NEQ" << endl;
-        m = Z3_solver_get_model(logic, z3_sol);
-        if (m)
-        {
-            Z3_model_inc_ref(logic, m);
-            /* the model returned by Z3 is a counterexample */
-            // printf("counterexample:\n%s\n", Z3_model_to_string(logic, m));
-            unsigned num_consts = Z3_model_get_num_consts(logic, m);
-            unsigned num_funcs = Z3_model_get_num_funcs(logic, m);
-            unsigned nums = num_consts + num_funcs;
-            // traversing the model
-            for (unsigned i = 0; i < nums; i++)
-            {
-                Z3_func_decl v = static_cast<unsigned>(i) < num_consts ? Z3_model_get_const_decl(logic, m, i) : Z3_model_get_func_decl(logic, m, i - num_consts);
-                // assert(v.arity() == 0);
-                this->fout << Z3_get_decl_name(logic, v) << " " << Z3_model_get_const_interp(logic, m, v) << "\n";
-            }
-        }
-        break;
-    }
-    if (m)
-        Z3_model_dec_ref(logic, m);
-    vector<Z3_ast>().swap(nodes);
+    check(logic, z3_sol, Z3_L_FALSE);
+    // Z3_solver_pop(logic, z3_sol, 1);
     Z3_solver_dec_ref(logic, z3_sol);
 }
 

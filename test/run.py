@@ -5,6 +5,7 @@ import subprocess
 
 def test_XCEC(exePath, root='./', output='./output/'):
     files = os.listdir(os.path.join(root, 'cases'))
+    files.sort(key= lambda x:int(x[4:]))
     if not os.path.exists(os.path.join(root, 'log')):
         os.mkdir(os.path.join(root, 'log'))
     for i, dir in enumerate(files):
