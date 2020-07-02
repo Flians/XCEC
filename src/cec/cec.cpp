@@ -208,7 +208,7 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
     Z3_solver z3_sol = Z3_mk_solver(logic);
     Z3_solver_inc_ref(logic, z3_sol);
     Z3_solver_assert(logic, z3_sol, result);
-    check(logic, z3_sol, Z3_L_FALSE);
+    check(logic, z3_sol, Z3_L_FALSE, this->fout);
     // Z3_solver_pop(logic, z3_sol, 1);
     Z3_solver_dec_ref(logic, z3_sol);
 }

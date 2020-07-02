@@ -63,7 +63,7 @@ void display_model(Z3_context c, FILE *out, Z3_model m);
    \brief Check whether the logical context is satisfiable, and compare the result with the expected result.
    If the context is satisfiable, then display the model.
 */
-void check(Z3_context ctx, Z3_solver s, Z3_lbool expected_result);
+void check(Z3_context ctx, Z3_solver s, Z3_lbool expected_result, FILE *fout);
 
 // Configure Z3 backend for C++ API
 z3::params config_z3(string priority, unsigned timeout);
