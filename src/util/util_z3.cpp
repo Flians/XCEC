@@ -23,6 +23,7 @@ Z3_context mk_context()
     Z3_config cfg;
     cfg = Z3_mk_config();
     Z3_set_param_value(cfg, "model", "true");
+    Z3_set_param_value(cfg, "proof", "true");
     Z3_set_param_value(cfg, "timeout", "1700000");
 
     Z3_context ctx;
