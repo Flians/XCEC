@@ -12,6 +12,7 @@
 
 #include "util_z3.h"
 #include "libstring.h"
+#include "roaring.hh"
 
 #define enumtoCharArr(val) #val
 

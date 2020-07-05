@@ -225,7 +225,8 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
                     {
                         vector<node *> nodes;
                         nodes.push_back(item->outs->at(j));
-                        record.insert(make_pair(item->outs->at(j)->cell, nodes));
+                        record[item->outs->at(j)->cell] = nodes;
+                        // record.insert(make_pair(item->outs->at(j)->cell, nodes));
                     }
                 }
                 for (auto &it : record)

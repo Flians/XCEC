@@ -195,19 +195,22 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
             nodes[layer->at(j)->id] = res;
         }
     }
+
+    Z3_solver z3_sol = Z3_mk_solver_for_logic(logic, Z3_mk_string_symbol(logic, "QF_BV"));
+    Z3_solver_inc_ref(logic, z3_sol);
+
     int i = 0;
     Z3_ast args[layers->back()->size()];
     for (auto &output : (*layers->back()))
     {
-        args[i++] = nodes[output->id];
+        Z3_solver_assert(logic, z3_sol, nodes[output->id]);
+        // args[i++] = nodes[output->id];
     }
-    Z3_ast result = Z3_mk_or(logic, layers->back()->size(), args);
+    // Z3_ast result = Z3_mk_or(logic, layers->back()->size(), args);
     // printf("term: %s\n", Z3_ast_to_string(logic, result));
     vector<Z3_ast>().swap(nodes);
 
-    Z3_solver z3_sol = Z3_mk_solver(logic);
-    Z3_solver_inc_ref(logic, z3_sol);
-    Z3_solver_assert(logic, z3_sol, result);
+    // Z3_solver_assert(logic, z3_sol, result);
     check(logic, z3_sol, Z3_L_FALSE, this->fout);
     // Z3_solver_pop(logic, z3_sol, 1);
     Z3_solver_dec_ref(logic, z3_sol);

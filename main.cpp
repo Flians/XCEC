@@ -1,7 +1,7 @@
-#include "util/parser.h"
-#include "cec/simplify.h"
 #include "cec/cec.h"
+#include "cec/simplify.h"
 #include "testOp.h"
+#include "util/parser.h"
 
 using namespace std;
 
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
         verilog_parser.parse(argv[1], argv[2], PIs, POs);
         endTime = clock();
         cout << "The parsing time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
-        
+
         /*
         cout << ">>> before: " << endl;
         verilog_parser.printG(miter);
@@ -46,7 +46,8 @@ int main(int argc, char *argv[])
         cout << ">>> after: " << endl;
         verilog_parser.printG(miter);
         */
-
+        endTime = clock();
+        cout << "The preprocess time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
         /* evaluate the graph */
         cec cec_(argv[3]);
         // cec_.evaluate_from_PIs_to_POs(PIs);
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
     {
         printf("Please input three parameters, like \"./xec <golden.v> <revised.v> <output>\".");
     }
-    
+
     Z3_del_context(logic);
     return 0;
 }

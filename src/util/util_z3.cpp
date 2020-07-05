@@ -21,10 +21,11 @@ void unreachable()
 Z3_context mk_context()
 {
     Z3_config cfg;
-    Z3_context ctx;
     cfg = Z3_mk_config();
     Z3_set_param_value(cfg, "model", "true");
+    Z3_set_param_value(cfg, "timeout", "1700000");
 
+    Z3_context ctx;
     ctx = Z3_mk_context(cfg);
     Z3_set_error_handler(ctx, error_handler);
 
@@ -352,13 +353,13 @@ void check(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *f
     Z3_lbool result = Z3_solver_check(logic, z3_sol);
     switch (result)
     {
+    case Z3_L_UNDEF:
+        /* Z3 failed to prove/disprove f. */
+        printf(">>> unknown <<<\n");
     case Z3_L_FALSE:
         fprintf(fout, "EQ\n");
         // fout << "EQ" << endl;
         break;
-    case Z3_L_UNDEF:
-        /* Z3 failed to prove/disprove f. */
-        printf(">>> unknown <<<\n");
     case Z3_L_TRUE:
         /* disproved */
         fprintf(fout, "NEQ\n");
@@ -375,7 +376,8 @@ void check(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *f
     {
         printf(">>> unexpected result <<<\n");
     }
-    if (m) {
+    if (m)
+    {
         Z3_model_dec_ref(logic, m);
     }
 }
@@ -388,6 +390,7 @@ void check(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *f
  */
 z3::params config_z3(z3::context logic, string priority, unsigned timeout)
 {
+    z3::set_param("timeout", (int)timeout);
     z3::params z3_param(logic);
     // http://smtlib.cs.uiowa.edu/logics-all.shtml
     logic.set("logic", "QF_BV");
@@ -396,6 +399,7 @@ z3::params config_z3(z3::context logic, string priority, unsigned timeout)
     //z3_param.set(":opt.dump_models", true);
     // z3_param.set(":opt.pb.compile_equality", true);
     // z3_param.set(":opt.priority", priority.c_str());
-    z3_param.set(":timeout", timeout);
+    z3_param.set("timeout", static_cast<unsigned>(timeout));
+
     return z3_param;
 }

@@ -23,6 +23,8 @@ elseif(CMAKE_HOST_UNIX)
     set(LINUX 1)
 endif()
 
+add_library(croaring STATIC ${PROJECT_SOURCE_DIR}/include/CRoaring/roaring.c)
+
 #find STP
 # find_package(STP REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/cmake/STP)
 
@@ -74,20 +76,20 @@ set(XCEC_ALL_SRCS main.cpp ${SOURCE_FILES})
 add_executable(${PROJECT_NAME} ${XCEC_ALL_SRCS})
 if(WINDOWS)
     if(CMAKE_CL_64)
-        target_link_libraries (${PROJECT_NAME} z3)
+        target_link_libraries (${PROJECT_NAME} z3 croaring)
     else()
-        target_link_libraries (${PROJECT_NAME} z3)
+        target_link_libraries (${PROJECT_NAME} z3 croaring)
     endif()
 elseif(LINUX)
     # static library
     # target_link_libraries (${PROJECT_NAME} PRIVATE Threads::Threads ${CMAKE_SOURCE_DIR}/lib/linux/libz3.a)
     # shared library
-    target_link_libraries (${PROJECT_NAME} -lz3)
+    target_link_libraries (${PROJECT_NAME} -lz3 croaring)
 elseif(MACOS)
     # static library
     # target_link_libraries (${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/macos/libz3.a)
     # shared library
-    target_link_libraries (${PROJECT_NAME} -lz3 -lstp)
+    target_link_libraries (${PROJECT_NAME} -lz3 -lstp croaring)
 endif()
 
 if(WINDOWS)
