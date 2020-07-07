@@ -135,7 +135,7 @@ void simplify::id_reassign(vector<node *> *PIs)
 }
 
 
-vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs)
+vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs, vector<node *> *POs)
 {
     vector<vector<node *> *> *layers = new vector<vector<node *> *>;
     if (PIs->empty())
@@ -143,10 +143,11 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs)
         std::cout << "PIs is empty in simplify.layer_assignment." << std::endl;
         return layers;
     }
-    layers->push_back(PIs);
-    int i = 0;
     vector<int> visit(init_id, 0);
     vector<int> logic_depth(init_id, 0);
+    layers->push_back(PIs);
+    int i = 0;
+    int nums = PIs->size();
     // layer assignment, and calculate the logic depth of each node
     while (i < layers->size())
     {
@@ -158,7 +159,7 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs)
                 for (auto &out:(*layers->at(i)->at(j)->outs)) {
                     visit[out->id]++;
                     logic_depth[out->id] = max(logic_depth[layers->at(i)->at(j)->id] + 1, logic_depth[out->id]);
-                    if (out->ins->size() == visit[out->id])
+                    if (out->ins->size() == visit[out->id] && out->cell != _EXOR)
                         layer->push_back(out);
                 }
             }
@@ -166,9 +167,13 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs)
         if (!layer->empty())
         {
             layers->push_back(layer);
+            nums += layer->size();
         }
         i++;
     }
+    layers->push_back(POs);
+    nums += POs->size();
+    cout << nums << " " << init_id << endl;
     vector<int>().swap(visit);
     vector<int>().swap(logic_depth);
     std::cout << "The layer assignment is over!" << std::endl;
