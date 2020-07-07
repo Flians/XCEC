@@ -109,7 +109,7 @@ Z3_ast z3_mk_DC(const Z3_ast &C, const Z3_ast &D)
     return Z3_mk_ite(logic, Z3_mk_eq(logic, D, z3_zero), C, z3_x);
 }
 
-Z3_ast z3_mk_HMUX(const Z3_ast &S, const Z3_ast &I0, const Z3_ast &I1)
+Z3_ast z3_mk_HMUX(const Z3_ast &I0, const Z3_ast &I1, const Z3_ast &S)
 {
     // return z3::ite(S == z3_x, z3::ite(I0 == I1, I0, z3_x), z3::ite(S == z3_zero, I0, I1));
     return Z3_mk_ite(logic, Z3_mk_eq(logic, S, z3_x),

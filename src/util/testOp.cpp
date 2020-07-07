@@ -21,7 +21,8 @@ void testOp::prove(Z3_ast f)
 
     // printf("term: %s\n", Z3_ast_to_string(logic, not_f));
 
-    switch (Z3_solver_check(logic, s)) {
+    switch (Z3_solver_check(logic, s))
+    {
     case Z3_L_FALSE:
         /* proved */
         printf("valid\n");
@@ -30,7 +31,8 @@ void testOp::prove(Z3_ast f)
         /* Z3 failed to prove/disprove f. */
         printf("unknown\n");
         m = Z3_solver_get_model(logic, s);
-        if (m != 0) {
+        if (m != 0)
+        {
             Z3_model_inc_ref(logic, m);
             /* m should be viewed as a potential counterexample. */
             printf("potential counterexample:\n%s\n", Z3_model_to_string(logic, m));
@@ -40,14 +42,16 @@ void testOp::prove(Z3_ast f)
         /* disproved */
         printf("invalid\n");
         m = Z3_solver_get_model(logic, s);
-        if (m) {
+        if (m)
+        {
             Z3_model_inc_ref(logic, m);
             /* the model returned by Z3 is a counterexample */
             printf("counterexample:\n%s\n", Z3_model_to_string(logic, m));
         }
         break;
     }
-    if (m) Z3_model_dec_ref(logic, m);
+    if (m)
+        Z3_model_dec_ref(logic, m);
 
     /* restore scope */
     Z3_solver_pop(logic, s, 1);
@@ -67,7 +71,8 @@ void testOp::prove(Z3_ast left, Z3_ast right, int op)
     Z3_ast not_f = Z3_mk_not(logic, Z3_mk_eq(logic, left, right));
     Z3_solver_assert(logic, s, not_f);
 
-    switch (Z3_solver_check(logic, s)) {
+    switch (Z3_solver_check(logic, s))
+    {
     case Z3_L_FALSE:
         /* proved */
         printf("valid\n");
@@ -76,7 +81,8 @@ void testOp::prove(Z3_ast left, Z3_ast right, int op)
         /* Z3 failed to prove/disprove f. */
         printf("unknown\n");
         m = Z3_solver_get_model(logic, s);
-        if (m != 0) {
+        if (m != 0)
+        {
             Z3_model_inc_ref(logic, m);
             /* m should be viewed as a potential counterexample. */
             printf("potential counterexample:\n%s\n", Z3_model_to_string(logic, m));
@@ -86,14 +92,16 @@ void testOp::prove(Z3_ast left, Z3_ast right, int op)
         /* disproved */
         printf("invalid\n");
         m = Z3_solver_get_model(logic, s);
-        if (m) {
+        if (m)
+        {
             Z3_model_inc_ref(logic, m);
             /* the model returned by Z3 is a counterexample */
             printf("counterexample:\n%s\n", Z3_model_to_string(logic, m));
         }
         break;
     }
-    if (m) Z3_model_dec_ref(logic, m);
+    if (m)
+        Z3_model_dec_ref(logic, m);
 
     /* restore scope */
     Z3_solver_pop(logic, s, 1);
@@ -187,33 +195,33 @@ void testOp::test_DC()
 void testOp::test_HMUX()
 {
     prove(z3_mk_HMUX(z3_zero, z3_zero, z3_zero), z3_zero);
-    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_one), z3_zero);
-    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_x), z3_zero);
-    prove(z3_mk_HMUX(z3_zero, z3_one, z3_zero), z3_one);
-    prove(z3_mk_HMUX(z3_zero, z3_one, z3_one), z3_one);
-    prove(z3_mk_HMUX(z3_zero, z3_one, z3_x), z3_one);
-    prove(z3_mk_HMUX(z3_zero, z3_x, z3_zero), z3_x);
-    prove(z3_mk_HMUX(z3_zero, z3_x, z3_one), z3_x);
-    prove(z3_mk_HMUX(z3_zero, z3_x, z3_x), z3_x);
-
-    prove(z3_mk_HMUX(z3_one, z3_zero, z3_zero), z3_zero);
-    prove(z3_mk_HMUX(z3_one, z3_zero, z3_one), z3_one);
-    prove(z3_mk_HMUX(z3_one, z3_zero, z3_x), z3_x);
-    prove(z3_mk_HMUX(z3_one, z3_one, z3_zero), z3_zero);
-    prove(z3_mk_HMUX(z3_one, z3_one, z3_one), z3_one);
-    prove(z3_mk_HMUX(z3_one, z3_one, z3_x), z3_x);
-    prove(z3_mk_HMUX(z3_one, z3_x, z3_zero), z3_zero);
-    prove(z3_mk_HMUX(z3_one, z3_x, z3_one), z3_one);
-    prove(z3_mk_HMUX(z3_one, z3_x, z3_x), z3_x);
-
-    prove(z3_mk_HMUX(z3_x, z3_zero, z3_zero), z3_zero);
-    prove(z3_mk_HMUX(z3_x, z3_zero, z3_one), z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_zero, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_zero, z3_one, z3_zero), z3_zero);
+    prove(z3_mk_HMUX(z3_zero, z3_x, z3_zero), z3_zero);
+    prove(z3_mk_HMUX(z3_one, z3_zero, z3_zero), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_one, z3_zero), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_x, z3_zero), z3_one);
+    prove(z3_mk_HMUX(z3_x, z3_zero, z3_zero), z3_x);
     prove(z3_mk_HMUX(z3_x, z3_one, z3_zero), z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_one, z3_one), z3_one);
-    prove(z3_mk_HMUX(z3_x, z3_one, z3_x), z3_x);
     prove(z3_mk_HMUX(z3_x, z3_x, z3_zero), z3_x);
+
+    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_one), z3_zero);
+    prove(z3_mk_HMUX(z3_zero, z3_one, z3_one), z3_one);
+    prove(z3_mk_HMUX(z3_zero, z3_x, z3_one), z3_x);
+    prove(z3_mk_HMUX(z3_one, z3_zero, z3_one), z3_zero);
+    prove(z3_mk_HMUX(z3_one, z3_one, z3_one), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_x, z3_one), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_zero, z3_one), z3_zero);
+    prove(z3_mk_HMUX(z3_x, z3_one, z3_one), z3_one);
     prove(z3_mk_HMUX(z3_x, z3_x, z3_one), z3_x);
+
+    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_x), z3_zero);
+    prove(z3_mk_HMUX(z3_zero, z3_one, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_zero, z3_x, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_one, z3_zero, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_one, z3_one, z3_x), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_x, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_zero, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_one, z3_x), z3_x);
     prove(z3_mk_HMUX(z3_x, z3_x, z3_x), z3_x);
 }
 void testOp::test_EXOR()
