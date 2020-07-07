@@ -24,7 +24,7 @@ public:
     // evaluate from POs to PIs
     void evaluate_from_POs_to_PIs(vector<node *> *POs);
     // evaluate using z3
-    void evaluate_by_z3(vector<vector<node *> *> *layers);
+    void evaluate_by_z3(vector<vector<node *> *> *layers, unsigned timeout);
     // evaluate using stp
     void evaluate_by_stp(vector<vector<node *> *> *layers);
 };

@@ -18,13 +18,13 @@ void unreachable()
     exit(1);
 }
 
-Z3_context mk_context()
+Z3_context mk_context(unsigned timeout)
 {
     Z3_config cfg;
     cfg = Z3_mk_config();
     Z3_set_param_value(cfg, "model", "true");
     Z3_set_param_value(cfg, "proof", "true");
-    Z3_set_param_value(cfg, "timeout", "1700000");
+    Z3_set_param_value(cfg, "timeout", to_string(timeout).c_str());
 
     Z3_context ctx;
     ctx = Z3_mk_context(cfg);
@@ -34,13 +34,23 @@ Z3_context mk_context()
     return ctx;
 }
 
-Z3_context logic = mk_context();
-Z3_sort bv_sort = Z3_mk_bv_sort(logic, 2);
+Z3_context logic;
+Z3_sort bv_sort;
 
-Z3_ast z3_zero = Z3_mk_unsigned_int(logic, 0, bv_sort);
-Z3_ast z3_one = Z3_mk_unsigned_int(logic, 1, bv_sort);
-Z3_ast z3_x = Z3_mk_unsigned_int(logic, 2, bv_sort);
-Z3_ast z3_undefined = Z3_mk_unsigned_int(logic, 3, bv_sort);
+Z3_ast z3_zero;
+Z3_ast z3_one;
+Z3_ast z3_x;
+Z3_ast z3_undefined;
+
+void init_z3(unsigned timeout)
+{
+    logic = mk_context(timeout);
+    bv_sort = Z3_mk_bv_sort(logic, 2);
+    z3_zero = Z3_mk_unsigned_int(logic, 0, bv_sort);
+    z3_one = Z3_mk_unsigned_int(logic, 1, bv_sort);
+    z3_x = Z3_mk_unsigned_int(logic, 2, bv_sort);
+    z3_undefined = Z3_mk_unsigned_int(logic, 3, bv_sort);
+}
 
 Z3_ast z3_mk_and(const Z3_ast &A, const Z3_ast &B)
 {
@@ -402,7 +412,7 @@ void check_(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *
         /* Z3 failed to prove/disprove f. */
         printf(">>> unknown <<<\n");
     case Z3_L_TRUE:
-        fprintf(fout, "EQ\n");        
+        fprintf(fout, "EQ\n");
         break;
     }
     if (result != expected_result)

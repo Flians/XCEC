@@ -14,6 +14,8 @@ extern Z3_ast z3_one;
 extern Z3_ast z3_x;
 extern Z3_ast z3_undefined;
 
+void init_z3(unsigned timeout);
+
 // C API of Z3
 /**
    \brief Simpler error handler.

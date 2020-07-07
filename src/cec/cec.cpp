@@ -125,8 +125,9 @@ void cec::evaluate_from_POs_to_PIs(vector<node *> *POs)
 {
 }
 
-void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
+void cec::evaluate_by_z3(vector<vector<node *> *> *layers, unsigned timeout)
 {
+    init_z3(timeout);
     Z3_solver z3_sol = Z3_mk_solver_for_logic(logic, Z3_mk_string_symbol(logic, "QF_BV"));
     Z3_solver_inc_ref(logic, z3_sol);
 
