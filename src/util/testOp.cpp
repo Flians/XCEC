@@ -19,7 +19,7 @@ void testOp::prove(Z3_ast f)
     Z3_ast not_f = Z3_mk_not(logic, f);
     Z3_solver_assert(logic, s, not_f);
 
-    printf("term: %s\n", Z3_ast_to_string(logic, not_f));
+    // printf("term: %s\n", Z3_ast_to_string(logic, not_f));
 
     switch (Z3_solver_check(logic, s)) {
     case Z3_L_FALSE:
@@ -218,9 +218,6 @@ void testOp::test_HMUX()
 }
 void testOp::test_EXOR()
 {
-    Z3_ast args[] = {z3_mk_exor(z3_zero, z3_one)};
-    prove(Z3_mk_or(logic, 1, args));
-
     prove(Z3_mk_not(logic, z3_mk_exor(z3_zero, z3_zero)));
     prove(z3_mk_exor(z3_zero, z3_one));
     prove(z3_mk_exor(z3_zero, z3_x));

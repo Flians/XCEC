@@ -127,6 +127,9 @@ void cec::evaluate_from_POs_to_PIs(vector<node *> *POs)
 
 void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
 {
+    Z3_solver z3_sol = Z3_mk_solver_for_logic(logic, Z3_mk_string_symbol(logic, "QF_BV"));
+    Z3_solver_inc_ref(logic, z3_sol);
+
     vector<Z3_ast> nodes(init_id);
     for (auto &node : (*layers->at(0)))
     {
@@ -137,6 +140,7 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
         else
         {
             nodes[node->id] = Z3_mk_const(logic, Z3_mk_string_symbol(logic, node->name.c_str()), bv_sort);
+            Z3_solver_assert(logic, z3_sol, Z3_mk_bvule(logic, nodes[node->id], z3_one));
         }
     }
 
@@ -195,9 +199,6 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
             nodes[layer->at(j)->id] = res;
         }
     }
-
-    Z3_solver z3_sol = Z3_mk_solver_for_logic(logic, Z3_mk_string_symbol(logic, "QF_BV"));
-    Z3_solver_inc_ref(logic, z3_sol);
 
     int i = 0;
     Z3_ast args[layers->back()->size()];

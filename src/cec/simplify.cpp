@@ -67,7 +67,7 @@ void simplify::clean_wire_buf(vector<node *> *miter)
                 }
                 else
                 {
-                    cerr << "There are some wrong in" << pi->name << endl;
+                    std::cerr << "There are some wrong in" << pi->name << std::endl;
                     exit(-1);
                 }
                 ++it;
@@ -92,7 +92,7 @@ void simplify::id_reassign(vector<node *> *PIs)
 {
     if (PIs->empty())
     {
-        cout << "PIs is empty in simplify.id_reassign" << endl;
+        std::cout << "PIs is empty in simplify.id_reassign." << endl;
         return;
     }
     map<node *, bool> visit;
@@ -140,7 +140,7 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs)
     vector<vector<node *> *> *layers = new vector<vector<node *> *>;
     if (PIs->empty())
     {
-        cout << "PIs is empty in simplify.layer_assignment" << endl;
+        std::cout << "PIs is empty in simplify.layer_assignment." << std::endl;
         return layers;
     }
     layers->push_back(PIs);
@@ -171,7 +171,7 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs)
     }
     vector<int>().swap(visit);
     vector<int>().swap(logic_depth);
-    cout << "The layer assignment is over!" << endl;
+    std::cout << "The layer assignment is over!" << std::endl;
     return layers;
 }
 
@@ -189,6 +189,7 @@ void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> 
         // son.outs.push(grandson)
         keep->outs->push_back(out);
     }
+
     layers->at(i)->erase(find(layers->at(i)->begin(), layers->at(i)->end(), dupl));
     delete dupl;
 }
@@ -281,5 +282,5 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
         }
     }
     vector<int>().swap(level);
-    cout << "The number of INV, BUF, and others reduction is " << reduce << endl;
+    std::cout << "The number of INV, BUF, and others reduction is " << reduce << std::endl;
 }
