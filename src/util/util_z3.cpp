@@ -122,7 +122,7 @@ Z3_ast z3_mk_exor(const Z3_ast &A, const Z3_ast &B)
     // return z3::ite(A == z3_x || A == B, z3_zero, z3_one);
     Z3_ast args[2] = {Z3_mk_eq(logic, A, z3_x), Z3_mk_eq(logic, A, B)};
     // return Z3_mk_ite(logic, Z3_mk_or(logic, 2, args), z3_zero, z3_one);
-    return Z3_mk_not(logic, Z3_mk_or(logic, 2, args));
+    return Z3_mk_or(logic, 2, args);
 }
 
 /****** print the information ******/
@@ -371,6 +371,38 @@ void check(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *f
             Z3_model_inc_ref(logic, m);
             display_model(logic, fout, m);
         }
+        break;
+    }
+    if (result != expected_result)
+    {
+        printf(">>> unexpected result <<<\n");
+    }
+    if (m)
+    {
+        Z3_model_dec_ref(logic, m);
+    }
+}
+
+void check_(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *fout)
+{
+    Z3_model m = 0;
+    Z3_lbool result = Z3_solver_check(logic, z3_sol);
+    switch (result)
+    {
+    case Z3_L_FALSE:
+        fprintf(fout, "NEQ\n");
+        m = Z3_solver_get_model(logic, z3_sol);
+        if (m)
+        {
+            Z3_model_inc_ref(logic, m);
+            display_model(logic, fout, m);
+        }
+        break;
+    case Z3_L_UNDEF:
+        /* Z3 failed to prove/disprove f. */
+        printf(">>> unknown <<<\n");
+    case Z3_L_TRUE:
+        fprintf(fout, "EQ\n");        
         break;
     }
     if (result != expected_result)

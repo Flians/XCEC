@@ -204,15 +204,15 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
     Z3_ast args[layers->back()->size()];
     for (auto &output : (*layers->back()))
     {
-        // Z3_solver_assert(logic, z3_sol, nodes[output->id]);
+        // Z3_solver_assert(logic, z3_sol, Z3_mk_not(logic,nodes[output->id]));
         args[i++] = nodes[output->id];
     }
-    Z3_ast result = Z3_mk_or(logic, layers->back()->size(), args);
-    // printf("term: %s\n", Z3_ast_to_string(logic, result));
     vector<Z3_ast>().swap(nodes);
+    Z3_ast result = Z3_mk_and(logic, layers->back()->size(), args);
+    Z3_solver_assert(logic, z3_sol, Z3_mk_not(logic, result));
+    // printf("term: %s\n", Z3_ast_to_string(logic, result));
 
-    Z3_solver_assert(logic, z3_sol, result);
-    check(logic, z3_sol, Z3_L_FALSE, this->fout);
+    check(logic, z3_sol, Z3_L_TRUE, this->fout);
     // Z3_solver_pop(logic, z3_sol, 1);
     Z3_solver_dec_ref(logic, z3_sol);
 }
