@@ -204,7 +204,7 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers)
     Z3_ast args[layers->back()->size()];
     for (auto &output : (*layers->back()))
     {
-        // Z3_solver_assert(logic, z3_sol, Z3_mk_not(logic,nodes[output->id]));
+        // Z3_solver_assert(logic, z3_sol, nodes[output->id]);
         args[i++] = nodes[output->id];
     }
     vector<Z3_ast>().swap(nodes);
