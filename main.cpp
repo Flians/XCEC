@@ -47,11 +47,12 @@ int main(int argc, char *argv[])
         verilog_parser.printG(miter);
         */
         endTime = clock();
-        cout << "The preprocess time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
+        double pre_time = (endTime - startTime) / 1000;
+        cout << "The preprocess time is: " << pre_time / 1000 << " S" << endl;
         /* evaluate the graph */
         cec cec_(argv[3]);
         // cec_.evaluate_from_PIs_to_POs(PIs);
-        cec_.evaluate_by_z3(layers, 1600000 - (endTime - startTime)/1000);
+        cec_.evaluate_by_z3(layers, pre_time > 112000 ? 1700000 - pre_time : 15 * pre_time);
         endTime = clock();
         cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
         /* free up space */
