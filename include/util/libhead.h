@@ -2,17 +2,17 @@
 #define _LIBHEAD_H_
 
 #include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <regex>
 #include <ctime>
-#include <queue>
-#include <set>
+#include <fstream>
+#include <iostream>
 #include <map>
+#include <queue>
+#include <regex>
+#include <set>
 
-#include "util_z3.h"
 #include "libstring.h"
 #include "roaring.hh"
+#include "util_z3.h"
 
 #define enumtoCharArr(val) #val
 
@@ -165,26 +165,34 @@ struct node
         return re;
     }
 
+    // for find
     bool operator==(const node &B)
     {
         return this->id == B.id;
     }
 
+    // for find
+    bool operator==(const node *B)
+    {
+        return this->id == B->id;
+    }
+
+    // for sort
     bool operator<(const node &B)
     {
         if (this->outs)
         {
             if (B.outs)
             {
-                return this->outs->size() < B.outs->size();
+                return this->outs->size() > B.outs->size();
             }
-            return false;
+            return true;
         }
         else
         {
             if (B.outs)
             {
-                return true;
+                return false;
             }
             return this->id < B.id;
         }

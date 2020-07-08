@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
         }
         sim.id_reassign(PIs);
         vector<vector<node *> *> *layers = sim.layer_assignment(PIs, POs);
-        // sim.reduce_repeat_nodes(layers);
-        // sim.id_reassign(layers->at(0));
+        sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
+        sim.id_reassign(layers->at(0));
         // PIs->insert(PIs->end(),verilog_parser.get_constants()->begin(),verilog_parser.get_constants()->end());
         /*
         cout << ">>> after: " << endl;

@@ -101,16 +101,7 @@ void simplify::id_reassign(vector<node *> *PIs)
     for (auto pi : (*PIs))
     {
         visit[pi] = true;
-        if (pi->name.find("clk") != string::npos && !bfs_record.empty())
-        {
-            pi->id = 0;
-            bfs_record.front()->id = i++;
-            swap(PIs->at(0), pi);
-        }
-        else
-        {
-            pi->id = i++;
-        }
+        pi->id = i++;
         bfs_record.push(pi);
     }
     while (!bfs_record.empty())
@@ -134,7 +125,6 @@ void simplify::id_reassign(vector<node *> *PIs)
     visit.clear();
 }
 
-
 vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs, vector<node *> *POs)
 {
     vector<vector<node *> *> *layers = new vector<vector<node *> *>;
@@ -156,7 +146,8 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs, vector
         {
             if (layers->at(i)->at(j)->outs)
             {
-                for (auto &out:(*layers->at(i)->at(j)->outs)) {
+                for (auto &out : (*layers->at(i)->at(j)->outs))
+                {
                     visit[out->id]++;
                     logic_depth[out->id] = max(logic_depth[layers->at(i)->at(j)->id] + 1, logic_depth[out->id]);
                     if (out->ins->size() == visit[out->id] && out->cell != _EXOR)
@@ -173,7 +164,6 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs, vector
     }
     layers->push_back(POs);
     nums += POs->size();
-    cout << nums << " " << init_id << endl;
     vector<int>().swap(visit);
     vector<int>().swap(logic_depth);
     std::cout << "The layer assignment is over!" << std::endl;
@@ -182,6 +172,11 @@ vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs, vector
 
 void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> *> *layers)
 {
+    if (keep->id == dupl->id)
+    {
+        cerr << "keep is the same as dupl in cec.deduplicate!" << endl;
+        exit(-1);
+    }
     if (!dupl->outs)
     {
         cerr << "The inputs is empty! in cec.deduplicate!" << endl;
@@ -190,12 +185,30 @@ void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> 
     for (auto &out : (*dupl->outs))
     {
         // grandson.ins.push(son)
-        out->ins->push_back(keep);
-        // son.outs.push(grandson)
-        keep->outs->push_back(out);
+        vector<node *>::iterator temp_in = out->ins->begin();
+        vector<node *>::iterator temp_in_end = out->ins->end();
+        while (temp_in != temp_in_end)
+        {
+            if (dupl == (*temp_in))
+            {
+                (*temp_in) = keep;
+                break;
+            }
+            temp_in++;
+        }
+        if (temp_in != temp_in_end)
+        {
+            // son.outs.push(grandson)
+            keep->outs->push_back(out);
+        } else {
+            cout << "dupl is not equal with keep in simplify.deduplicate." << endl;
+        }
     }
-
-    layers->at(i)->erase(find(layers->at(i)->begin(), layers->at(i)->end(), dupl));
+    vector<node *>::iterator it = find(layers->at(i)->begin(), layers->at(i)->end(), dupl);
+    // layers->at(i)->erase(it);
+    *it = *(layers->at(i)->end() - 1);
+    layers->at(i)->resize(layers->at(i)->size() - 1);
+    vector<node *>().swap(*(dupl->outs));
     delete dupl;
 }
 
@@ -209,18 +222,19 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
     vector<int> level(init_id, 0);
     for (int i = 0; i < layers->size(); i++)
     {
-        for (auto &node : (*layers->at(i))) {
+        for (auto &node : (*layers->at(i)))
+        {
             level[node->id] = i;
         }
     }
     int reduce = 0;
     for (int i = 0; i < layers->size() - 2; i++)
     {
+        map<Gtype, vector<node *>> record;
         for (auto &item : (*layers->at(i)))
         {
             if (item->outs && item->outs->size() > 0)
             {
-                map<Gtype, vector<node *>> record;
                 for (int j = 0; j < item->outs->size(); j++)
                 {
                     if (record.count(item->outs->at(j)->cell))
@@ -235,55 +249,86 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
                         // record.insert(make_pair(item->outs->at(j)->cell, nodes));
                     }
                 }
-                for (auto &it : record)
-                {
-                    if (it.second.size() > 1)
+            }
+        }
+        for (auto &it : record)
+        {
+            if (it.second.size() > 1)
+            {
+                // remove duplicate elements in vector
+                sort(it.second.begin(), it.second.end(), [](const node *A, const node *B) {
+                    if (A->outs)
                     {
-                        sort(it.second.begin(), it.second.end());
-                        if (it.first == BUF || it.first == INV)
+                        if (B->outs)
                         {
-                            for (int d = 1; d < it.second.size(); ++d)
-                            {
-                                this->deduplicate(level[it.second.at(d)->id], it.second.at(0), it.second.at(d), layers);
-                                reduce++;
-                            }
+                            return A->outs->size() == B->outs->size() ? A->id < B->id : A->outs->size() > B->outs->size();
                         }
-                        else
+                        return true;
+                    }
+                    else
+                    {
+                        if (B->outs)
                         {
-                            for (int si = 0; si < it.second.size(); si++)
+                            return false;
+                        }
+                        return A->id < B->id;
+                    }
+                });
+                it.second.erase(unique(it.second.begin(), it.second.end()), it.second.end());
+                if (it.first == BUF || it.first == INV)
+                {
+                    for (int d = 1; d < it.second.size(); ++d)
+                    {
+                        this->deduplicate(level[it.second.at(d)->id], it.second.at(0), it.second.at(d), layers);
+                        reduce++;
+                    }
+                }
+                else
+                {
+                    for (int si = 0; si < it.second.size(); si++)
+                    {
+                        int candidate_size = it.second.size();
+                        for (int ri = si + 1; ri < candidate_size; ri++)
+                        {
+                            if (it.second.at(si)->ins->size() == it.second.at(ri)->ins->size())
                             {
-                                for (int ri = si + 1; ri < it.second.size(); ri++)
+                                bool flag = true;
+                                for (int ii = 0; ii < it.second.at(si)->ins->size(); ii++)
                                 {
-                                    if (it.second.at(si)->ins->size() == it.second.at(ri)->ins->size())
+                                    if (it.second.at(si)->ins->at(ii)->id != it.second.at(ri)->ins->at(ii)->id)
                                     {
-                                        bool flag = true;
-                                        for (int ii = 0; ii < it.second.at(si)->ins->size(); ii++)
-                                        {
-                                            if (it.second.at(si)->ins->at(ii)->id != it.second.at(ri)->ins->at(ii)->id)
-                                            {
-                                                flag = false;
-                                                break;
-                                            }
-                                        }
-                                        if (flag)
-                                        {
-                                            this->deduplicate(level[it.second.at(ri)->id], it.second.at(si), it.second.at(ri), layers);
-                                            it.second.erase(it.second.begin() + ri);
-                                            reduce++;
-                                        }
+                                        flag = false;
+                                        break;
                                     }
+                                }
+                                if (flag)
+                                {
+                                    this->deduplicate(level[it.second.at(ri)->id], it.second.at(si), it.second.at(ri), layers);
+                                    // it.second.erase(it.second.begin() + ri);
+                                    --candidate_size;
+                                    *(it.second.begin() + ri) = *(it.second.begin() + candidate_size);
+                                    --ri;
                                 }
                             }
                         }
+                        if (it.second.size() > candidate_size)
+                        {
+                            reduce += it.second.size() - candidate_size;
+                            it.second.resize(candidate_size);
+                        }
                     }
-                    it.second.clear();
                 }
-                record.clear();
             }
+            it.second.clear();
         }
-        if (layers->at(i)->empty()) {
-            layers->erase(layers->begin()+i);
-            i--;
+        record.clear();
+    }
+    for (int i = 0; i < layers->size(); i++)
+    {
+        if (layers->at(i)->empty())
+        {
+            layers->erase(layers->begin() + i);
+            --i;
         }
     }
     vector<int>().swap(level);
