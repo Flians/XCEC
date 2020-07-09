@@ -2,6 +2,7 @@
 #define _LIBHEAD_H_
 
 #include <algorithm>
+#include <cmath>
 #include <ctime>
 #include <fstream>
 #include <iostream>
