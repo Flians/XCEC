@@ -1,7 +1,22 @@
 The parsing process is over!
-The parsing time is: 9.19097 S
-11416 11416
+The parsing time is: 8.8534 S
 The layer assignment is over!
-The preprocess time is: 9.241 S
-The run time is: 18.864 S
+The preprocess time is: 8.907 S
+\n22[15]_g1, C: 1'b0, D: \U$6
+\n22[0]_g1, C: 1'b0, D: \U$6
+\n22[1]_g1, C: 1'b0, D: \U$6
+\n22[2]_g1, C: 1'b0, D: \U$6
+\n22[3]_g1, C: 1'b0, D: \U$6
+\n22[4]_g1, C: 1'b0, D: \U$6
+\n22[5]_g1, C: 1'b0, D: \U$6
+\n22[6]_g1, C: 1'b0, D: \U$6
+\n22[7]_g1, C: 1'b0, D: \U$6
+\n22[8]_g1, C: 1'b0, D: \U$6
+\n22[9]_g1, C: 1'b0, D: \U$6
+\n22[10]_g1, C: 1'b0, D: \U$6
+\n22[11]_g1, C: 1'b0, D: \U$6
+\n22[12]_g1, C: 1'b0, D: \U$6
+\n22[13]_g1, C: 1'b0, D: \U$6
+\n22[14]_g1, C: 1'b0, D: \U$6
+The run time is: 18.8452 S
 The parser is destroyed!

@@ -1,7 +1,10 @@
 The parsing process is over!
-The parsing time is: 0.001841 S
-14 14
+The parsing time is: 0.00155 S
 The layer assignment is over!
 The preprocess time is: 0.001 S
-The run time is: 0.006633 S
+buf1, C: in, D: en1b_ins
+buf1, C: in, D: en1b_ins
+buf2, C: buf1, D: en2b_ins
+buf2, C: iso, D: en2b_ins
+The run time is: 0.006422 S
 The parser is destroyed!
