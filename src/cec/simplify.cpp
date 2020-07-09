@@ -163,8 +163,9 @@ vector<vector<node *>> &simplify::id_reassign_and_layered(vector<node *> *PIs, v
         vector<node *> layer;
         layer.reserve(layer_size);
     }
-    std::map<node *, int>::iterator iter;
-    for (iter = visit.begin(); iter != visit.end(); ++iter)
+    std::map<node *, int>::iterator iter = visit.begin();
+    std::map<node *, int>::iterator iter_end = visit.end();
+    for (; iter != iter_end; ++iter)
     {
         this->layers[iter->second - 1].emplace_back(iter->first);
     }
@@ -225,13 +226,13 @@ vector<vector<node *>> &simplify::layer_assignment(vector<node *> *PIs, vector<n
     while (i < this->layers.size())
     {
         vector<node *> layer;
-        for (int j = 0; j < this->layers[i].size(); j++)
+        for (int j = 0; j < this->layers[i].size(); ++j)
         {
             if (this->layers[i][j]->outs)
             {
                 for (auto &out : *this->layers[i][j]->outs)
                 {
-                    visit[out->id]++;
+                    ++visit[out->id];
                     logic_depth[out->id] = max(logic_depth[this->layers[i][j]->id] + 1, logic_depth[out->id]);
                     if (out->ins->size() == visit[out->id] && out->cell != _EXOR)
                         layer.emplace_back(out);
@@ -243,7 +244,7 @@ vector<vector<node *>> &simplify::layer_assignment(vector<node *> *PIs, vector<n
             this->layers.emplace_back(layer);
             nums += layer.size();
         }
-        i++;
+        ++i;
     }
     this->layers.emplace_back(*POs);
     nums += POs->size();
@@ -305,7 +306,7 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
         exit(-1);
     }
     vector<int> level(init_id, 0);
-    for (int i = 0; i < layers->size(); i++)
+    for (int i = 0; i < layers->size(); ++i)
     {
         for (auto &node : (*layers->at(i)))
         {
@@ -313,14 +314,14 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
         }
     }
     int reduce = 0;
-    for (int i = 0; i < layers->size() - 2; i++)
+    for (int i = 0; i < layers->size() - 2; ++i)
     {
         map<Gtype, vector<node *>> record;
         for (auto &item : (*layers->at(i)))
         {
             if (item->outs && item->outs->size() > 0)
             {
-                for (int j = 0; j < item->outs->size(); j++)
+                for (int j = 0; j < item->outs->size(); ++j)
                 {
                     // not including output
                     if (item->outs->at(j)->cell != _EXOR)
@@ -358,20 +359,20 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
                 for (int d = 1; d < it.second.size(); ++d)
                 {
                     this->deduplicate(level[it.second.at(d)->id], it.second.at(0), it.second.at(d), layers);
-                    reduce++;
+                    ++reduce;
                 }
             }
             else
             {
-                for (int si = 0; si < it.second.size(); si++)
+                for (int si = 0; si < it.second.size(); ++si)
                 {
                     int candidate_size = it.second.size();
-                    for (int ri = si + 1; ri < candidate_size; ri++)
+                    for (int ri = si + 1; ri < candidate_size; ++ri)
                     {
                         if (it.second.at(si)->ins->size() == it.second.at(ri)->ins->size())
                         {
                             bool flag = true;
-                            for (int ii = 0; ii < it.second.at(si)->ins->size(); ii++)
+                            for (int ii = 0; ii < it.second.at(si)->ins->size(); ++ii)
                             {
                                 if (it.second.at(si)->ins->at(ii)->id != it.second.at(ri)->ins->at(ii)->id)
                                 {
@@ -400,7 +401,7 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
         }
         record.clear();
     }
-    for (int i = 0; i < layers->size(); i++)
+    for (int i = 0; i < layers->size(); ++i)
     {
         if (layers->at(i)->empty())
         {

@@ -361,8 +361,9 @@ void parser::build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden,
         exit(-1);
     }
     vector<node *>::iterator iter = PIs_golden->begin();
+    vector<node *>::iterator iter_end = PIs_golden->end();
     // merge all inputs
-    while (iter != PIs_golden->end())
+    while (iter != iter_end)
     {
         // cout << (*iter)->name << endl;
         node *pi = find_node_by_name(PIs_revised, (*iter)->name);
@@ -376,7 +377,8 @@ void parser::build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden,
             if (pi->outs)
             {
                 vector<node *>::iterator it = pi->outs->begin();
-                while (it != pi->outs->end())
+                vector<node *>::iterator it_end = pi->outs->end();
+                while (it != it_end)
                 {
                     if (!replace_node_by_name((*it)->ins, (*iter)))
                     {
@@ -394,7 +396,8 @@ void parser::build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden,
     vector<node *>().swap(*PIs_revised);
     // merge all outputs
     iter = POs_golden->begin();
-    while (iter != POs_golden->end())
+    iter_end = POs_golden->end();
+    while (iter != iter_end)
     {
         node *po = find_node_by_name(POs_revised, (*iter)->name);
         if (!po)
@@ -412,7 +415,7 @@ void parser::build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden,
             }
             delete po;
         }
-        iter++;
+        ++iter;
     }
     vector<node *>().swap(*POs_revised);
 }
@@ -473,7 +476,8 @@ void parser::printG(vector<node *> *nodes)
     if (!nodes || nodes->size() == 0)
         return;
     vector<node *>::iterator pi = nodes->begin();
-    while (pi != nodes->end())
+    vector<node *>::iterator pi_end = nodes->end();
+    while (pi != pi_end)
     {
         cout << (*pi)->name << " " << Str_Value[(*pi)->cell] << " " << (*pi)->val << endl;
         printG((*pi)->outs);

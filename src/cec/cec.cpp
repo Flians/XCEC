@@ -145,13 +145,13 @@ void cec::evaluate_by_z3(vector<vector<node *> > &layers, unsigned timeout)
         }
     }
 
-    for (int i = 1; i < layers.size(); i++)
+    for (int i = 1; i < layers.size(); ++i)
     {
         vector<node *> layer = layers[i];
-        for (int j = 0; j < layer.size(); j++)
+        for (int j = 0; j < layer.size(); ++j)
         {
             vector<Z3_ast> inputs(layer[j]->ins->size());
-            for (int k = 0; k < layer[j]->ins->size(); k++)
+            for (int k = 0; k < layer[j]->ins->size(); ++k)
             {
                 inputs[k] = nodes[layer[j]->ins->at(k)->id];
             }

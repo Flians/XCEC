@@ -62,7 +62,7 @@ Z3_ast z3_mk_and(vector<Z3_ast> &exprs)
 {
     Z3_ast res = exprs[0];
     vector<Z3_ast>::iterator it_ = exprs.begin();
-    vector<Z3_ast>::iterator it_end = exprs.end();
+    vector<Z3_ast>::iterator it_end = exprs.end() - 1;
     while (it_ != it_end)
     {
         res = z3_mk_and(res, *(++it_));
@@ -80,7 +80,7 @@ Z3_ast z3_mk_or(vector<Z3_ast> &exprs)
 {
     Z3_ast res = exprs[0];
     vector<Z3_ast>::iterator it_ = exprs.begin();
-    vector<Z3_ast>::iterator it_end = exprs.end();
+    vector<Z3_ast>::iterator it_end = exprs.end() - 1;
     while (it_ != it_end)
     {
         res = z3_mk_or(res, *(++it_));
@@ -98,7 +98,7 @@ Z3_ast z3_mk_xor(vector<Z3_ast> &exprs)
 {
     Z3_ast res = exprs[0];
     vector<Z3_ast>::iterator it_ = exprs.begin();
-    vector<Z3_ast>::iterator it_end = exprs.end();
+    vector<Z3_ast>::iterator it_end = exprs.end() - 1;
     while (it_ != it_end)
     {
         res = z3_mk_xor(res, *(++it_));
@@ -194,7 +194,7 @@ void display_sort(Z3_context c, FILE *out, Z3_sort ty)
             unsigned num_fields = Z3_get_tuple_sort_num_fields(c, ty);
             unsigned i;
             fprintf(out, "(");
-            for (i = 0; i < num_fields; i++)
+            for (i = 0; i < num_fields; ++i)
             {
                 Z3_func_decl field = Z3_get_tuple_sort_field_decl(c, ty, i);
                 if (i > 0)
@@ -244,7 +244,7 @@ void display_ast(Z3_context c, FILE *out, Z3_ast v)
         if (num_fields > 0)
         {
             fprintf(out, "[");
-            for (i = 0; i < num_fields; i++)
+            for (i = 0; i < num_fields; ++i)
             {
                 if (i > 0)
                 {
@@ -276,7 +276,7 @@ void display_function_interpretations(Z3_context c, FILE *out, Z3_model m)
     fprintf(out, "function interpretations:\n");
 
     num_functions = Z3_model_get_num_funcs(c, m);
-    for (i = 0; i < num_functions; i++)
+    for (i = 0; i < num_functions; ++i)
     {
         Z3_func_decl fdecl;
         Z3_symbol name;
@@ -292,7 +292,7 @@ void display_function_interpretations(Z3_context c, FILE *out, Z3_model m)
         fprintf(out, " = {");
         if (finterp)
             num_entries = Z3_func_interp_get_num_entries(c, finterp);
-        for (j = 0; j < num_entries; j++)
+        for (j = 0; j < num_entries; ++j)
         {
             unsigned num_args, k;
             Z3_func_entry fentry = Z3_func_interp_get_entry(c, finterp, j);
@@ -303,7 +303,7 @@ void display_function_interpretations(Z3_context c, FILE *out, Z3_model m)
             }
             num_args = Z3_func_entry_get_num_args(c, fentry);
             fprintf(out, "(");
-            for (k = 0; k < num_args; k++)
+            for (k = 0; k < num_args; ++k)
             {
                 if (k > 0)
                 {
@@ -340,7 +340,7 @@ void display_model(Z3_context c, FILE *out, Z3_model m)
         return;
 
     num_constants = Z3_model_get_num_consts(c, m);
-    for (i = 0; i < num_constants; i++)
+    for (i = 0; i < num_constants; ++i)
     {
         Z3_symbol name;
         Z3_func_decl cnst = Z3_model_get_const_decl(c, m, i);
