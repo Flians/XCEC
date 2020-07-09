@@ -6,12 +6,12 @@
 class parser
 {
 private:
-    vector<node *> *constants;
+    vector<node *> constants;
 
 public:
     parser(/* args */);
     ~parser();
-    vector<node *> *get_constants();
+    vector<node *> &get_constants();
 
     // find the node from vector<node *> *nodes by name
     node *find_node_by_name(vector<node *> *nodes, string name);

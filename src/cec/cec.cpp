@@ -95,10 +95,9 @@ bool cec::evaluate(vector<node *> nodes)
                 {
                     out->vis = 0;
                     out->val = calculate(out);
-                    cout << out->name << " " << out->val << endl;
                     if (out->outs)
                     {
-                        qu.push_back(out);
+                        qu.emplace_back(out);
                     }
                     else if (out->cell == _EXOR)
                     {
@@ -118,21 +117,22 @@ bool cec::evaluate(vector<node *> nodes)
             cout << "The outputs of the gate " << g->name << " are empty!" << endl;
         }
     }
-    return evaluate(unique_element_in_vector(qu));
+    unique_element_in_vector(qu);
+    return evaluate(qu);
 }
 
 void cec::evaluate_from_POs_to_PIs(vector<node *> *POs)
 {
 }
 
-void cec::evaluate_by_z3(vector<vector<node *> *> *layers, unsigned timeout)
+void cec::evaluate_by_z3(vector<vector<node *> > &layers, unsigned timeout)
 {
     init_z3(timeout);
     Z3_solver z3_sol = Z3_mk_solver_for_logic(logic, Z3_mk_string_symbol(logic, "QF_BV"));
     Z3_solver_inc_ref(logic, z3_sol);
 
     vector<Z3_ast> nodes(init_id);
-    for (auto &node : (*layers->at(0)))
+    for (auto &node : layers[0])
     {
         if (node->cell == _CONSTANT)
         {
@@ -145,19 +145,18 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers, unsigned timeout)
         }
     }
 
-    for (int i = 1; i < layers->size(); i++)
+    for (int i = 1; i < layers.size(); i++)
     {
-        cout << i << endl;
-        vector<node *> *layer = layers->at(i);
-        for (int j = 0; j < layer->size(); j++)
+        vector<node *> layer = layers[i];
+        for (int j = 0; j < layer.size(); j++)
         {
-            vector<Z3_ast> inputs(layer->at(j)->ins->size());
-            for (int k = 0; k < layer->at(j)->ins->size(); k++)
+            vector<Z3_ast> inputs(layer[j]->ins->size());
+            for (int k = 0; k < layer[j]->ins->size(); k++)
             {
-                inputs[k] = nodes[layer->at(j)->ins->at(k)->id];
+                inputs[k] = nodes[layer[j]->ins->at(k)->id];
             }
             Z3_ast res;
-            switch (layer->at(j)->cell)
+            switch (layer[j]->cell)
             {
             case _AND:
                 res = z3_mk_and(inputs);
@@ -184,7 +183,7 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers, unsigned timeout)
                 res = z3_mk_HMUX(inputs[0], inputs[1], inputs[2]);
                 break;
             case _DC:
-                cout << layer->at(j)->name << ", C: " << layer->at(j)->ins->at(0)->name << ", D: " << layer->at(j)->ins->at(0)->name << endl;
+                // cout << layer->at(j)->name << ", C: " << layer->at(j)->ins->front()->name << ", D: " << layer->at(j)->ins->at(1)->name << endl;
                 res = z3_mk_DC(inputs[0], inputs[1]);
                 break;
             case _EXOR:
@@ -199,27 +198,28 @@ void cec::evaluate_by_z3(vector<vector<node *> *> *layers, unsigned timeout)
                 res = inputs[0];
                 break;
             }
-            nodes[layer->at(j)->id] = res;
+            nodes[layer[j]->id] = res;
         }
     }
 
     int i = 0;
-    Z3_ast args[layers->back()->size()];
-    for (auto &output : (*layers->back()))
+    Z3_ast args[layers.back().size()];
+    for (auto &output : layers.back())
     {
         // Z3_solver_assert(logic, z3_sol, nodes[output->id]);
         args[i++] = nodes[output->id];
     }
     vector<Z3_ast>().swap(nodes);
-    Z3_ast result = Z3_mk_and(logic, layers->back()->size(), args);
+    Z3_ast result = Z3_mk_and(logic, layers.back().size(), args);
     Z3_solver_assert(logic, z3_sol, Z3_mk_not(logic, result));
     // printf("term: %s\n", Z3_ast_to_string(logic, result));
 
     check(logic, z3_sol, Z3_L_TRUE, this->fout);
     // Z3_solver_pop(logic, z3_sol, 1);
     Z3_solver_dec_ref(logic, z3_sol);
+    Z3_del_context(logic);
 }
 
-void cec::evaluate_by_stp(vector<vector<node *> *> *layers)
+void cec::evaluate_by_stp(vector<vector<node *> > &layers)
 {
 }

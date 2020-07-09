@@ -2,36 +2,21 @@
 
 parser::parser(/* args */)
 {
-    this->constants = new vector<node *>[3];
+    this->constants.reserve(3);
     for (Value val = L; val <= X; val = (Value)(val + 1))
     {
         node *cont = new node(Const_Str[val], _CONSTANT, val);
-        this->constants->push_back(cont);
+        this->constants.emplace_back(cont);
     }
 }
 
 parser::~parser()
 {
-    if (this->constants)
-    {
-        for (auto &con : *this->constants)
-        {
-            if (con->outs)
-            {
-                for (auto &out : *con->outs)
-                {
-                    vector<node *>::iterator temp = find(out->ins->begin(), out->ins->end(), con);
-                    if (temp != out->ins->end())
-                        out->ins->erase(temp);
-                }
-            }
-        }
-        vector<node *>().swap(*this->constants);
-    }
+    vector<node *>().swap(this->constants);
     cout << "The parser is destroyed!" << endl;
 }
 
-vector<node *> *parser::get_constants()
+vector<node *> &parser::get_constants()
 {
     return this->constants;
 }
@@ -98,7 +83,7 @@ void parser::parse_verilog(stringstream &in, vector<node *> *PIs, vector<node *>
                     while (regex_search(iterStart, iterEnd, match, pattern))
                     {
                         item = match[0];
-                        PIs->push_back(new node(item, IN));
+                        PIs->emplace_back(new node(item, IN));
                         iterStart = match[0].second;
                     }
                     break;
@@ -108,7 +93,7 @@ void parser::parse_verilog(stringstream &in, vector<node *> *PIs, vector<node *>
                     while (regex_search(iterStart, iterEnd, match, pattern))
                     {
                         item = match[0];
-                        POs->push_back(new node(item, _EXOR));
+                        POs->emplace_back(new node(item, _EXOR));
                         iterStart = match[0].second;
                     }
                     break;
@@ -119,7 +104,7 @@ void parser::parse_verilog(stringstream &in, vector<node *> *PIs, vector<node *>
                     {
                         item = match[0];
                         if (!find_node_by_name(PIs, item) && !find_node_by_name(POs, item))
-                            wires->push_back(new node(item, WIRE));
+                            wires->emplace_back(new node(item, WIRE));
                         iterStart = match[0].second;
                     }
                     break;
@@ -157,13 +142,13 @@ void parser::parse_verilog(stringstream &in, vector<node *> *PIs, vector<node *>
                                 exit(-1);
                             }
                         }
-                        g->outs->push_back(port);
+                        g->outs->emplace_back(port);
                         if (!port->ins)
                         {
                             port->ins = new vector<node *>[1];
                         }
                         // cout << "output port: " << port->name << endl;
-                        port->ins->push_back(g);
+                        port->ins->emplace_back(g);
                     }
                     // input port
                     while (regex_search(iterStart, iterEnd, match, pattern))
@@ -184,10 +169,10 @@ void parser::parse_verilog(stringstream &in, vector<node *> *PIs, vector<node *>
                             {
                             case '0':
                             case '1':
-                                port = this->constants->at(item[3] - '0');
+                                port = this->constants[item[3] - '0'];
                                 break;
                             default:
-                                port = this->constants->at(2);
+                                port = this->constants[2];
                                 break;
                             }
                         }
@@ -204,15 +189,15 @@ void parser::parse_verilog(stringstream &in, vector<node *> *PIs, vector<node *>
                                 }
                             }
                         }
-                        g->ins->push_back(port);
+                        g->ins->emplace_back(port);
                         if (!port->outs)
                         {
                             port->outs = new vector<node *>[2];
                         }
                         // cout << "input port: " << port->name << endl;
-                        port->outs->push_back(g);
+                        port->outs->emplace_back(g);
                     }
-                    gates->push_back(g);
+                    gates->emplace_back(g);
                     break;
                 }
                 }
@@ -262,7 +247,7 @@ void parser::parse_revised(stringstream &in, vector<node *> *PIs, vector<node *>
                     {
                         item = match[0];
                         if (!find_node_by_name(PIs, item) && !find_node_by_name(POs, item))
-                            wires->push_back(new node(item, WIRE));
+                            wires->emplace_back(new node(item, WIRE));
                         iterStart = match[0].second;
                     }
                     break;
@@ -300,13 +285,13 @@ void parser::parse_revised(stringstream &in, vector<node *> *PIs, vector<node *>
                                 exit(-1);
                             }
                         }
-                        g->outs->push_back(port);
+                        g->outs->emplace_back(port);
                         if (!port->ins)
                         {
                             port->ins = new vector<node *>[1];
                         }
                         // cout << "output port: " << port->name << endl;
-                        port->ins->push_back(g);
+                        port->ins->emplace_back(g);
                     }
                     // input port
                     while (regex_search(iterStart, iterEnd, match, pattern))
@@ -327,10 +312,10 @@ void parser::parse_revised(stringstream &in, vector<node *> *PIs, vector<node *>
                             {
                             case '0':
                             case '1':
-                                port = this->constants->at(item[3] - '0');
+                                port = this->constants[item[3] - '0'];
                                 break;
                             default:
-                                port = this->constants->at(2);
+                                port = this->constants[2];
                                 break;
                             }
                         }
@@ -347,15 +332,15 @@ void parser::parse_revised(stringstream &in, vector<node *> *PIs, vector<node *>
                                 }
                             }
                         }
-                        g->ins->push_back(port);
+                        g->ins->emplace_back(port);
                         if (!port->outs)
                         {
                             port->outs = new vector<node *>[2];
                         }
                         // cout << "input port: " << port->name << endl;
-                        port->outs->push_back(g);
+                        port->outs->emplace_back(g);
                     }
-                    gates->push_back(g);
+                    gates->emplace_back(g);
                     break;
                 }
                 }
@@ -398,13 +383,13 @@ void parser::build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden,
                         cerr << "There may be some wrong!" << endl;
                         exit(-1);
                     }
-                    (*iter)->outs->push_back(*it);
-                    it++;
+                    (*iter)->outs->emplace_back(*it);
+                    ++it;
                 }
             }
             delete pi;
         }
-        iter++;
+        ++iter;
     }
     vector<node *>().swap(*PIs_revised);
     // merge all outputs
@@ -422,8 +407,8 @@ void parser::build_miter(vector<node *> *PIs_golden, vector<node *> *POs_golden,
             (*iter)->cell = _EXOR;
             for (auto &tg : *po->ins)
             {
-                (*iter)->ins->push_back(tg);
-                tg->outs->push_back((*iter));
+                (*iter)->ins->emplace_back(tg);
+                tg->outs->emplace_back((*iter));
             }
             delete po;
         }
@@ -439,18 +424,18 @@ void parser::parse(ifstream &golden, ifstream &revised, vector<node *> *&PIs, ve
         cerr << "The golden can not be open!" << endl;
         exit(-1);
     }
-    
+
     string buffer;
     buffer.resize(golden.seekg(0, std::ios::end).tellg());
     golden.seekg(0, std::ios::beg).read(&buffer[0], static_cast<std::streamsize>(buffer.size()));
     stringstream f_input;
-	f_input.str(buffer);
-    
+    f_input.str(buffer);
+
     if (!PIs)
-        PIs = new vector<node *>[32];
+        PIs = new vector<node *>[128];
     if (!POs)
         POs = new vector<node *>[32];
-    vector<node *> *wires_golden = new vector<node *>[128];
+    vector<node *> *wires_golden = new vector<node *>[256];
     vector<node *> *gates_golden = new vector<node *>[2048];
     parse_verilog(f_input, PIs, POs, wires_golden, gates_golden);
     buffer.clear();
@@ -461,12 +446,12 @@ void parser::parse(ifstream &golden, ifstream &revised, vector<node *> *&PIs, ve
         cerr << "The revised can not be open!" << endl;
         exit(-1);
     }
-    
+
     buffer.resize(revised.seekg(0, std::ios::end).tellg());
     revised.seekg(0, std::ios::beg).read(&buffer[0], static_cast<std::streamsize>(buffer.size()));
-	f_input.str(buffer);
-    
-    vector<node *> *wires_revised = new vector<node *>[128];
+    f_input.str(buffer);
+
+    vector<node *> *wires_revised = new vector<node *>[256];
     vector<node *> *gates_revised = new vector<node *>[2048];
     parse_revised(f_input, PIs, POs, wires_revised, gates_revised);
     buffer.clear();
@@ -492,6 +477,6 @@ void parser::printG(vector<node *> *nodes)
     {
         cout << (*pi)->name << " " << Str_Value[(*pi)->cell] << " " << (*pi)->val << endl;
         printG((*pi)->outs);
-        pi++;
+        ++pi;
     }
 }

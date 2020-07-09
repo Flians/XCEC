@@ -81,7 +81,11 @@ struct node
             {
                 vector<node *>::iterator temp = find(in->outs->begin(), in->outs->end(), this);
                 if (temp != in->outs->end())
-                    in->outs->erase(temp);
+                {
+                    // in->outs->erase(temp);
+                    *temp = *(in->outs->end() - 1);
+                    in->outs->resize(in->outs->size() - 1);
+                }
             }
             vector<node *>().swap(*this->ins);
         }
@@ -223,18 +227,23 @@ Value EXOR(const Value &, const Value &);
 
 Value calculate(node *g);
 
-template <typename T>
-vector<T> unique_element_in_vector(vector<T> v)
+void unique_element_in_vector(vector<node *> &v);
+
+// Functor for deleting pointers in vector.
+template <class T>
+class DeleteVector
 {
-    typename vector<T>::iterator vector_iterator;
-    sort(v.begin(), v.end());
-    vector_iterator = unique(v.begin(), v.end());
-    if (vector_iterator != v.end())
+public:
+    // Overloaded () operator.
+    // This will be called by for_each() function.
+    bool operator()(T x) const
     {
-        v.erase(vector_iterator, v.end());
+        // Delete pointer.
+        delete x;
+        return true;
     }
-    return v;
-}
+};
 
 extern void cleanVP(vector<node *> *vp);
+
 #endif

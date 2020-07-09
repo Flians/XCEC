@@ -6,6 +6,20 @@ simplify::simplify(/* args */)
 
 simplify::~simplify()
 {
+    /* free up space */
+    for (auto &item : this->layers)
+    {
+        // Now delete the vector contents in a single  line.
+        for_each(item.begin(), item.end(), DeleteVector<node *>());
+        //Clear the vector
+        vector<node *>().swap(item);
+    }
+    vector<vector<node *>>().swap(this->layers);
+}
+
+vector<vector<node *>> &simplify::get_layers()
+{
+    return this->layers;
 }
 
 bool simplify::replace_node_by_id(vector<node *> *nodes, node *new_node, int id)
@@ -45,7 +59,7 @@ void simplify::clean_wire_buf(vector<node *> *miter)
                 cerr << pi->name << " WIRE have none or more one inputs in simplify.clean_wire_buf!" << endl;
                 exit(-1);
             }
-            node *tin = pi->ins->at(0);
+            node *tin = pi->ins->front();
             vector<node *>::iterator it = pi->outs->begin();
             vector<node *>::iterator it_end = pi->outs->end();
             while (it != it_end)
@@ -59,11 +73,11 @@ void simplify::clean_wire_buf(vector<node *> *miter)
                         (*temp_in) = tin;
                         break;
                     }
-                    temp_in++;
+                    ++temp_in;
                 }
                 if (temp_in != temp_in_end)
                 {
-                    tin->outs->push_back(*it);
+                    tin->outs->emplace_back(*it);
                 }
                 else
                 {
@@ -77,7 +91,7 @@ void simplify::clean_wire_buf(vector<node *> *miter)
             clean_wire_buf(tin->outs);
         }
         // this node has been visited.
-        else if (pi->cell != IN && pi->outs->at(0)->cell != WIRE)
+        else if (pi->cell != IN && pi->outs->front()->cell != WIRE)
         {
             continue;
         }
@@ -86,6 +100,76 @@ void simplify::clean_wire_buf(vector<node *> *miter)
             clean_wire_buf(pi->outs);
         }
     }
+}
+
+vector<vector<node *>> &simplify::id_reassign_and_layered(vector<node *> *PIs, vector<node *> *POs)
+{
+    if (PIs->empty())
+    {
+        std::cout << "PIs is empty in simplify.id_reassign." << endl;
+        return this->layers;
+    }
+    map<node *, int> visit;
+    queue<node *> bfs_record;
+    // reassign id of each node, and obtain the length of the longest path
+    int i = 0;
+    for (auto pi : (*PIs))
+    {
+        visit[pi] = 1;
+        pi->id = i++;
+        bfs_record.push(pi);
+    }
+    int longest_path = 0;
+    while (!bfs_record.empty())
+    {
+        node *item = bfs_record.front();
+        if (item->outs)
+        {
+            for (auto out : (*item->outs))
+            {
+                if (visit.count(out) == 0)
+                {
+                    visit[out] = visit[item] + 1;
+                    out->id = i++;
+                    bfs_record.push(out);
+                }
+                else if (visit[item] >= visit[out])
+                {
+                    visit[out] = visit[item] + 1;
+                    if (longest_path < visit[out])
+                        longest_path = visit[out];
+                    bfs_record.push(out);
+                }
+            }
+        }
+        else if (longest_path < visit[item])
+        {
+            longest_path = visit[item];
+        }
+        bfs_record.pop();
+    }
+    init_id = i;
+
+    // set the logic depth of all outputs
+    for (auto &po:*POs) {
+        visit[po] = longest_path;
+    }
+
+    // layer assignment
+    this->layers.resize(longest_path);
+    int layer_size = ceil(init_id / longest_path) * 2;
+    for (i = 0; i < longest_path; ++i)
+    {
+        vector<node *> layer;
+        layer.reserve(layer_size);
+    }
+    std::map<node *, int>::iterator iter;
+    for (iter = visit.begin(); iter != visit.end(); ++iter)
+    {
+        this->layers[iter->second - 1].emplace_back(iter->first);
+    }
+    visit.clear();
+    return this->layers;
 }
 
 void simplify::id_reassign(vector<node *> *PIs)
@@ -125,44 +209,43 @@ void simplify::id_reassign(vector<node *> *PIs)
     visit.clear();
 }
 
-vector<vector<node *> *> *simplify::layer_assignment(vector<node *> *PIs, vector<node *> *POs)
+vector<vector<node *>> &simplify::layer_assignment(vector<node *> *PIs, vector<node *> *POs)
 {
-    vector<vector<node *> *> *layers = new vector<vector<node *> *>;
     if (PIs->empty())
     {
         std::cout << "PIs is empty in simplify.layer_assignment." << std::endl;
-        return layers;
+        return this->layers;
     }
     vector<int> visit(init_id, 0);
     vector<int> logic_depth(init_id, 0);
-    layers->push_back(PIs);
+    this->layers.emplace_back(*PIs);
     int i = 0;
     int nums = PIs->size();
     // layer assignment, and calculate the logic depth of each node
-    while (i < layers->size())
+    while (i < this->layers.size())
     {
-        vector<node *> *layer = new vector<node *>;
-        for (int j = 0; j < layers->at(i)->size(); j++)
+        vector<node *> layer;
+        for (int j = 0; j < this->layers[i].size(); j++)
         {
-            if (layers->at(i)->at(j)->outs)
+            if (this->layers[i][j]->outs)
             {
-                for (auto &out : (*layers->at(i)->at(j)->outs))
+                for (auto &out : *this->layers[i][j]->outs)
                 {
                     visit[out->id]++;
-                    logic_depth[out->id] = max(logic_depth[layers->at(i)->at(j)->id] + 1, logic_depth[out->id]);
+                    logic_depth[out->id] = max(logic_depth[this->layers[i][j]->id] + 1, logic_depth[out->id]);
                     if (out->ins->size() == visit[out->id] && out->cell != _EXOR)
-                        layer->push_back(out);
+                        layer.emplace_back(out);
                 }
             }
         }
-        if (!layer->empty())
+        if (!layer.empty())
         {
-            layers->push_back(layer);
-            nums += layer->size();
+            this->layers.emplace_back(layer);
+            nums += layer.size();
         }
         i++;
     }
-    layers->push_back(POs);
+    this->layers.emplace_back(*POs);
     nums += POs->size();
     vector<int>().swap(visit);
     vector<int>().swap(logic_depth);
@@ -194,13 +277,15 @@ void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> 
                 (*temp_in) = keep;
                 break;
             }
-            temp_in++;
+            ++temp_in;
         }
         if (temp_in != temp_in_end)
         {
             // son.outs.push(grandson)
-            keep->outs->push_back(out);
-        } else {
+            keep->outs->emplace_back(out);
+        }
+        else
+        {
             cout << "dupl is not equal with keep in simplify.deduplicate." << endl;
         }
     }
@@ -237,85 +322,77 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
             {
                 for (int j = 0; j < item->outs->size(); j++)
                 {
-                    if (record.count(item->outs->at(j)->cell))
+                    // not including output
+                    if (item->outs->at(j)->cell != _EXOR)
                     {
-                        record[item->outs->at(j)->cell].push_back(item->outs->at(j));
-                    }
-                    else
-                    {
-                        vector<node *> nodes;
-                        nodes.push_back(item->outs->at(j));
-                        record[item->outs->at(j)->cell] = nodes;
-                        // record.insert(make_pair(item->outs->at(j)->cell, nodes));
+                        if (record.count(item->outs->at(j)->cell))
+                        {
+                            record[item->outs->at(j)->cell].emplace_back(item->outs->at(j));
+                        }
+                        else
+                        {
+                            vector<node *> nodes;
+                            nodes.emplace_back(item->outs->at(j));
+                            record[item->outs->at(j)->cell] = nodes;
+                            // record.insert(make_pair(item->outs->at(j)->cell, nodes));
+                        }
                     }
                 }
             }
         }
         for (auto &it : record)
         {
-            if (it.second.size() > 1)
+            if (it.second.size() <= 1)
             {
-                // remove duplicate elements in vector
-                sort(it.second.begin(), it.second.end(), [](const node *A, const node *B) {
-                    if (A->outs)
-                    {
-                        if (B->outs)
-                        {
-                            return A->outs->size() == B->outs->size() ? A->id < B->id : A->outs->size() > B->outs->size();
-                        }
-                        return true;
-                    }
-                    else
-                    {
-                        if (B->outs)
-                        {
-                            return false;
-                        }
-                        return A->id < B->id;
-                    }
-                });
-                it.second.erase(unique(it.second.begin(), it.second.end()), it.second.end());
-                if (it.first == BUF || it.first == INV)
+                continue;
+            }
+            // remove duplicate elements in vector
+            unique_element_in_vector(it.second);
+            if (it.second.size() <= 1)
+            {
+                continue;
+            }
+
+            if (it.first == BUF || it.first == INV)
+            {
+                for (int d = 1; d < it.second.size(); ++d)
                 {
-                    for (int d = 1; d < it.second.size(); ++d)
-                    {
-                        this->deduplicate(level[it.second.at(d)->id], it.second.at(0), it.second.at(d), layers);
-                        reduce++;
-                    }
+                    this->deduplicate(level[it.second.at(d)->id], it.second.at(0), it.second.at(d), layers);
+                    reduce++;
                 }
-                else
+            }
+            else
+            {
+                for (int si = 0; si < it.second.size(); si++)
                 {
-                    for (int si = 0; si < it.second.size(); si++)
+                    int candidate_size = it.second.size();
+                    for (int ri = si + 1; ri < candidate_size; ri++)
                     {
-                        int candidate_size = it.second.size();
-                        for (int ri = si + 1; ri < candidate_size; ri++)
+                        if (it.second.at(si)->ins->size() == it.second.at(ri)->ins->size())
                         {
-                            if (it.second.at(si)->ins->size() == it.second.at(ri)->ins->size())
+                            bool flag = true;
+                            for (int ii = 0; ii < it.second.at(si)->ins->size(); ii++)
                             {
-                                bool flag = true;
-                                for (int ii = 0; ii < it.second.at(si)->ins->size(); ii++)
+                                if (it.second.at(si)->ins->at(ii)->id != it.second.at(ri)->ins->at(ii)->id)
                                 {
-                                    if (it.second.at(si)->ins->at(ii)->id != it.second.at(ri)->ins->at(ii)->id)
-                                    {
-                                        flag = false;
-                                        break;
-                                    }
-                                }
-                                if (flag)
-                                {
-                                    this->deduplicate(level[it.second.at(ri)->id], it.second.at(si), it.second.at(ri), layers);
-                                    // it.second.erase(it.second.begin() + ri);
-                                    --candidate_size;
-                                    *(it.second.begin() + ri) = *(it.second.begin() + candidate_size);
-                                    --ri;
+                                    flag = false;
+                                    break;
                                 }
                             }
+                            if (flag)
+                            {
+                                this->deduplicate(level[it.second.at(ri)->id], it.second.at(si), it.second.at(ri), layers);
+                                // it.second.erase(it.second.begin() + ri);
+                                --candidate_size;
+                                *(it.second.begin() + ri) = *(it.second.begin() + candidate_size);
+                                --ri;
+                            }
                         }
-                        if (it.second.size() > candidate_size)
-                        {
-                            reduce += it.second.size() - candidate_size;
-                            it.second.resize(candidate_size);
-                        }
+                    }
+                    if (it.second.size() > candidate_size)
+                    {
+                        reduce += it.second.size() - candidate_size;
+                        it.second.resize(candidate_size);
                     }
                 }
             }

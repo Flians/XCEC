@@ -132,47 +132,47 @@ Value calculate(node *g)
     node temp_g;
     if (g)
     {
-        temp_g.val = g->ins->at(0)->val;
-        vector<node *>::iterator it_ = g->ins->begin() + 1;
+        temp_g.val = g->ins->front()->val;
+        vector<node *>::iterator it_ = g->ins->begin();
         vector<node *>::iterator it_end = g->ins->end();
         switch (g->cell)
         {
         case _AND:
             while (it_ != it_end)
             {
-                temp_g = temp_g & *(*(it_++));
+                temp_g = temp_g & *(*(++it_));
             }
             break;
         case _NAND:
             while (it_ != it_end)
             {
-                temp_g = temp_g & *(*(it_++));
+                temp_g = temp_g & *(*(++it_));
             }
             temp_g = ~temp_g;
             break;
         case _OR:
             while (it_ != it_end)
             {
-                temp_g = temp_g | *(*(it_++));
+                temp_g = temp_g | *(*(++it_));
             }
             break;
         case _NOR:
             while (it_ != it_end)
             {
-                temp_g = temp_g | *(*(it_++));
+                temp_g = temp_g | *(*(++it_));
             }
             temp_g = ~temp_g;
             break;
         case _XOR:
             while (it_ != it_end)
             {
-                temp_g = temp_g ^ *(*(it_++));
+                temp_g = temp_g ^ *(*(++it_));
             }
             break;
         case _XNOR:
             while (it_ != it_end)
             {
-                temp_g = temp_g ^ *(*(it_++));
+                temp_g = temp_g ^ *(*(++it_));
             }
             temp_g = ~temp_g;
             break;
@@ -200,6 +200,33 @@ Value calculate(node *g)
         exit(-1);
     }
     return temp_g.val;
+}
+
+void unique_element_in_vector(vector<node *> &v)
+{
+    sort(v.begin(), v.end(), [](const node *A, const node *B) {
+        if (A->outs)
+        {
+            if (B->outs)
+            {
+                return A->outs->size() == B->outs->size() ? A->id < B->id : A->outs->size() > B->outs->size();
+            }
+            return true;
+        }
+        else
+        {
+            if (B->outs)
+            {
+                return false;
+            }
+            return A->id < B->id;
+        }
+    });
+    typename vector<node *>::iterator vector_iterator = unique(v.begin(), v.end());
+    if (vector_iterator != v.end())
+    {
+        v.erase(vector_iterator, v.end());
+    }
 }
 
 void cleanVP(vector<node *> *vecPtr)

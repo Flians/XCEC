@@ -48,7 +48,7 @@ void libstring::split(const string &str, vector<string> &ret_, string sep = ",")
 
         if (!tmp.empty())
         {
-            ret_.push_back(tmp);
+            ret_.emplace_back(tmp);
             tmp.clear();
         }
     }
