@@ -35,6 +35,11 @@ vector<node *> &parser::get_constants()
     return this->constants;
 }
 
+void parser::clean_wires() {
+    vector<node *>().swap(wires_golden);
+    vector<node *>().swap(wires_revised);
+}
+
 node *parser::find_node_by_name(vector<node *> &nodes, string &name)
 {
     for (auto node : nodes)
@@ -126,8 +131,8 @@ void parser::parse_verilog(stringstream &in)
                 default:
                 {
                     node *g = new node;
-                    g->ins = new vector<node *>[2];
-                    g->outs = new vector<node *>[1];
+                    g->ins = new vector<node *>;
+                    g->outs = new vector<node *>;
                     g->cell = nt;
                     if (regex_search(iterStart, iterEnd, match, pattern))
                     {
@@ -215,6 +220,12 @@ void parser::parse_verilog(stringstream &in)
                 }
                 }
             }
+            else if (item == "module")
+            {
+                int io_num = count(iterStart, iterEnd, ',');
+                this->PIs.reserve(io_num);
+                this->POs.reserve(io_num);
+            }
         }
     }
 }
@@ -268,8 +279,8 @@ void parser::parse_revised(stringstream &in)
                 default:
                 {
                     node *g = new node;
-                    g->ins = new vector<node *>[2];
-                    g->outs = new vector<node *>[1];
+                    g->ins = new vector<node *>;
+                    g->outs = new vector<node *>;
                     g->cell = nt;
                     if (regex_search(iterStart, iterEnd, match, pattern))
                     {
@@ -466,6 +477,9 @@ void parser::parse(ifstream &golden, ifstream &revised)
     parse_revised(f_input);
     buffer.clear();
     f_input.clear();
+
+    // clear the wires
+    this->clean_wires();
 
     // merge PIs and constants
     for (auto &con : this->constants)

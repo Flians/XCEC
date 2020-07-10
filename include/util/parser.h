@@ -9,6 +9,8 @@ private:
     vector<node *> wires_golden;
     vector<node *> wires_revised;
 
+    void clean_wires();
+
 public:
     vector<node *> PIs;
     vector<node *> POs;
