@@ -1,21 +1,9 @@
 The parsing process is over!
-The parsing time is: 38.3923 S
-The preprocess time is: 40.477 S
-g125, C: RIb4c2af8_63, D: \U$128
-r13a, C: RIb4c6860_42, D: \U$130
-r139, C: RIb4c67e8_43, D: \U$130
-r12f, C: RIb4c2fa8_53, D: \U$130
-r138, C: RIb4c6770_44, D: \U$130
-r137, C: RIb4c3368_45, D: \U$130
-r12e, C: RIb4c2f30_54, D: \U$130
-r12d, C: RIb4c2eb8_55, D: \U$130
-r12a, C: RIb4c2d50_58, D: \U$130
-r129, C: RIb4c2cd8_59, D: \U$130
-r128, C: RIb4c2c60_60, D: \U$130
-r127, C: RIb4c2be8_61, D: \U$130
+The parsing time is: 41.8259 S
+The preprocess time is: 44.22 S
 g143, C: RIb4ca3e8_33, D: \U$128
-g142, C: RIb4c6c20_34, D: \U$128
 g141, C: RIb4c6ba8_35, D: \U$128
+g142, C: RIb4c6c20_34, D: \U$128
 g13f, C: RIb4c6ab8_37, D: \U$128
 g140, C: RIb4c6b30_36, D: \U$128
 g13d, C: RIb4c69c8_39, D: \U$128
@@ -23,26 +11,36 @@ g13e, C: RIb4c6a40_38, D: \U$128
 g13c, C: RIb4c6950_40, D: \U$128
 g13b, C: RIb4c68d8_41, D: \U$128
 g13a, C: RIb4c6860_42, D: \U$128
+g136, C: RIb4c32f0_46, D: \U$128
+g12b, C: RIb4c2dc8_57, D: \U$128
+g12a, C: RIb4c2d50_58, D: \U$128
+g129, C: RIb4c2cd8_59, D: \U$128
 g139, C: RIb4c67e8_43, D: \U$128
 g138, C: RIb4c6770_44, D: \U$128
-g137, C: RIb4c3368_45, D: \U$128
-g136, C: RIb4c32f0_46, D: \U$128
 g135, C: RIb4c3278_47, D: \U$128
-g134, C: RIb4c3200_48, D: \U$128
+g128, C: RIb4c2c60_60, D: \U$128
+g127, C: RIb4c2be8_61, D: \U$128
+g126, C: RIb4c2b70_62, D: \U$128
 g133, C: RIb4c3188_49, D: \U$128
 g132, C: RIb4c3110_50, D: \U$128
 g131, C: RIb4c3098_51, D: \U$128
 g130, C: RIb4c3020_52, D: \U$128
-g12f, C: RIb4c2fa8_53, D: \U$128
-g12e, C: RIb4c2f30_54, D: \U$128
 g12d, C: RIb4c2eb8_55, D: \U$128
 g12c, C: RIb4c2e40_56, D: \U$128
-g12b, C: RIb4c2dc8_57, D: \U$128
-g12a, C: RIb4c2d50_58, D: \U$128
-g129, C: RIb4c2cd8_59, D: \U$128
-g128, C: RIb4c2c60_60, D: \U$128
-g127, C: RIb4c2be8_61, D: \U$128
-g126, C: RIb4c2b70_62, D: \U$128
+g125, C: RIb4c2af8_63, D: \U$128
+g137, C: RIb4c3368_45, D: \U$128
+g134, C: RIb4c3200_48, D: \U$128
+g12f, C: RIb4c2fa8_53, D: \U$128
+g12e, C: RIb4c2f30_54, D: \U$128
+r130, C: RIb4c3020_52, D: \U$130
+r12f, C: RIb4c2fa8_53, D: \U$130
+r12e, C: RIb4c2f30_54, D: \U$130
+r12d, C: RIb4c2eb8_55, D: \U$130
+r12c, C: RIb4c2e40_56, D: \U$130
+r12b, C: RIb4c2dc8_57, D: \U$130
+r12a, C: RIb4c2d50_58, D: \U$130
+r129, C: RIb4c2cd8_59, D: \U$130
+r126, C: RIb4c2b70_62, D: \U$130
 r13d, C: RIb4c69c8_39, D: \U$130
 r13c, C: RIb4c6950_40, D: \U$130
 r13b, C: RIb4c68d8_41, D: \U$130
@@ -52,16 +50,18 @@ r141, C: RIb4c6ba8_35, D: \U$130
 r140, C: RIb4c6b30_36, D: \U$130
 r143, C: RIb4ca3e8_33, D: \U$130
 r142, C: RIb4c6c20_34, D: \U$130
+r13a, C: RIb4c6860_42, D: \U$130
+r139, C: RIb4c67e8_43, D: \U$130
+r138, C: RIb4c6770_44, D: \U$130
+r137, C: RIb4c3368_45, D: \U$130
 r136, C: RIb4c32f0_46, D: \U$130
 r135, C: RIb4c3278_47, D: \U$130
+r125, C: RIb4c2af8_63, D: \U$130
 r134, C: RIb4c3200_48, D: \U$130
 r133, C: RIb4c3188_49, D: \U$130
 r132, C: RIb4c3110_50, D: \U$130
 r131, C: RIb4c3098_51, D: \U$130
-r130, C: RIb4c3020_52, D: \U$130
-r12c, C: RIb4c2e40_56, D: \U$130
-r12b, C: RIb4c2dc8_57, D: \U$130
-r126, C: RIb4c2b70_62, D: \U$130
-r125, C: RIb4c2af8_63, D: \U$130
-The run time is: 111.416 S
+r128, C: RIb4c2c60_60, D: \U$130
+r127, C: RIb4c2be8_61, D: \U$130
+The run time is: 89.2082 S
 The parser is destroyed!

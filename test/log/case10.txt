@@ -1,6 +1,6 @@
 The parsing process is over!
-The parsing time is: 336.688 S
-The preprocess time is: 339.1 S
+The parsing time is: 353.372 S
+The preprocess time is: 355.819 S
 g45c, C: \U$43981, D: \U$43627
 g4d8, C: \U$43978, D: \U$43627
 g55a, C: \U$43975, D: \U$43627
@@ -122,5 +122,5 @@ gaec8, C: \U$43630, D: \U$43627
 gaeea, C: \U$43563, D: \U$43627
 >>> unknown <<<
 >>> unexpected result <<<
-The run time is: 1527.93 S
+The run time is: 1708.06 S
 The parser is destroyed!

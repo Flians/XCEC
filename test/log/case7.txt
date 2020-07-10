@@ -1,6 +1,6 @@
 The parsing process is over!
-The parsing time is: 10.9261 S
-The preprocess time is: 12.437 S
+The parsing time is: 11.6692 S
+The preprocess time is: 13.433 S
 g2cd, C: 1'b0, D: 1'b1
 g2bf, C: 1'b0, D: 1'b1
 g2b1, C: 1'b0, D: 1'b1
@@ -11,25 +11,25 @@ g279, C: 1'b0, D: 1'b1
 g26b, C: 1'b0, D: 1'b1
 g25d, C: 1'b0, D: 1'b1
 g24f, C: 1'b0, D: 1'b1
-g241, C: 1'b0, D: 1'b1
+g1a7, C: 1'b0, D: 1'b1
+g16f, C: 1'b0, D: 1'b1
+g161, C: 1'b0, D: 1'b1
+g153, C: 1'b0, D: 1'b1
+g145, C: 1'b0, D: 1'b1
 g233, C: 1'b0, D: 1'b1
 g225, C: 1'b0, D: 1'b1
 g217, C: 1'b0, D: 1'b1
 g209, C: 1'b0, D: 1'b1
 g1fb, C: 1'b0, D: 1'b1
-g1ed, C: 1'b0, D: 1'b1
-g1df, C: 1'b0, D: 1'b1
 g1d1, C: 1'b0, D: 1'b1
 g1c3, C: 1'b0, D: 1'b1
+g241, C: 1'b0, D: 1'b1
+g1ed, C: 1'b0, D: 1'b1
+g1df, C: 1'b0, D: 1'b1
 g1b5, C: 1'b0, D: 1'b1
-g1a7, C: 1'b0, D: 1'b1
 g199, C: 1'b0, D: 1'b1
 g18b, C: 1'b0, D: 1'b1
 g17d, C: 1'b0, D: 1'b1
-g16f, C: 1'b0, D: 1'b1
-g161, C: 1'b0, D: 1'b1
-g153, C: 1'b0, D: 1'b1
-g145, C: 1'b0, D: 1'b1
 g137, C: 1'b0, D: 1'b1
 g12c, C: 1'b0, D: 1'b1
 g104, C: 1'b0, D: 1'b1
@@ -65,5 +65,5 @@ r295, C: \U$296, D: \U$253
 r2a1, C: \U$265, D: \U$253
 r2ad, C: \U$258, D: \U$253
 r2b9, C: \U$188, D: \U$253
-The run time is: 55.8398 S
+The run time is: 28.5418 S
 The parser is destroyed!

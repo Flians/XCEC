@@ -1,15 +1,15 @@
 The parsing process is over!
-The parsing time is: 0.349667 S
-The preprocess time is: 0.384 S
-\n6_5[9], C: \U$3/U$37, D: \U$2/U$1
-\n6_5[8], C: \U$3/U$33, D: \U$2/U$1
-\n6_5[7], C: \U$3/U$29, D: \U$2/U$1
-\n6_5[6], C: \U$3/U$25, D: \U$2/U$1
+The parsing time is: 0.402178 S
+The preprocess time is: 0.44 S
 \n6_5[5], C: \U$3/U$21, D: \U$2/U$1
 \n6_5[4], C: \U$3/U$17, D: \U$2/U$1
 \n6_5[3], C: \U$3/U$13, D: \U$2/U$1
 \n6_5[2], C: \U$3/U$9, D: \U$2/U$1
 \n6_5[1], C: \U$3/U$5, D: \U$2/U$1
+\n6_5[9], C: \U$3/U$37, D: \U$2/U$1
+\n6_5[8], C: \U$3/U$33, D: \U$2/U$1
+\n6_5[7], C: \U$3/U$29, D: \U$2/U$1
+\n6_5[6], C: \U$3/U$25, D: \U$2/U$1
 \n6_5[0], C: \U$3/U$1, D: \U$2/U$1
-The run time is: 1.66148 S
+The run time is: 2.72765 S
 The parser is destroyed!
