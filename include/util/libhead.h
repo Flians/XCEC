@@ -87,6 +87,7 @@ struct node
                     {
                         // in->outs->erase(temp);
                         *temp = *(in->outs->end() - 1);
+                        *(in->outs->end() - 1) = nullptr;
                         in->outs->resize(in->outs->size() - 1);
                     }
                 }

@@ -9,8 +9,7 @@ simplify::~simplify()
     /* free up space */
     for (auto &item : this->layers)
     {
-        //Clear the vector
-        vector<node *>().swap(item);
+        cleanVP(item);
     }
     vector<vector<node *>>().swap(this->layers);
 }
@@ -292,6 +291,7 @@ void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> 
     vector<node *>::iterator it = find(layers[i].begin(), layers[i].end(), dupl);
     // layers->at(i)->erase(it);
     *it = *(layers[i].end() - 1);
+    *(layers[i].end() - 1) = nullptr;
     layers[i].resize(layers[i].size() - 1);
     vector<node *>().swap(*(dupl->outs));
     delete dupl;
@@ -386,6 +386,7 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> > &layers)
                                 // it.second.erase(it.second.begin() + ri);
                                 --candidate_size;
                                 *(it.second.begin() + ri) = *(it.second.begin() + candidate_size);
+                                *(it.second.begin() + candidate_size) = nullptr;
                                 --ri;
                             }
                         }

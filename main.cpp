@@ -23,13 +23,13 @@ int main(int argc, char *argv[])
         simplify sim;
         sim.clean_wire_buf(&miter.PIs);
         
-        vector<vector<node *> > layers = sim.id_reassign_and_layered(miter.PIs, miter.POs);
+        vector<vector<node *> > &layers = sim.id_reassign_and_layered(miter.PIs, miter.POs);
 
         // sim.id_reassign(miter.PIs);
-        // vector<vector<node *> > layers = sim.layer_assignment(miter.PIs, miter.POs);
+        // vector<vector<node *> > &layers = sim.layer_assignment(miter.PIs, miter.POs);
 
-        sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
-        sim.id_reassign(miter.PIs);
+        // sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
+        // sim.id_reassign(miter.PIs);
 
         endTime = clock();
         double pre_time = (endTime - startTime) / 1000;
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
         /* evaluate the graph */
         cec cec_(argv[3]);
         // pre_time > 112000 ? 1700000 - pre_time : 15 * pre_time
-        cec_.evaluate_by_z3(layers, 1700000);
+        cec_.evaluate_by_z3(layers, 1500000 - pre_time);
         cec_.close_fout();
         endTime = clock();
         cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;

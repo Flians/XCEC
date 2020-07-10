@@ -187,7 +187,7 @@ void cec::evaluate_by_z3(vector<vector<node *> > &layers, unsigned timeout)
                 res = z3_mk_HMUX(inputs[0], inputs[1], inputs[2]);
                 break;
             case _DC:
-                // cout << layer->at(j)->name << ", C: " << layer->at(j)->ins->front()->name << ", D: " << layer->at(j)->ins->at(1)->name << endl;
+                cout << layer[j]->name << ", C: " << layer[j]->ins->front()->name << ", D: " << layer[j]->ins->at(1)->name << endl;
                 res = z3_mk_DC(inputs[0], inputs[1]);
                 break;
             case _EXOR:

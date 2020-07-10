@@ -231,12 +231,16 @@ void unique_element_in_vector(vector<node *> &v)
 
 void cleanVP(vector<node *> vecPtr)
 {
+    if (vecPtr.empty())
+        return;
     vector<node *>::iterator it = vecPtr.begin();
-    for (; it != vecPtr.end();)
+    int len = vecPtr.size();
+    for (int i = 0; i < len; ++i, ++it)
     {
-        delete *it;
-        *it = nullptr;
-        *it = *(vecPtr.end()-1);
-        vecPtr.resize(vecPtr.size()-1);
+        if (*it) {
+            delete *it;
+            *it = nullptr;
+        }
     }
+    vector<node *>().swap(vecPtr);
 }
