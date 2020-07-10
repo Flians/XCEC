@@ -1,7 +1,6 @@
 The parsing process is over!
-The parsing time is: 337.232 S
-The layer assignment is over!
-The preprocess time is: 337.668 S
+The parsing time is: 337.998 S
+The preprocess time is: 340.606 S
 g4d8, C: \U$43321, D: \U$43069
 g55a, C: \U$43318, D: \U$43069
 g5ea, C: \U$43315, D: \U$43069
@@ -87,5 +86,7 @@ ga91c, C: \U$43078, D: \U$43069
 gab00, C: \U$43075, D: \U$43069
 gac16, C: \U$43072, D: \U$43069
 gac8c, C: \U$43005, D: \U$43069
-The run time is: 705.242 S
+>>> unknown <<<
+>>> unexpected result <<<
+The run time is: 1514.57 S
 The parser is destroyed!

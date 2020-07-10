@@ -1,7 +1,6 @@
 The parsing process is over!
-The parsing time is: 426.166 S
-The layer assignment is over!
-The preprocess time is: 426.72 S
+The parsing time is: 408.319 S
+The preprocess time is: 415.366 S
 gab06, C: \U$43183, D: \U$42548
 gab02, C: \U$43178, D: \U$42548
 gaafe, C: \U$43173, D: \U$42548
@@ -132,5 +131,5 @@ ga90e, C: \U$42553, D: \U$42548
 ga90a, C: \U$42547, D: \U$42548
 >>> unknown <<<
 >>> unexpected result <<<
-The run time is: 2117.58 S
+The run time is: 1500.73 S
 The parser is destroyed!

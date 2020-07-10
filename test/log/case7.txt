@@ -1,7 +1,6 @@
 The parsing process is over!
-The parsing time is: 11.6833 S
-The layer assignment is over!
-The preprocess time is: 11.748 S
+The parsing time is: 10.9261 S
+The preprocess time is: 12.437 S
 g2cd, C: 1'b0, D: 1'b1
 g2bf, C: 1'b0, D: 1'b1
 g2b1, C: 1'b0, D: 1'b1
@@ -66,5 +65,5 @@ r295, C: \U$296, D: \U$253
 r2a1, C: \U$265, D: \U$253
 r2ad, C: \U$258, D: \U$253
 r2b9, C: \U$188, D: \U$253
-The run time is: 34.8578 S
+The run time is: 55.8398 S
 The parser is destroyed!
