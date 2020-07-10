@@ -229,13 +229,14 @@ void unique_element_in_vector(vector<node *> &v)
     }
 }
 
-void cleanVP(vector<node *> *vecPtr)
+void cleanVP(vector<node *> vecPtr)
 {
-    vector<node *>::iterator it = vecPtr->begin();
-    for (; it != vecPtr->end();)
+    vector<node *>::iterator it = vecPtr.begin();
+    for (; it != vecPtr.end();)
     {
-        delete *it;         
-        *it = *(vecPtr->end()-1);
-        vecPtr->resize(vecPtr->size()-1);
+        delete *it;
+        *it = nullptr;
+        *it = *(vecPtr.end()-1);
+        vecPtr.resize(vecPtr.size()-1);
     }
 }

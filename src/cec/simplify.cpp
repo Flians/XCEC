@@ -9,8 +9,6 @@ simplify::~simplify()
     /* free up space */
     for (auto &item : this->layers)
     {
-        // Now delete the vector contents in a single  line.
-        for_each(item.begin(), item.end(), DeleteVector<node *>());
         //Clear the vector
         vector<node *>().swap(item);
     }
@@ -39,14 +37,14 @@ bool simplify::replace_node_by_id(vector<node *> *nodes, node *new_node, int id)
  * clean all wires and bufs
  * from PIs to POs
  */
-void simplify::clean_wire_buf(vector<node *> *miter)
+void simplify::clean_wire_buf(vector<node *> *PIs)
 {
-    if (!miter || miter->size() == 0)
+    if (!PIs || PIs->empty())
         return;
-    int len = miter->size();
+    int len = PIs->size();
     for (int i = 0; i < len; ++i)
     {
-        node *pi = miter->at(i);
+        node *pi = PIs->at(i);
         if (!(pi->outs) || pi->outs->size() == 0)
         {
             continue;
@@ -88,6 +86,7 @@ void simplify::clean_wire_buf(vector<node *> *miter)
             }
             vector<node *>().swap(*(pi->outs));
             delete pi;
+            pi = nullptr;
             clean_wire_buf(tin->outs);
         }
         // this node has been visited.
@@ -102,9 +101,9 @@ void simplify::clean_wire_buf(vector<node *> *miter)
     }
 }
 
-vector<vector<node *>> &simplify::id_reassign_and_layered(vector<node *> *PIs, vector<node *> *POs)
+vector<vector<node *>> &simplify::id_reassign_and_layered(vector<node *> &PIs, vector<node *> &POs)
 {
-    if (PIs->empty())
+    if (PIs.empty())
     {
         std::cout << "PIs is empty in simplify.id_reassign." << endl;
         return this->layers;
@@ -113,7 +112,7 @@ vector<vector<node *>> &simplify::id_reassign_and_layered(vector<node *> *PIs, v
     queue<node *> bfs_record;
     // reassign id of each node, and obtain the length of the longest path
     int i = 0;
-    for (auto pi : (*PIs))
+    for (auto pi : PIs)
     {
         visit[pi] = 1;
         pi->id = i++;
@@ -151,7 +150,7 @@ vector<vector<node *>> &simplify::id_reassign_and_layered(vector<node *> *PIs, v
     init_id = i;
 
     // set the logic depth of all outputs
-    for (auto &po:*POs) {
+    for (auto &po:POs) {
         visit[po] = longest_path;
     }
 
@@ -173,9 +172,9 @@ vector<vector<node *>> &simplify::id_reassign_and_layered(vector<node *> *PIs, v
     return this->layers;
 }
 
-void simplify::id_reassign(vector<node *> *PIs)
+void simplify::id_reassign(vector<node *> &PIs)
 {
-    if (PIs->empty())
+    if (PIs.empty())
     {
         std::cout << "PIs is empty in simplify.id_reassign." << endl;
         return;
@@ -183,7 +182,7 @@ void simplify::id_reassign(vector<node *> *PIs)
     map<node *, bool> visit;
     queue<node *> bfs_record;
     int i = 0;
-    for (auto pi : (*PIs))
+    for (auto pi : PIs)
     {
         visit[pi] = true;
         pi->id = i++;
@@ -210,18 +209,18 @@ void simplify::id_reassign(vector<node *> *PIs)
     visit.clear();
 }
 
-vector<vector<node *>> &simplify::layer_assignment(vector<node *> *PIs, vector<node *> *POs)
+vector<vector<node *>> &simplify::layer_assignment(vector<node *> &PIs, vector<node *> &POs)
 {
-    if (PIs->empty())
+    if (PIs.empty())
     {
         std::cout << "PIs is empty in simplify.layer_assignment." << std::endl;
         return this->layers;
     }
     vector<int> visit(init_id, 0);
     vector<int> logic_depth(init_id, 0);
-    this->layers.emplace_back(*PIs);
+    this->layers.emplace_back(PIs);
     int i = 0;
-    int nums = PIs->size();
+    int nums = PIs.size();
     // layer assignment, and calculate the logic depth of each node
     while (i < this->layers.size())
     {
@@ -246,15 +245,15 @@ vector<vector<node *>> &simplify::layer_assignment(vector<node *> *PIs, vector<n
         }
         ++i;
     }
-    this->layers.emplace_back(*POs);
-    nums += POs->size();
+    this->layers.emplace_back(POs);
+    nums += POs.size();
     vector<int>().swap(visit);
     vector<int>().swap(logic_depth);
     std::cout << "The layer assignment is over!" << std::endl;
     return layers;
 }
 
-void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> *> *layers)
+void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> > &layers)
 {
     if (keep->id == dupl->id)
     {
@@ -290,34 +289,35 @@ void simplify::deduplicate(int i, node *keep, node *dupl, vector<vector<node *> 
             cout << "dupl is not equal with keep in simplify.deduplicate." << endl;
         }
     }
-    vector<node *>::iterator it = find(layers->at(i)->begin(), layers->at(i)->end(), dupl);
+    vector<node *>::iterator it = find(layers[i].begin(), layers[i].end(), dupl);
     // layers->at(i)->erase(it);
-    *it = *(layers->at(i)->end() - 1);
-    layers->at(i)->resize(layers->at(i)->size() - 1);
+    *it = *(layers[i].end() - 1);
+    layers[i].resize(layers[i].size() - 1);
     vector<node *>().swap(*(dupl->outs));
     delete dupl;
+    dupl = nullptr;
 }
 
-void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
+void simplify::reduce_repeat_nodes(vector<vector<node *> > &layers)
 {
-    if (!layers || layers->size() == 0)
+    if (layers.empty())
     {
         cerr << "The layers is empty in simplify.reduce_repeat_nodes!" << endl;
         exit(-1);
     }
     vector<int> level(init_id, 0);
-    for (int i = 0; i < layers->size(); ++i)
+    for (int i = 0; i < layers.size(); ++i)
     {
-        for (auto &node : (*layers->at(i)))
+        for (auto &node : layers[i])
         {
             level[node->id] = i;
         }
     }
     int reduce = 0;
-    for (int i = 0; i < layers->size() - 2; ++i)
+    for (int i = 0; i < layers.size() - 2; ++i)
     {
-        map<Gtype, vector<node *>> record;
-        for (auto &item : (*layers->at(i)))
+        map<Gtype, vector<node *> > record;
+        for (auto &item : layers[i])
         {
             if (item->outs && item->outs->size() > 0)
             {
@@ -401,11 +401,11 @@ void simplify::reduce_repeat_nodes(vector<vector<node *> *> *layers)
         }
         record.clear();
     }
-    for (int i = 0; i < layers->size(); ++i)
+    for (int i = 0; i < layers.size(); ++i)
     {
-        if (layers->at(i)->empty())
+        if (layers[i].empty())
         {
-            layers->erase(layers->begin() + i);
+            layers.erase(layers.begin() + i);
             --i;
         }
     }

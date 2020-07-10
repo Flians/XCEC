@@ -19,6 +19,10 @@ cec::~cec()
     */
 }
 
+int cec::close_fout() {
+    return fclose(this->fout);
+}
+
 void cec::print_PIs_value(vector<node *> *PIs, ofstream &output)
 {
     for (auto pi : *PIs)

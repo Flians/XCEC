@@ -77,27 +77,35 @@ struct node
         // cout << "~delete node: " << this->name << endl;
         if (this->ins)
         {
-            for (auto in : (*this->ins))
+            for (auto &in : (*this->ins))
             {
-                vector<node *>::iterator temp = find(in->outs->begin(), in->outs->end(), this);
-                if (temp != in->outs->end())
+                if (in && in->outs)
                 {
-                    // in->outs->erase(temp);
-                    *temp = *(in->outs->end() - 1);
-                    in->outs->resize(in->outs->size() - 1);
+                    vector<node *>::iterator temp = find(in->outs->begin(), in->outs->end(), this);
+                    if (temp != in->outs->end())
+                    {
+                        // in->outs->erase(temp);
+                        *temp = *(in->outs->end() - 1);
+                        in->outs->resize(in->outs->size() - 1);
+                    }
                 }
             }
             vector<node *>().swap(*this->ins);
+            this->ins = nullptr;
         }
         if (this->outs)
         {
-            for (auto out : (*this->outs))
+            for (auto &out : (*this->outs))
             {
-                vector<node *>::iterator temp = find(out->ins->begin(), out->ins->end(), this);
-                if (temp != out->ins->end())
-                    out->ins->erase(temp);
+                if (out && out->ins)
+                {
+                    vector<node *>::iterator temp = find(out->ins->begin(), out->ins->end(), this);
+                    if (temp != out->ins->end())
+                        out->ins->erase(temp);
+                }
             }
             vector<node *>().swap(*this->outs);
+            this->outs = nullptr;
         }
     }
 
@@ -229,21 +237,6 @@ Value calculate(node *g);
 
 void unique_element_in_vector(vector<node *> &v);
 
-// Functor for deleting pointers in vector.
-template <class T>
-class DeleteVector
-{
-public:
-    // Overloaded () operator.
-    // This will be called by for_each() function.
-    bool operator()(T x) const
-    {
-        // Delete pointer.
-        delete x;
-        return true;
-    }
-};
-
-extern void cleanVP(vector<node *> *vp);
+extern void cleanVP(vector<node *> vp);
 
 #endif

@@ -17,6 +17,7 @@ public:
     cec();
     cec(const string &path_output);
     ~cec();
+    int close_fout();
     void print_PIs_value(vector<node *> *PIs, ofstream &output);
     void print_PIs_value(vector<node *> *PIs, FILE *fout);
     // evaluate from PIs to POs
