@@ -25,5 +25,5 @@ make
 
 ``` shell
 cd build
-./XCEC.exe ../test/case2/gf.v ../test/case2/rf.v ../output/output_2.txt
+./XCEC ../test/case2/gf.v ../test/case2/rf.v ../output/output_2.txt
 ```

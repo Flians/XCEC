@@ -6,33 +6,34 @@
 class simplify
 {
 private:
-    vector<vector<node *> > layers;
+    vector<vector<Node *> > layers;
+
+    // delete duplicate node, i is the index level of dupl
+    void deduplicate(int i, Node *keep, Node *dupl, vector<vector<Node *> > &layers, vector<Roaring> &nbrs);
 
 public:
     simplify(/* args */);
     ~simplify();
-    vector<vector<node *> > &get_layers();
+    vector<vector<Node *> > &get_layers();
 
     // replace the node from vector<node *> *nodes with the new_node, which the id of this node is id
-    bool replace_node_by_id(vector<node *> *nodes, node *new_node, int id);
+    bool replace_node_by_id(vector<Node *> *nodes, Node *new_node, int id);
 
     // clean all wires and bufs from PIs to POs
-    void clean_wire_buf(vector<node *> *PIs);
+    void clean_wire_buf(vector<Node *> *PIs);
 
     // reassign id of each node, and layer assigment according to the logic depth, and achieve path balancing
-    vector<vector<node *> > &id_reassign_and_layered(vector<node *> &PIs, vector<node *> &POs);
+    vector<vector<Node *> > &id_reassign_and_layered(vector<Node *> &PIs, vector<Node *> &POs);
 
     // reassign id of each node
-    void id_reassign(vector<node *> &PIs);
+    void id_reassign(vector<Node *> &PIs);
+    void id_reassign(vector<vector<Node *> > &layers);
 
     // layer assigment according to the logic depth, and achieve path balancing
-    vector<vector<node *> > &layer_assignment(vector<node *> &PIs, vector<node *> &POs);
-    
-    // delete duplicate node, i is the index level of dupl
-    void deduplicate(int i, node *keep, node *dupl, vector<vector<node *> > &layers);
+    vector<vector<Node *> > &layer_assignment(vector<Node *> &PIs, vector<Node *> &POs);
 
     // reduce the number of INV, BUF and others
-    void reduce_repeat_nodes(vector<vector<node *> > &layers);
+    void reduce_repeat_nodes(vector<vector<Node *> > &layers);
 };
 
 #endif

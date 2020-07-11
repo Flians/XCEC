@@ -5,64 +5,41 @@ parser::parser(/* args */)
     this->constants.reserve(3);
     for (Value val = L; val <= X; val = (Value)(val + 1))
     {
-        node *cont = new node(Const_Str[val], _CONSTANT, val);
+        Node *cont = new Node(Const_Str[val], _CONSTANT, val);
         this->constants.emplace_back(cont);
     }
 }
 
 parser::~parser()
 {
-    vector<node *>().swap(this->PIs);
-    vector<node *>().swap(this->POs);
-    vector<node *>().swap(this->constants);
-    vector<node *>().swap(this->wires_golden);
-    vector<node *>().swap(this->wires_revised);
+    vector<Node *>().swap(this->PIs);
+    vector<Node *>().swap(this->POs);
+    vector<Node *>().swap(this->constants);
+    this->clean_wires();
+    this->map_PIs.clear();
+    this->map_POs.clear();
     cout << "The parser is destroyed!" << endl;
 }
 
-vector<node *> &parser::get_PIs()
+vector<Node *> &parser::get_PIs()
 {
     return this->PIs;
 }
 
-vector<node *> &parser::get_POs()
+vector<Node *> &parser::get_POs()
 {
     return this->POs;
 }
 
-vector<node *> &parser::get_constants()
+vector<Node *> &parser::get_constants()
 {
     return this->constants;
 }
 
-void parser::clean_wires() {
-    vector<node *>().swap(wires_golden);
-    vector<node *>().swap(wires_revised);
-}
-
-node *parser::find_node_by_name(vector<node *> &nodes, string &name)
+void parser::clean_wires()
 {
-    for (auto node : nodes)
-    {
-        if (name == node->name)
-        {
-            return node;
-        }
-    }
-    return nullptr;
-}
-
-bool parser::replace_node_by_name(vector<node *> &nodes, node *new_node)
-{
-    for (auto &node : nodes)
-    {
-        if (new_node->name == node->name)
-        {
-            node = new_node;
-            return true;
-        }
-    }
-    return false;
+    this->wires_golden.clear();
+    this->wires_revised.clear();
 }
 
 void parser::parse_verilog(stringstream &in)
@@ -97,12 +74,20 @@ void parser::parse_verilog(stringstream &in)
                 Gtype nt = Value_Str[item];
                 switch (nt)
                 {
+                case _MODULE:
+                {
+                    int io_num = count(iterStart, iterEnd, ',');
+                    this->PIs.reserve(io_num);
+                    this->POs.reserve(io_num);
+                    break;
+                }
                 case IN:
                 {
                     while (regex_search(iterStart, iterEnd, match, pattern))
                     {
                         item = match[0];
-                        this->PIs.emplace_back(new node(item, IN));
+                        this->map_PIs[item] = this->PIs.size();
+                        this->PIs.emplace_back(new Node(item, IN));
                         iterStart = match[0].second;
                     }
                     break;
@@ -112,7 +97,8 @@ void parser::parse_verilog(stringstream &in)
                     while (regex_search(iterStart, iterEnd, match, pattern))
                     {
                         item = match[0];
-                        this->POs.emplace_back(new node(item, _EXOR));
+                        this->map_POs[item] = this->POs.size();
+                        this->POs.emplace_back(new Node(item, _EXOR));
                         iterStart = match[0].second;
                     }
                     break;
@@ -122,17 +108,17 @@ void parser::parse_verilog(stringstream &in)
                     while (regex_search(iterStart, iterEnd, match, pattern))
                     {
                         item = match[0];
-                        if (!find_node_by_name(this->PIs, item) && !find_node_by_name(this->POs, item))
-                            this->wires_golden.emplace_back(new node(item, WIRE));
+                        if (this->map_PIs.count(item) == 0 && this->map_POs.count(item) == 0)
+                            this->wires_golden[item] = new Node(item, WIRE);
                         iterStart = match[0].second;
                     }
                     break;
                 }
                 default:
                 {
-                    node *g = new node;
-                    g->ins = new vector<node *>;
-                    g->outs = new vector<node *>;
+                    Node *g = new Node;
+                    g->ins = new vector<Node *>;
+                    g->outs = new vector<Node *>;
                     g->cell = nt;
                     if (regex_search(iterStart, iterEnd, match, pattern))
                     {
@@ -151,20 +137,23 @@ void parser::parse_verilog(stringstream &in)
                             iterStart = match[0].second;
                             // cout << item << endl;
                         }
-                        node *port = find_node_by_name(this->wires_golden, item);
-                        if (!port)
+                        Node *port = nullptr;
+                        if (this->wires_golden.count(item))
                         {
-                            port = find_node_by_name(this->POs, item);
-                            if (!port)
-                            {
-                                cout << "There are some troubles in parser.cpp for output port: " << line << endl;
-                                exit(-1);
-                            }
+                            port = this->wires_golden[item];
+                        }
+                        else if (this->map_POs.count(item))
+                        {
+                            port = this->POs[this->map_POs[item]];
+                        }
+                        else
+                        {
+                            error_fout("There is no output port " + item + " in parser.parse_verilog for " + line);
                         }
                         g->outs->emplace_back(port);
                         if (!port->ins)
                         {
-                            port->ins = new vector<node *>[1];
+                            port->ins = new vector<Node *>[1];
                         }
                         // cout << "output port: " << port->name << endl;
                         port->ins->emplace_back(g);
@@ -181,7 +170,7 @@ void parser::parse_verilog(stringstream &in)
                             iterStart = match[0].second;
                             // cout << item << endl;
                         }
-                        node *port;
+                        Node *port;
                         if (item.length() == 4 && libstring::startsWith(item, "1'b"))
                         {
                             switch (item[3])
@@ -197,21 +186,23 @@ void parser::parse_verilog(stringstream &in)
                         }
                         else
                         {
-                            port = find_node_by_name(this->wires_golden, item);
-                            if (!port)
+                            if (this->wires_golden.count(item))
                             {
-                                port = find_node_by_name(this->PIs, item);
-                                if (!port)
-                                {
-                                    cout << "There are some troubles in parser.cpp for input port: " << line << endl;
-                                    exit(-1);
-                                }
+                                port = this->wires_golden[item];
+                            }
+                            else if (this->map_PIs.count(item))
+                            {
+                                port = this->PIs[this->map_PIs[item]];
+                            }
+                            else
+                            {
+                                error_fout("There is no input port " + item + " in parser.parse_verilog for " + line);
                             }
                         }
                         g->ins->emplace_back(port);
                         if (!port->outs)
                         {
-                            port->outs = new vector<node *>[2];
+                            port->outs = new vector<Node *>[2];
                         }
                         // cout << "input port: " << port->name << endl;
                         port->outs->emplace_back(g);
@@ -219,12 +210,6 @@ void parser::parse_verilog(stringstream &in)
                     break;
                 }
                 }
-            }
-            else if (item == "module")
-            {
-                int io_num = count(iterStart, iterEnd, ',');
-                this->PIs.reserve(io_num);
-                this->POs.reserve(io_num);
             }
         }
     }
@@ -262,6 +247,7 @@ void parser::parse_revised(stringstream &in)
                 Gtype nt = Value_Str[item];
                 switch (nt)
                 {
+                case _MODULE:
                 case IN:
                 case OUT:
                     break;
@@ -270,17 +256,17 @@ void parser::parse_revised(stringstream &in)
                     while (regex_search(iterStart, iterEnd, match, pattern))
                     {
                         item = match[0];
-                        if (!find_node_by_name(this->PIs, item) && !find_node_by_name(this->POs, item))
-                            this->wires_revised.emplace_back(new node(item, WIRE));
+                        if (this->map_PIs.count(item) == 0 && this->map_POs.count(item) == 0)
+                            this->wires_revised[item] = new Node(item, WIRE);
                         iterStart = match[0].second;
                     }
                     break;
                 }
                 default:
                 {
-                    node *g = new node;
-                    g->ins = new vector<node *>;
-                    g->outs = new vector<node *>;
+                    Node *g = new Node;
+                    g->ins = new vector<Node *>;
+                    g->outs = new vector<Node *>;
                     g->cell = nt;
                     if (regex_search(iterStart, iterEnd, match, pattern))
                     {
@@ -299,20 +285,23 @@ void parser::parse_revised(stringstream &in)
                             iterStart = match[0].second;
                             // cout << item << endl;
                         }
-                        node *port = find_node_by_name(this->wires_revised, item);
-                        if (!port)
+                        Node *port = nullptr;
+                        if (this->wires_revised.count(item))
                         {
-                            port = find_node_by_name(this->POs, item);
-                            if (!port)
-                            {
-                                cout << "There are some troubles in parser.cpp for output port: " << line << endl;
-                                exit(-1);
-                            }
+                            port = this->wires_revised[item];
+                        }
+                        else if (this->map_POs.count(item))
+                        {
+                            port = this->POs[this->map_POs[item]];
+                        }
+                        else
+                        {
+                            error_fout("There is no output port " + item + " in parser.parse_verilog for " + line);
                         }
                         g->outs->emplace_back(port);
                         if (!port->ins)
                         {
-                            port->ins = new vector<node *>[1];
+                            port->ins = new vector<Node *>[1];
                         }
                         // cout << "output port: " << port->name << endl;
                         port->ins->emplace_back(g);
@@ -329,7 +318,7 @@ void parser::parse_revised(stringstream &in)
                             iterStart = match[0].second;
                             // cout << item << endl;
                         }
-                        node *port;
+                        Node *port;
                         if (item.length() == 4 && libstring::startsWith(item, "1'b"))
                         {
                             switch (item[3])
@@ -345,21 +334,23 @@ void parser::parse_revised(stringstream &in)
                         }
                         else
                         {
-                            port = find_node_by_name(this->wires_revised, item);
-                            if (!port)
+                            if (this->wires_revised.count(item))
                             {
-                                port = find_node_by_name(this->PIs, item);
-                                if (!port)
-                                {
-                                    cout << "There are some troubles in parser.cpp for input port: " << line << endl;
-                                    exit(-1);
-                                }
+                                port = this->wires_revised[item];
+                            }
+                            else if (this->map_PIs.count(item))
+                            {
+                                port = this->PIs[this->map_PIs[item]];
+                            }
+                            else
+                            {
+                                error_fout("There is no input port " + item + " in parser.parse_verilog for " + line);
                             }
                         }
                         g->ins->emplace_back(port);
                         if (!port->outs)
                         {
-                            port->outs = new vector<node *>[2];
+                            port->outs = new vector<Node *>[2];
                         }
                         // cout << "input port: " << port->name << endl;
                         port->outs->emplace_back(g);
@@ -372,86 +363,13 @@ void parser::parse_revised(stringstream &in)
     }
 }
 
-void parser::build_miter(vector<node *> &PIs_golden, vector<node *> &POs_golden, vector<node *> &PIs_revised, vector<node *> &POs_revised)
-{
-    int ig_len = PIs_golden.size();
-    int ir_len = PIs_revised.size();
-    int og_len = POs_golden.size();
-    int or_len = POs_revised.size();
-    if (ig_len != ir_len || og_len != or_len)
-    {
-        cerr << "The golden Verilog has a different number of PIs and POs than the revised Verilog!" << endl;
-        exit(-1);
-    }
-    vector<node *>::iterator iter = PIs_golden.begin();
-    vector<node *>::iterator iter_end = PIs_golden.end();
-    // merge all inputs
-    while (iter != iter_end)
-    {
-        // cout << (*iter)->name << endl;
-        node *pi = find_node_by_name(PIs_revised, (*iter)->name);
-        if (!pi)
-        {
-            cerr << "The input pi in the golden Verilog does not exist in the revised Verilog!" << endl;
-            exit(-1);
-        }
-        else
-        {
-            if (pi->outs)
-            {
-                vector<node *>::iterator it = pi->outs->begin();
-                vector<node *>::iterator it_end = pi->outs->end();
-                while (it != it_end)
-                {
-                    if (!replace_node_by_name(*(*it)->ins, (*iter)))
-                    {
-                        cerr << "There may be some wrong!" << endl;
-                        exit(-1);
-                    }
-                    (*iter)->outs->emplace_back(*it);
-                    ++it;
-                }
-            }
-            delete pi;
-            pi = nullptr;
-        }
-        ++iter;
-    }
-    vector<node *>().swap(PIs_revised);
-    // merge all outputs
-    iter = POs_golden.begin();
-    iter_end = POs_golden.end();
-    while (iter != iter_end)
-    {
-        node *po = find_node_by_name(POs_revised, (*iter)->name);
-        if (!po)
-        {
-            cerr << "The output po in the golden Verilog does not exist in the revised Verilog!" << endl;
-            exit(-1);
-        }
-        else
-        {
-            (*iter)->cell = _EXOR;
-            for (auto &tg : *po->ins)
-            {
-                (*iter)->ins->emplace_back(tg);
-                tg->outs->emplace_back((*iter));
-            }
-            delete po;
-            po = nullptr;
-        }
-        ++iter;
-    }
-    vector<node *>().swap(POs_revised);
-}
-
 void parser::parse(ifstream &golden, ifstream &revised)
 {
     // parse the golden file
     if (!golden.is_open())
     {
         cerr << "The golden can not be open!" << endl;
-        exit(-1);
+        error_fout("The golden can not be open");
     }
     string buffer;
     buffer.resize(golden.seekg(0, std::ios::end).tellg());
@@ -467,7 +385,7 @@ void parser::parse(ifstream &golden, ifstream &revised)
     if (!revised.is_open())
     {
         cerr << "The revised can not be open!" << endl;
-        exit(-1);
+        error_fout("The revised can not be open");
     }
 
     buffer.resize(revised.seekg(0, std::ios::end).tellg());
@@ -501,16 +419,114 @@ void parser::parse(const string &path_golden, const string &path_revised)
     cout << "The parsing process is over!" << endl;
 }
 
-void parser::printG(vector<node *> *nodes)
+void parser::printG(vector<Node *> *nodes)
 {
     if (!nodes || nodes->size() == 0)
         return;
-    vector<node *>::iterator pi = nodes->begin();
-    vector<node *>::iterator pi_end = nodes->end();
+    vector<Node *>::iterator pi = nodes->begin();
+    vector<Node *>::iterator pi_end = nodes->end();
     while (pi != pi_end)
     {
         cout << (*pi)->name << " " << Str_Value[(*pi)->cell] << " " << (*pi)->val << endl;
         printG((*pi)->outs);
         ++pi;
     }
+}
+
+Node *parser::find_node_by_name(vector<Node *> &nodes, string &name)
+{
+    for (auto node : nodes)
+    {
+        if (name == node->name)
+        {
+            return node;
+        }
+    }
+    return nullptr;
+}
+
+bool parser::replace_node_by_name(vector<Node *> &nodes, Node *new_node)
+{
+    for (auto &node : nodes)
+    {
+        if (new_node->name == node->name)
+        {
+            node = new_node;
+            return true;
+        }
+    }
+    return false;
+}
+
+void parser::build_miter(vector<Node *> &PIs_golden, vector<Node *> &POs_golden, vector<Node *> &PIs_revised, vector<Node *> &POs_revised)
+{
+    int ig_len = PIs_golden.size();
+    int ir_len = PIs_revised.size();
+    int og_len = POs_golden.size();
+    int or_len = POs_revised.size();
+    if (ig_len != ir_len || og_len != or_len)
+    {
+        cerr << "The golden Verilog has a different number of PIs and POs than the revised Verilog!" << endl;
+        error_fout("The golden Verilog has a different number of PIs and POs than the revised Verilog!");
+    }
+    vector<Node *>::iterator iter = PIs_golden.begin();
+    vector<Node *>::iterator iter_end = PIs_golden.end();
+    // merge all inputs
+    while (iter != iter_end)
+    {
+        // cout << (*iter)->name << endl;
+        Node *pi = find_node_by_name(PIs_revised, (*iter)->name);
+        if (!pi)
+        {
+            cerr << "The input pi in the golden Verilog does not exist in the revised Verilog!" << endl;
+            error_fout("The input pi in the golden Verilog does not exist in the revised Verilog!");
+        }
+        else
+        {
+            if (pi->outs)
+            {
+                vector<Node *>::iterator it = pi->outs->begin();
+                vector<Node *>::iterator it_end = pi->outs->end();
+                while (it != it_end)
+                {
+                    if (!replace_node_by_name(*(*it)->ins, (*iter)))
+                    {
+                        cerr << "There may be some wrong!" << endl;
+                        error_fout("There may be some wrong!");
+                    }
+                    (*iter)->outs->emplace_back(*it);
+                    ++it;
+                }
+            }
+            delete pi;
+            pi = nullptr;
+        }
+        ++iter;
+    }
+    vector<Node *>().swap(PIs_revised);
+    // merge all outputs
+    iter = POs_golden.begin();
+    iter_end = POs_golden.end();
+    while (iter != iter_end)
+    {
+        Node *po = find_node_by_name(POs_revised, (*iter)->name);
+        if (!po)
+        {
+            cerr << "The output po in the golden Verilog does not exist in the revised Verilog!" << endl;
+            error_fout("The output po in the golden Verilog does not exist in the revised Verilog!");
+        }
+        else
+        {
+            (*iter)->cell = _EXOR;
+            for (auto &tg : *po->ins)
+            {
+                (*iter)->ins->emplace_back(tg);
+                tg->outs->emplace_back((*iter));
+            }
+            delete po;
+            po = nullptr;
+        }
+        ++iter;
+    }
+    vector<Node *>().swap(POs_revised);
 }

@@ -2,7 +2,8 @@
 
 /* initial */
 unsigned int init_id = 0;
-map<string, Gtype> Value_Str = {
+FILE *fout = nullptr;
+std::unordered_map<string, Gtype> Value_Str = {
     {"constant", _CONSTANT},
     {"input", IN},
     {"output", OUT},
@@ -17,9 +18,10 @@ map<string, Gtype> Value_Str = {
     {"buf", BUF},
     {"_HMUX", _HMUX},
     {"_DC", _DC},
-    {"_EXOR", _EXOR}};
+    {"_EXOR", _EXOR},
+    {"module", _MODULE}};
 
-map<Gtype, string> Str_Value = {
+std::unordered_map<Gtype, string, EnumClassHash> Str_Value = {
     {_CONSTANT, "constant"},
     {IN, "input"},
     {OUT, "output"},
@@ -34,15 +36,16 @@ map<Gtype, string> Str_Value = {
     {BUF, "buf"},
     {_HMUX, "_HMUX"},
     {_DC, "_DC"},
-    {_EXOR, "_EXOR"}};
+    {_EXOR, "_EXOR"},
+    {_MODULE, "module"}};
 
-map<Value, string> Const_Str = {
+std::unordered_map<Value, string, EnumClassHash> Const_Str = {
     {L, "1'b0"},
     {H, "1'b1"},
     {X, "1'bx"}};
 
 /* Global operator overload */
-Value operator&(const Value &A, const Value &B)
+inline Value operator&(const Value &A, const Value &B)
 {
     if (A == L || B == L)
     {
@@ -54,7 +57,7 @@ Value operator&(const Value &A, const Value &B)
     }
 }
 
-Value operator|(const Value &A, const Value &B)
+inline Value operator|(const Value &A, const Value &B)
 {
     if (A == H || B == H)
     {
@@ -66,7 +69,7 @@ Value operator|(const Value &A, const Value &B)
     }
 }
 
-Value operator^(const Value &A, const Value &B)
+inline Value operator^(const Value &A, const Value &B)
 {
     if (A == H && B == H)
     {
@@ -78,7 +81,7 @@ Value operator^(const Value &A, const Value &B)
     }
 }
 
-Value operator~(const Value &A)
+inline Value operator~(const Value &A)
 {
     switch (A)
     {
@@ -127,14 +130,14 @@ inline Value EXOR(const Value &A, const Value &B)
     }
 }
 
-Value calculate(node *g)
+Value calculate(Node *g)
 {
-    node temp_g;
+    Node temp_g;
     if (g)
     {
         temp_g.val = g->ins->front()->val;
-        vector<node *>::iterator it_ = g->ins->begin();
-        vector<node *>::iterator it_end = g->ins->end();
+        vector<Node *>::iterator it_ = g->ins->begin();
+        vector<Node *>::iterator it_end = g->ins->end();
         switch (g->cell)
         {
         case _AND:
@@ -196,15 +199,15 @@ Value calculate(node *g)
     }
     else
     {
-        cout << "The node g is empty in libhead.cpp: Value calculate(node *g)" << endl;
+        cerr << "The node g is empty in libhead.cpp: Value calculate(node *g)" << endl;
         exit(-1);
     }
     return temp_g.val;
 }
 
-void unique_element_in_vector(vector<node *> &v)
+void unique_element_in_vector(vector<Node *> &v)
 {
-    sort(v.begin(), v.end(), [](const node *A, const node *B) {
+    sort(v.begin(), v.end(), [](const Node *A, const Node *B) {
         if (A->outs)
         {
             if (B->outs)
@@ -222,25 +225,41 @@ void unique_element_in_vector(vector<node *> &v)
             return A->id < B->id;
         }
     });
-    typename vector<node *>::iterator vector_iterator = unique(v.begin(), v.end());
+    typename vector<Node *>::iterator vector_iterator = unique(v.begin(), v.end());
     if (vector_iterator != v.end())
     {
         v.erase(vector_iterator, v.end());
     }
 }
 
-void cleanVP(vector<node *> vecPtr)
+void cleanVP(vector<Node *> vecPtr)
 {
     if (vecPtr.empty())
         return;
-    vector<node *>::iterator it = vecPtr.begin();
+    vector<Node *>::iterator it = vecPtr.begin();
     int len = vecPtr.size();
     for (int i = 0; i < len; ++i, ++it)
     {
-        if (*it) {
+        if (*it)
+        {
             delete *it;
             *it = nullptr;
         }
     }
-    vector<node *>().swap(vecPtr);
+    vector<Node *>().swap(vecPtr);
+}
+
+void init_fout(const string &path_output) {
+    fout = fopen(path_output.c_str(), "w");
+}
+
+int close_fout() {
+    return fclose(fout);
+}
+
+void error_fout(const string &message)
+{
+    cerr << "Error: " << message << endl;
+    fprintf(fout, "NEQ\n%s", message.c_str());
+    exit(-1);
 }

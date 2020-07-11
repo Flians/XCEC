@@ -6,46 +6,40 @@ cec::cec(/* args */)
 
 cec::cec(const string &path_output)
 {
-    this->fout = fopen(path_output.c_str(), "w");
     // this->fout.open(path_output, ios::out);
 }
 
 cec::~cec()
 {
-    fclose(this->fout);
     /*
     this->fout.flush();
     this->fout.close();
     */
 }
 
-int cec::close_fout() {
-    return fclose(this->fout);
-}
-
-void cec::print_PIs_value(vector<node *> *PIs, ofstream &output)
+void cec::print_PIs_value(vector<Node *> *PIs, ofstream &output)
 {
     for (auto pi : *PIs)
     {
         output << pi->name << " " << pi->val << endl;
     }
 }
-void cec::print_PIs_value(vector<node *> *PIs, FILE *output) {
+void cec::print_PIs_value(vector<Node *> *PIs, FILE *output) {
     for (auto pi : *PIs)
     {
         fprintf(output, "%s %d", pi->name.c_str(), pi->val);
     }
 }
 
-bool cec::assign_PIs_value(vector<node *> *PIs, int i)
+bool cec::assign_PIs_value(vector<Node *> *PIs, int i)
 {
     if (i == PIs->size())
     {
         if (!evaluate(*PIs))
         {
             // this->fout << "NEQ" << endl;
-            fprintf(this->fout, "NEQ\n");
-            print_PIs_value(PIs, this->fout);
+            fprintf(fout, "NEQ\n");
+            print_PIs_value(PIs, fout);
             return false;
         }
     }
@@ -69,7 +63,7 @@ bool cec::assign_PIs_value(vector<node *> *PIs, int i)
     return true;
 }
 
-void cec::evaluate_from_PIs_to_POs(vector<node *> *PIs)
+void cec::evaluate_from_PIs_to_POs(vector<Node *> *PIs)
 {
     if (!PIs || PIs->size() == 0)
     {
@@ -79,15 +73,15 @@ void cec::evaluate_from_PIs_to_POs(vector<node *> *PIs)
     if (assign_PIs_value(PIs, 0))
     {
         // this->fout << "EQ" << endl;
-        fprintf(this->fout, "EQ\n");
+        fprintf(fout, "EQ\n");
     }
 }
 
-bool cec::evaluate(vector<node *> nodes)
+bool cec::evaluate(vector<Node *> nodes)
 {
     if (nodes.size() == 0)
         return true;
-    vector<node *> qu;
+    vector<Node *> qu;
     for (auto &g : nodes)
     {
         if (g->outs)
@@ -125,11 +119,11 @@ bool cec::evaluate(vector<node *> nodes)
     return evaluate(qu);
 }
 
-void cec::evaluate_from_POs_to_PIs(vector<node *> *POs)
+void cec::evaluate_from_POs_to_PIs(vector<Node *> *POs)
 {
 }
 
-void cec::evaluate_by_z3(vector<vector<node *> > &layers, unsigned timeout)
+void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
 {
     init_z3(timeout);
     Z3_solver z3_sol = Z3_mk_solver_for_logic(logic, Z3_mk_string_symbol(logic, "QF_BV"));
@@ -151,7 +145,7 @@ void cec::evaluate_by_z3(vector<vector<node *> > &layers, unsigned timeout)
 
     for (int i = 1; i < layers.size(); ++i)
     {
-        vector<node *> layer = layers[i];
+        vector<Node *> layer = layers[i];
         for (int j = 0; j < layer.size(); ++j)
         {
             vector<Z3_ast> inputs(layer[j]->ins->size());
@@ -187,7 +181,7 @@ void cec::evaluate_by_z3(vector<vector<node *> > &layers, unsigned timeout)
                 res = z3_mk_HMUX(inputs[0], inputs[1], inputs[2]);
                 break;
             case _DC:
-                cout << layer[j]->name << ", C: " << layer[j]->ins->front()->name << ", D: " << layer[j]->ins->at(1)->name << endl;
+                // cout << layer[j]->name << ", C: " << layer[j]->ins->front()->name << ", D: " << layer[j]->ins->at(1)->name << endl;
                 res = z3_mk_DC(inputs[0], inputs[1]);
                 break;
             case _EXOR:
@@ -218,12 +212,12 @@ void cec::evaluate_by_z3(vector<vector<node *> > &layers, unsigned timeout)
     Z3_solver_assert(logic, z3_sol, Z3_mk_not(logic, result));
     // printf("term: %s\n", Z3_ast_to_string(logic, result));
 
-    check(logic, z3_sol, Z3_L_TRUE, this->fout);
+    check(logic, z3_sol, Z3_L_TRUE, fout);
     // Z3_solver_pop(logic, z3_sol, 1);
     Z3_solver_dec_ref(logic, z3_sol);
     Z3_del_context(logic);
 }
 
-void cec::evaluate_by_stp(vector<vector<node *> > &layers)
+void cec::evaluate_by_stp(vector<vector<Node *> > &layers)
 {
 }

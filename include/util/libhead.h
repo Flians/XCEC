@@ -6,10 +6,10 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <queue>
 #include <regex>
 #include <set>
+#include <unordered_map>
 
 #include "libstring.h"
 #include "roaring.hh"
@@ -19,7 +19,15 @@
 
 using namespace std;
 
-extern unsigned int init_id;
+// resolve the error: 'implicit instantiation of undefined template 'std::__1::hash<Gtype>'
+struct EnumClassHash
+{
+    template <typename T>
+    std::size_t operator()(T t) const
+    {
+        return static_cast<std::size_t>(t);
+    }
+};
 
 // all cell types
 enum Gtype
@@ -38,7 +46,8 @@ enum Gtype
     BUF,
     _HMUX, // _HMUX \U$1 ( .O(\282 ), .I0(1'b1), .I1(\277 ), .S(\281 ));
     _DC,   // _DC \n6_5[9] ( .O(\108 ), .C(\96 ), .D(\107 ));
-    _EXOR
+    _EXOR,
+    _MODULE
 };
 
 enum Value
@@ -48,13 +57,13 @@ enum Value
     X
 };
 
-extern map<string, Gtype> Value_Str;
+extern FILE *fout;
+extern unsigned int init_id;
+extern std::unordered_map<string, Gtype> Value_Str;
+extern std::unordered_map<Gtype, string, EnumClassHash> Str_Value;
+extern std::unordered_map<Value, string, EnumClassHash> Const_Str;
 
-extern map<Gtype, string> Str_Value;
-
-extern map<Value, string> Const_Str;
-
-struct node
+struct Node
 {
     // the name of the gate
     string name;
@@ -64,16 +73,16 @@ struct node
     int id;
     // record the number of times the node is visited
     int vis;
-    vector<node *> *ins;
-    vector<node *> *outs;
+    vector<Node *> *ins;
+    vector<Node *> *outs;
 
     // constructor
-    node() : val(X), id(init_id++), vis(0), ins(nullptr), outs(nullptr) {}
-    node(string _name, Gtype _cell = WIRE, Value _val = L, int _id = (init_id++)) : name(_name), cell(_cell), val(_val), id(_id), vis(0), ins(nullptr), outs(nullptr) {}
+    Node() : val(X), id(init_id++), vis(0), ins(nullptr), outs(nullptr) {}
+    Node(string _name, Gtype _cell = WIRE, Value _val = L, int _id = (init_id++)) : name(_name), cell(_cell), val(_val), id(_id), vis(0), ins(nullptr), outs(nullptr) {}
 
     // destructor
     // delete this node and all edges connected to this node.
-    ~node()
+    ~Node()
     {
         // cout << "~delete node: " << this->name << endl;
         if (this->ins)
@@ -82,7 +91,7 @@ struct node
             {
                 if (in && in->outs)
                 {
-                    vector<node *>::iterator temp = find(in->outs->begin(), in->outs->end(), this);
+                    vector<Node *>::iterator temp = find(in->outs->begin(), in->outs->end(), this);
                     if (temp != in->outs->end())
                     {
                         // in->outs->erase(temp);
@@ -92,7 +101,7 @@ struct node
                     }
                 }
             }
-            vector<node *>().swap(*this->ins);
+            vector<Node *>().swap(*this->ins);
             this->ins = nullptr;
         }
         if (this->outs)
@@ -101,21 +110,21 @@ struct node
             {
                 if (out && out->ins)
                 {
-                    vector<node *>::iterator temp = find(out->ins->begin(), out->ins->end(), this);
+                    vector<Node *>::iterator temp = find(out->ins->begin(), out->ins->end(), this);
                     if (temp != out->ins->end())
                         out->ins->erase(temp);
                 }
             }
-            vector<node *>().swap(*this->outs);
+            vector<Node *>().swap(*this->outs);
             this->outs = nullptr;
         }
     }
 
     /* operator overload */
     // AND
-    node operator&(const node &B)
+    Node operator&(const Node &B)
     {
-        node re;
+        Node re;
         if (this->val == L || B.val == L)
         {
             re.val = L;
@@ -129,9 +138,9 @@ struct node
     }
 
     // OR
-    node operator|(const node &B)
+    Node operator|(const Node &B)
     {
-        node re;
+        Node re;
         if (this->val == H || B.val == H)
         {
             re.val = H;
@@ -145,9 +154,9 @@ struct node
     }
 
     // XOR
-    node operator^(const node &B)
+    Node operator^(const Node &B)
     {
-        node re;
+        Node re;
         if (this->val == H && B.val == H)
         {
             re.val = L;
@@ -161,9 +170,9 @@ struct node
     }
 
     // not
-    node operator~()
+    Node operator~()
     {
-        node re;
+        Node re;
         switch (this->val)
         {
         case L:
@@ -180,19 +189,19 @@ struct node
     }
 
     // for find
-    bool operator==(const node &B)
+    bool operator==(const Node &B)
     {
         return this->id == B.id;
     }
 
     // for find
-    bool operator==(const node *B)
+    bool operator==(const Node *B)
     {
         return this->id == B->id;
     }
 
     // for sort
-    bool operator<(const node &B)
+    bool operator<(const Node &B)
     {
         if (this->outs)
         {
@@ -235,10 +244,16 @@ Value HMUX(const Value &S, const Value &I0, const Value &I1);
 // exor
 Value EXOR(const Value &, const Value &);
 
-Value calculate(node *g);
+Value calculate(Node *g);
 
-void unique_element_in_vector(vector<node *> &v);
+void unique_element_in_vector(vector<Node *> &v);
 
-extern void cleanVP(vector<node *> vp);
+void cleanVP(vector<Node *> vp);
+
+void init_fout(const string &path_output);
+
+int close_fout();
+
+void error_fout(const string &message);
 
 #endif

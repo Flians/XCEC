@@ -6,28 +6,26 @@
 class cec
 {
 private:
-    FILE *fout;
     // ofstream fout;
 
     // assign values to the i-th element in the PIs
-    bool assign_PIs_value(vector<node *> *PIs, int i);
+    bool assign_PIs_value(vector<Node *> *PIs, int i);
     // Calculate all nodes according to PIs
-    bool evaluate(vector<node *> nodes);
+    bool evaluate(vector<Node *> nodes);
 public:
     cec();
     cec(const string &path_output);
     ~cec();
-    int close_fout();
-    void print_PIs_value(vector<node *> *PIs, ofstream &output);
-    void print_PIs_value(vector<node *> *PIs, FILE *fout);
+    void print_PIs_value(vector<Node *> *PIs, ofstream &output);
+    void print_PIs_value(vector<Node *> *PIs, FILE *fout);
     // evaluate from PIs to POs
-    void evaluate_from_PIs_to_POs(vector<node *> *PIs);
+    void evaluate_from_PIs_to_POs(vector<Node *> *PIs);
     // evaluate from POs to PIs
-    void evaluate_from_POs_to_PIs(vector<node *> *POs);
+    void evaluate_from_POs_to_PIs(vector<Node *> *POs);
     // evaluate using z3
-    void evaluate_by_z3(vector<vector<node *> > &layers, unsigned timeout);
+    void evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout);
     // evaluate using stp
-    void evaluate_by_stp(vector<vector<node *> > &layers);
+    void evaluate_by_stp(vector<vector<Node *> > &layers);
 };
 
 #endif
