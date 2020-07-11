@@ -1,7 +1,7 @@
 #include "libhead.h"
 
 /* initial */
-unsigned int init_id = 0;
+unsigned init_id = 0;
 FILE *fout = nullptr;
 std::unordered_map<string, Gtype> Value_Str = {
     {"constant", _CONSTANT},

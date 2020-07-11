@@ -17,7 +17,7 @@ public:
     vector<vector<Node *> > &get_layers();
 
     // replace the node from vector<node *> *nodes with the new_node, which the id of this node is id
-    bool replace_node_by_id(vector<Node *> *nodes, Node *new_node, int id);
+    bool replace_node_by_id(vector<Node *> *nodes, Node *new_node, unsigned id);
 
     // clean all wires and bufs from PIs to POs
     void clean_wire_buf(vector<Node *> *PIs);

@@ -19,7 +19,7 @@ vector<vector<Node *>> &simplify::get_layers()
     return this->layers;
 }
 
-bool simplify::replace_node_by_id(vector<Node *> *nodes, Node *new_node, int id)
+bool simplify::replace_node_by_id(vector<Node *> *nodes, Node *new_node, unsigned id)
 {
     for (auto &node : *nodes)
     {
@@ -180,9 +180,9 @@ void simplify::id_reassign(vector<vector<Node *>> &layers)
         return;
     }
     int id = 0;
-    for (int i = 0; i < layers.size(); ++i)
+    for (unsigned i = 0; i < layers.size(); ++i)
     {
-        for (int j = 0; j < layers[i].size(); ++j)
+        for (unsigned j = 0; j < layers[i].size(); ++j)
         {
             layers[i][j]->id = id++;
         }
@@ -234,16 +234,16 @@ vector<vector<Node *>> &simplify::layer_assignment(vector<Node *> &PIs, vector<N
         std::cout << "PIs is empty in simplify.layer_assignment." << std::endl;
         return this->layers;
     }
-    vector<int> visit(init_id, 0);
+    vector<unsigned> visit(init_id, 0);
     vector<int> logic_depth(init_id, 0);
     this->layers.emplace_back(PIs);
-    int i = 0;
-    int nums = PIs.size();
+    unsigned i = 0;
+    unsigned nums = PIs.size();
     // layer assignment, and calculate the logic depth of each node
     while (i < this->layers.size())
     {
         vector<Node *> layer;
-        for (int j = 0; j < this->layers[i].size(); ++j)
+        for (unsigned j = 0; j < this->layers[i].size(); ++j)
         {
             if (this->layers[i][j]->outs)
             {
@@ -265,7 +265,7 @@ vector<vector<Node *>> &simplify::layer_assignment(vector<Node *> &PIs, vector<N
     }
     this->layers.emplace_back(POs);
     nums += POs.size();
-    vector<int>().swap(visit);
+    vector<unsigned>().swap(visit);
     vector<int>().swap(logic_depth);
     std::cout << "The layer assignment is over!" << std::endl;
     return layers;
@@ -329,7 +329,7 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
     }
     vector<int> level(init_id, 0);
     vector<Roaring> nbrs(init_id);
-    for (int i = 0; i < layers.size(); ++i)
+    for (unsigned i = 0; i < layers.size(); ++i)
     {
         for (auto &node_ : layers[i])
         {
@@ -344,14 +344,14 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
         }
     }
     int reduce = 0;
-    for (int i = 0; i < layers.size() - 2; ++i)
+    for (unsigned i = 0; i < layers.size() - 2; ++i)
     {
         vector<vector<Node *>> record(15);
         for (auto &item : layers[i])
         {
             if (item->outs && item->outs->size() > 0)
             {
-                for (int j = 0; j < item->outs->size(); ++j)
+                for (unsigned j = 0; j < item->outs->size(); ++j)
                 {
                     // not including output
                     if (item->outs->at(j)->cell != _EXOR)
@@ -376,7 +376,7 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
 
             if (item[0]->cell == BUF || item[0]->cell == INV)
             {
-                for (int d = 1; d < item.size(); ++d)
+                for (unsigned d = 1; d < item.size(); ++d)
                 {
                     this->deduplicate(level[item[d]->id], item.front(), item[d], layers, nbrs);
                     ++reduce;
@@ -384,10 +384,10 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
             }
             else
             {
-                for (int si = 0; si < item.size(); ++si)
+                for (unsigned si = 0; si < item.size(); ++si)
                 {
-                    int candidate_size = item.size();
-                    for (int ri = si + 1; ri < candidate_size; ++ri)
+                    unsigned candidate_size = item.size();
+                    for (unsigned ri = si + 1; ri < candidate_size; ++ri)
                     {
                         if (nbrs[item[si]->id] == nbrs[item[ri]->id])
                         {
@@ -410,7 +410,7 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
         }
         record.clear();
     }
-    for (int i = 0; i < layers.size(); ++i)
+    for (unsigned i = 0; i < layers.size(); ++i)
     {
         if (layers[i].empty())
         {

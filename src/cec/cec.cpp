@@ -31,7 +31,7 @@ void cec::print_PIs_value(vector<Node *> *PIs, FILE *output) {
     }
 }
 
-bool cec::assign_PIs_value(vector<Node *> *PIs, int i)
+bool cec::assign_PIs_value(vector<Node *> *PIs, unsigned i)
 {
     if (i == PIs->size())
     {
@@ -143,13 +143,13 @@ void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
         }
     }
 
-    for (int i = 1; i < layers.size(); ++i)
+    for (unsigned i = 1; i < layers.size(); ++i)
     {
         vector<Node *> layer = layers[i];
-        for (int j = 0; j < layer.size(); ++j)
+        for (unsigned j = 0; j < layer.size(); ++j)
         {
             vector<Z3_ast> inputs(layer[j]->ins->size());
-            for (int k = 0; k < layer[j]->ins->size(); ++k)
+            for (unsigned k = 0; k < layer[j]->ins->size(); ++k)
             {
                 inputs[k] = nodes[layer[j]->ins->at(k)->id];
             }
