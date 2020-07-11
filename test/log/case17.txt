@@ -1,9 +1,7 @@
 The parsing process is over!
-The parsing time is: 491.312 S
-The preprocess time is: 492.513 S
-g2fd, C: 1'b0, D: 1'b1
-g5796, C: 1'b0, D: 1'b1
+The parsing time is: 10.1212 S
+The preprocess time is: 11.293 S
 >>> unknown <<<
 >>> unexpected result <<<
-The run time is: 1703.66 S
+The run time is: 1706.03 S
 The parser is destroyed!
