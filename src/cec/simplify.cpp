@@ -40,8 +40,8 @@ void simplify::clean_wire_buf(vector<Node *> *PIs)
 {
     if (!PIs || PIs->empty())
         return;
-    int len = PIs->size();
-    for (int i = 0; i < len; ++i)
+    unsigned len = PIs->size();
+    for (unsigned i = 0; i < len; ++i)
     {
         Node *pi = PIs->at(i);
         if (!(pi->outs) || pi->outs->size() == 0)
