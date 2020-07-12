@@ -1,5 +1,5 @@
 The parsing process is over!
-The parsing time is: 1.54075 S
-The preprocess time is: 3.027 S
-The run time is: 171.238 S
+The parsing time is: 0.287256 S
+The preprocess time is: 1.941 S
+The run time is: 34.8617 S
 The parser is destroyed!
