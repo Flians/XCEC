@@ -125,21 +125,31 @@ void cec::evaluate_from_POs_to_PIs(vector<Node *> *POs)
 
 void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
 {
-    init_z3(timeout);
-    Z3_solver z3_sol = Z3_mk_solver_for_logic(logic, Z3_mk_string_symbol(logic, "QF_BV"));
-    Z3_solver_inc_ref(logic, z3_sol);
+    Z3Prover z3_prover(timeout);
+    Z3_solver z3_sol = Z3_mk_solver_for_logic(z3_prover.logic, Z3_mk_string_symbol(z3_prover.logic, "QF_BV"));
+    Z3_solver_inc_ref(z3_prover.logic, z3_sol);
 
     vector<Z3_ast> nodes(init_id);
     for (auto &node : layers[0])
     {
         if (node->cell == _CONSTANT)
         {
-            nodes[node->id] = Z3_mk_unsigned_int(logic, node->val, bv_sort);
+            switch (node->val)
+            {
+            case L:
+                nodes[node->id] = z3_prover.z3_zero;
+                break;
+            case H:
+                nodes[node->id] = z3_prover.z3_one;
+                break;
+            default:
+                nodes[node->id] = z3_prover.z3_x;
+                break;
+            }
         }
         else
         {
-            nodes[node->id] = Z3_mk_const(logic, Z3_mk_string_symbol(logic, node->name.c_str()), bv_sort);
-            Z3_solver_assert(logic, z3_sol, Z3_mk_bvule(logic, nodes[node->id], z3_one));
+            nodes[node->id] = z3_prover.z3_mk_variable(node->name, z3_sol);
         }
     }
 
@@ -157,35 +167,35 @@ void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
             switch (layer[j]->cell)
             {
             case _AND:
-                res = z3_mk_and(inputs);
+                res = z3_prover.z3_mk_and(inputs);
                 break;
             case _NAND:
-                res = z3_mk_not(z3_mk_and(inputs));
+                res = z3_prover.z3_mk_not(z3_prover.z3_mk_and(inputs));
                 break;
             case _OR:
-                res = z3_mk_or(inputs);
+                res = z3_prover.z3_mk_or(inputs);
                 break;
             case _NOR:
-                res = z3_mk_not(z3_mk_or(inputs));
+                res = z3_prover.z3_mk_not(z3_prover.z3_mk_or(inputs));
                 break;
             case _XOR:
-                res = z3_mk_xor(inputs);
+                res = z3_prover.z3_mk_xor(inputs);
                 break;
             case _XNOR:
-                res = z3_mk_not(z3_mk_xor(inputs));
+                res = z3_prover.z3_mk_not(z3_prover.z3_mk_xor(inputs));
                 break;
             case INV:
-                res = z3_mk_not(inputs[0]);
+                res = z3_prover.z3_mk_not(inputs[0]);
                 break;
             case _HMUX:
-                res = z3_mk_HMUX(inputs[0], inputs[1], inputs[2]);
+                res = z3_prover.z3_mk_HMUX(inputs[0], inputs[1], inputs[2]);
                 break;
             case _DC:
                 // cout << layer[j]->name << ", C: " << layer[j]->ins->front()->name << ", D: " << layer[j]->ins->at(1)->name << endl;
-                res = z3_mk_DC(inputs[0], inputs[1]);
+                res = z3_prover.z3_mk_DC(inputs[0], inputs[1]);
                 break;
             case _EXOR:
-                res = z3_mk_exor(inputs[0], inputs[1]);
+                res = z3_prover.z3_mk_exor(inputs[0], inputs[1]);
                 break;
             default:
                 if (inputs.size() == 0)
@@ -208,14 +218,13 @@ void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
         args[i++] = nodes[output->id];
     }
     vector<Z3_ast>().swap(nodes);
-    Z3_ast result = Z3_mk_and(logic, layers.back().size(), args);
-    Z3_solver_assert(logic, z3_sol, Z3_mk_not(logic, result));
+    Z3_ast result = Z3_mk_and(z3_prover.logic, layers.back().size(), args);
+    Z3_solver_assert(z3_prover.logic, z3_sol, Z3_mk_not(z3_prover.logic, result));
     // printf("term: %s\n", Z3_ast_to_string(logic, result));
 
-    check(logic, z3_sol, Z3_L_TRUE, fout);
+    z3_prover.check(z3_prover.logic, z3_sol, Z3_L_TRUE, fout);
     // Z3_solver_pop(logic, z3_sol, 1);
-    Z3_solver_dec_ref(logic, z3_sol);
-    Z3_del_context(logic);
+    Z3_solver_dec_ref(z3_prover.logic, z3_sol);
 }
 
 void cec::evaluate_by_stp(vector<vector<Node *> > &layers)

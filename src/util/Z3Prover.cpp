@@ -1,9 +1,51 @@
-#include "util_z3.h"
+#include "Z3Prover.h"
+
+/**
+ * init z3
+ * 
+ * @param timeout millisecond
+ */
+Z3Prover::Z3Prover(unsigned timeout)
+{
+    // init z3
+    Z3_config cfg;
+    cfg = Z3_mk_config();
+    Z3_set_param_value(cfg, "model", "true");
+    Z3_set_param_value(cfg, "proof", "true");
+    Z3_set_param_value(cfg, "timeout", to_string(timeout).c_str());
+
+    logic = Z3_mk_context(cfg);
+    Z3_set_error_handler(logic, error_handler);
+    Z3_del_config(cfg);
+
+    // set constraints
+    bv_sort = Z3_mk_bv_sort(logic, 2);
+    z3_zero = Z3_mk_unsigned_int(logic, 0, bv_sort);
+    z3_one = Z3_mk_unsigned_int(logic, 1, bv_sort);
+    z3_x = Z3_mk_unsigned_int(logic, 2, bv_sort);
+    z3_undefined = Z3_mk_unsigned_int(logic, 3, bv_sort);
+}
+
+Z3Prover::Z3Prover()
+{
+    Z3Prover(1700000);
+    // new (this) Z3Prover{1700000};
+}
+
+Z3Prover::~Z3Prover()
+{
+    Z3_del_context(logic);
+}
+
+Z3_context &Z3Prover::get_context()
+{
+    return this->logic;
+}
 
 /**
    \brief Simpler error handler.
  */
-inline void error_handler(Z3_context c, Z3_error_code e)
+void Z3Prover::error_handler(Z3_context c, Z3_error_code e)
 {
     cerr << "Error code: " << e << "\nBUG: incorrect use of Z3." << endl;
     exit(1);
@@ -12,53 +54,25 @@ inline void error_handler(Z3_context c, Z3_error_code e)
 /**
    \brief exit if unreachable code was reached.
 */
-void unreachable()
+void Z3Prover::unreachable()
 {
     cerr << "BUG: unreachable code was reached." << endl;
     exit(1);
 }
 
-Z3_context mk_context(unsigned timeout)
-{
-    Z3_config cfg;
-    cfg = Z3_mk_config();
-    Z3_set_param_value(cfg, "model", "true");
-    Z3_set_param_value(cfg, "proof", "true");
-    Z3_set_param_value(cfg, "timeout", to_string(timeout).c_str());
-
-    Z3_context ctx;
-    ctx = Z3_mk_context(cfg);
-    Z3_set_error_handler(ctx, error_handler);
-
-    Z3_del_config(cfg);
-    return ctx;
+Z3_ast Z3Prover::z3_mk_variable(string &name, Z3_solver &z3_sol) {
+    Z3_ast var = Z3_mk_const(logic, Z3_mk_string_symbol(logic, name.c_str()), bv_sort);
+    Z3_solver_assert(logic, z3_sol, Z3_mk_bvule(logic, var, z3_one));
+    return var;
 }
 
-Z3_context logic;
-Z3_sort bv_sort;
-
-Z3_ast z3_zero;
-Z3_ast z3_one;
-Z3_ast z3_x;
-Z3_ast z3_undefined;
-
-void init_z3(unsigned timeout)
-{
-    logic = mk_context(timeout);
-    bv_sort = Z3_mk_bv_sort(logic, 2);
-    z3_zero = Z3_mk_unsigned_int(logic, 0, bv_sort);
-    z3_one = Z3_mk_unsigned_int(logic, 1, bv_sort);
-    z3_x = Z3_mk_unsigned_int(logic, 2, bv_sort);
-    z3_undefined = Z3_mk_unsigned_int(logic, 3, bv_sort);
-}
-
-Z3_ast z3_mk_and(const Z3_ast &A, const Z3_ast &B)
+Z3_ast Z3Prover::z3_mk_and(const Z3_ast &A, const Z3_ast &B)
 {
     // return z3::ite(A == z3_zero || B == z3_zero, z3_zero, z3::max(A, B));
     return Z3_mk_ite(logic, Z3_mk_eq(logic, Z3_mk_bvxor(logic, A, B), z3_undefined), z3_x, Z3_mk_bvand(logic, A, B));
 }
 
-Z3_ast z3_mk_and(vector<Z3_ast> &exprs)
+Z3_ast Z3Prover::z3_mk_and(vector<Z3_ast> &exprs)
 {
     Z3_ast res = exprs[0];
     vector<Z3_ast>::iterator it_ = exprs.begin() + 1;
@@ -70,13 +84,13 @@ Z3_ast z3_mk_and(vector<Z3_ast> &exprs)
     return res;
 }
 
-Z3_ast z3_mk_or(const Z3_ast &A, const Z3_ast &B)
+Z3_ast Z3Prover::z3_mk_or(const Z3_ast &A, const Z3_ast &B)
 {
     // return z3::ite(A == z3_one || B == z3_one, z3_one, z3::max(A, B));
     return Z3_mk_ite(logic, Z3_mk_eq(logic, Z3_mk_bvxor(logic, A, B), z3_undefined), z3_one, Z3_mk_bvor(logic, A, B));
 }
 
-Z3_ast z3_mk_or(vector<Z3_ast> &exprs)
+Z3_ast Z3Prover::z3_mk_or(vector<Z3_ast> &exprs)
 {
     Z3_ast res = exprs[0];
     vector<Z3_ast>::iterator it_ = exprs.begin() + 1;
@@ -88,13 +102,13 @@ Z3_ast z3_mk_or(vector<Z3_ast> &exprs)
     return res;
 }
 
-Z3_ast z3_mk_xor(const Z3_ast &A, const Z3_ast &B)
+Z3_ast Z3Prover::z3_mk_xor(const Z3_ast &A, const Z3_ast &B)
 {
     // return z3::ite(A == z3_one && B == z3_one, z3_zero, z3::max(A, B));
     return Z3_mk_ite(logic, Z3_mk_eq(logic, Z3_mk_bvand(logic, A, B), z3_one), z3_zero, Z3_mk_ite(logic, Z3_mk_bvuge(logic, A, B), A, B));
 }
 
-Z3_ast z3_mk_xor(vector<Z3_ast> &exprs)
+Z3_ast Z3Prover::z3_mk_xor(vector<Z3_ast> &exprs)
 {
     Z3_ast res = exprs[0];
     vector<Z3_ast>::iterator it_ = exprs.begin() + 1;
@@ -106,20 +120,20 @@ Z3_ast z3_mk_xor(vector<Z3_ast> &exprs)
     return res;
 }
 
-Z3_ast z3_mk_not(const Z3_ast &A)
+Z3_ast Z3Prover::z3_mk_not(const Z3_ast &A)
 {
     // return z3::ite(A == z3_zero, z3_one, z3::ite(A == z3_one, z3_zero, z3_x));
     // return z3::ite(A == z3_x, z3_x, A ^ z3_one);
     return Z3_mk_ite(logic, Z3_mk_eq(logic, A, z3_x), z3_x, Z3_mk_bvxor(logic, A, z3_one));
 }
 
-Z3_ast z3_mk_DC(const Z3_ast &C, const Z3_ast &D)
+Z3_ast Z3Prover::z3_mk_DC(const Z3_ast &C, const Z3_ast &D)
 {
     // return z3::ite(D == z3_zero, C, z3_x);
     return Z3_mk_ite(logic, Z3_mk_eq(logic, D, z3_zero), C, z3_x);
 }
 
-Z3_ast z3_mk_HMUX(const Z3_ast &I0, const Z3_ast &I1, const Z3_ast &S)
+Z3_ast Z3Prover::z3_mk_HMUX(const Z3_ast &I0, const Z3_ast &I1, const Z3_ast &S)
 {
     // return z3::ite(S == z3_x, z3::ite(I0 == I1, I0, z3_x), z3::ite(S == z3_zero, I0, I1));
     return Z3_mk_ite(logic, Z3_mk_eq(logic, S, z3_x),
@@ -127,7 +141,7 @@ Z3_ast z3_mk_HMUX(const Z3_ast &I0, const Z3_ast &I1, const Z3_ast &S)
                      Z3_mk_ite(logic, Z3_mk_eq(logic, S, z3_zero), I0, I1));
 }
 
-Z3_ast z3_mk_exor(const Z3_ast &A, const Z3_ast &B)
+Z3_ast Z3Prover::z3_mk_exor(const Z3_ast &A, const Z3_ast &B)
 {
     // return z3::ite(A == z3_x || A == B, z3_zero, z3_one);
     Z3_ast args[2] = {Z3_mk_eq(logic, A, z3_x), Z3_mk_eq(logic, A, B)};
@@ -140,7 +154,7 @@ Z3_ast z3_mk_exor(const Z3_ast &A, const Z3_ast &B)
 /**
    \brief Display a symbol in the given output stream.
 */
-void display_symbol(Z3_context c, FILE *out, Z3_symbol s)
+void Z3Prover::display_symbol(Z3_context &c, FILE *out, Z3_symbol s)
 {
     switch (Z3_get_symbol_kind(c, s))
     {
@@ -158,7 +172,7 @@ void display_symbol(Z3_context c, FILE *out, Z3_symbol s)
 /**
    \brief Display the given type.
 */
-void display_sort(Z3_context c, FILE *out, Z3_sort ty)
+void Z3Prover::display_sort(Z3_context &c, FILE *out, Z3_sort ty)
 {
     switch (Z3_get_sort_kind(c, ty))
     {
@@ -219,7 +233,7 @@ void display_sort(Z3_context c, FILE *out, Z3_sort ty)
 
    This function demonstrates how to use the API to navigate terms.
 */
-void display_ast(Z3_context c, FILE *out, Z3_ast v)
+void Z3Prover::display_ast(Z3_context &c, FILE *out, Z3_ast v)
 {
     switch (Z3_get_ast_kind(c, v))
     {
@@ -268,7 +282,7 @@ void display_ast(Z3_context c, FILE *out, Z3_ast v)
 /**
    \brief Custom function interpretations pretty printer.
 */
-void display_function_interpretations(Z3_context c, FILE *out, Z3_model m)
+void Z3Prover::display_function_interpretations(Z3_context &c, FILE *out, Z3_model m)
 {
     unsigned num_functions, i;
 
@@ -330,7 +344,7 @@ void display_function_interpretations(Z3_context c, FILE *out, Z3_model m)
 /**
    \brief Custom model pretty printer.
 */
-void display_model(Z3_context c, FILE *out, Z3_model m)
+void Z3Prover::display_model(Z3_context &c, FILE *out, Z3_model m)
 {
     unsigned num_constants;
     unsigned i;
@@ -357,7 +371,7 @@ void display_model(Z3_context c, FILE *out, Z3_model m)
     }
 }
 
-void check(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *fout)
+void Z3Prover::check(Z3_context &logic, Z3_solver &z3_sol, Z3_lbool expected_result, FILE *fout)
 {
     Z3_model m = 0;
     Z3_lbool result = Z3_solver_check(logic, z3_sol);
@@ -392,7 +406,7 @@ void check(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *f
     }
 }
 
-void check_(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *fout)
+void Z3Prover::check_(Z3_context &logic, Z3_solver &z3_sol, Z3_lbool expected_result, FILE *fout)
 {
     Z3_model m = 0;
     Z3_lbool result = Z3_solver_check(logic, z3_sol);
@@ -430,7 +444,7 @@ void check_(Z3_context logic, Z3_solver z3_sol, Z3_lbool expected_result, FILE *
  * @param priority: pareto, box, lex
  * @param timeout millisecond
  */
-z3::params config_z3(z3::context logic, string priority, unsigned timeout)
+z3::params Z3Prover::config_z3(z3::context &logic, string &priority, unsigned timeout)
 {
     z3::set_param("timeout", (int)timeout);
     z3::params z3_param(logic);

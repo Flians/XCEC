@@ -1,6 +1,5 @@
 #include "cec/cec.h"
 #include "cec/simplify.h"
-#include "testOp.h"
 #include "util/parser.h"
 
 using namespace std;
