@@ -225,10 +225,9 @@ void display_ast(Z3_context c, FILE *out, Z3_ast v)
     {
     case Z3_NUMERAL_AST:
     {
-        Z3_sort t;
         fprintf(out, "%s", Z3_get_numeral_string(c, v));
-        t = Z3_get_sort(c, v);
         /*
+        Z3_sort t = Z3_get_sort(c, v);
         fprintf(out, ":");
         display_sort(c, out, t);
         */
