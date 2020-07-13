@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
         /* evaluate the graph */
         cec cec_(argv[3]);
         // cec_.evaluate_from_PIs_to_POs(PIs);
-        cec_.evaluate_by_z3(layers, pre_time > 112000 ? 1700000 - pre_time : 15 * pre_time);
+        cec_.evaluate_by_z3(layers, pre_time > 112000 ? 1700000 - pre_time : 16 * pre_time);
         endTime = clock();
         cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
         /* free up space */
