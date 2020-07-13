@@ -83,9 +83,9 @@ if(WINDOWS)
     endif()
 elseif(LINUX)
     # static library
-    # target_link_libraries (${PROJECT_NAME} PRIVATE Threads::Threads ${CMAKE_SOURCE_DIR}/lib/linux/libz3.a)
+    target_link_libraries (${PROJECT_NAME} PRIVATE Threads::Threads ${CMAKE_SOURCE_DIR}/lib/linux/libz3.a croaring)
     # shared library
-    target_link_libraries (${PROJECT_NAME} -lz3 croaring)
+    # target_link_libraries (${PROJECT_NAME} -lz3 croaring)
 elseif(MACOS)
     # static library
     # target_link_libraries (${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/macos/libz3.a)
