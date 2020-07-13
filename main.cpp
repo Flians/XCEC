@@ -38,11 +38,7 @@ int main(int argc, char *argv[])
         for (auto &item : layers)
         {
             sort(item.begin(), item.end(), [](const Node *A, const Node *B) {
-                if (B->outs)
-                {
-                    return A->name < B->name;
-                }
-                return true;
+                return A->name < B->name;
             });
             for (auto &node : item)
             {
