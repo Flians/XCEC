@@ -102,6 +102,7 @@ void simplify::clean_wire_buf(vector<Node *> *PIs)
 
 vector<vector<Node *>> &simplify::id_reassign_and_layered(vector<Node *> &PIs, vector<Node *> &POs)
 {
+    vector<vector<Node *>>().swap(this->layers);
     if (PIs.empty())
     {
         std::cout << "PIs is empty in simplify.id_reassign." << endl;
@@ -223,6 +224,7 @@ void simplify::id_reassign(vector<Node *> &PIs)
 
 vector<vector<Node *>> &simplify::layer_assignment(vector<Node *> &PIs, vector<Node *> &POs)
 {
+    vector<vector<Node *>>().swap(this->layers);
     if (PIs.empty())
     {
         std::cout << "PIs is empty in simplify.layer_assignment." << std::endl;

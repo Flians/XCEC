@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
         /* simplify the graph */
         simplify sim;
         sim.clean_wire_buf(&miter.PIs);
-        
-        vector<vector<Node *> > &layers = sim.id_reassign_and_layered(miter.PIs, miter.POs);
+
+        vector<vector<Node *>> &layers = sim.id_reassign_and_layered(miter.PIs, miter.POs);
         // sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
         // sim.id_reassign(layers);
 
@@ -34,7 +34,22 @@ int main(int argc, char *argv[])
         sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
         sim.id_reassign(miter.PIs);
 */
-
+/*
+        for (auto &item : layers)
+        {
+            sort(item.begin(), item.end(), [](const Node *A, const Node *B) {
+                if (B->outs)
+                {
+                    return A->name < B->name;
+                }
+                return true;
+            });
+            for (auto &node : item)
+            {
+                cout << node->name << " " << (node->ins ? node->ins->size() : 0) << " " << (node->outs ? node->outs->size() : 0) << endl;
+            }
+        }
+*/
         endTime = clock();
         double pre_time = (endTime - startTime) / 1000;
         cout << "The preprocess time is: " << pre_time / 1000 << " S" << endl;
