@@ -61,11 +61,11 @@ Z3_ast z3_mk_and(const Z3_ast &A, const Z3_ast &B)
 Z3_ast z3_mk_and(vector<Z3_ast> &exprs)
 {
     Z3_ast res = exprs[0];
-    vector<Z3_ast>::iterator it_ = exprs.begin();
-    vector<Z3_ast>::iterator it_end = exprs.end() - 1;
+    vector<Z3_ast>::iterator it_ = exprs.begin() + 1;
+    vector<Z3_ast>::iterator it_end = exprs.end();
     while (it_ != it_end)
     {
-        res = z3_mk_and(res, *(++it_));
+        res = z3_mk_and(res, *(it_++));
     }
     return res;
 }
@@ -79,11 +79,11 @@ Z3_ast z3_mk_or(const Z3_ast &A, const Z3_ast &B)
 Z3_ast z3_mk_or(vector<Z3_ast> &exprs)
 {
     Z3_ast res = exprs[0];
-    vector<Z3_ast>::iterator it_ = exprs.begin();
-    vector<Z3_ast>::iterator it_end = exprs.end() - 1;
+    vector<Z3_ast>::iterator it_ = exprs.begin() + 1;
+    vector<Z3_ast>::iterator it_end = exprs.end();
     while (it_ != it_end)
     {
-        res = z3_mk_or(res, *(++it_));
+        res = z3_mk_or(res, *(it_++));
     }
     return res;
 }
@@ -97,11 +97,11 @@ Z3_ast z3_mk_xor(const Z3_ast &A, const Z3_ast &B)
 Z3_ast z3_mk_xor(vector<Z3_ast> &exprs)
 {
     Z3_ast res = exprs[0];
-    vector<Z3_ast>::iterator it_ = exprs.begin();
-    vector<Z3_ast>::iterator it_end = exprs.end() - 1;
+    vector<Z3_ast>::iterator it_ = exprs.begin() + 1;
+    vector<Z3_ast>::iterator it_end = exprs.end();
     while (it_ != it_end)
     {
-        res = z3_mk_xor(res, *(++it_));
+        res = z3_mk_xor(res, *(it_++));
     }
     return res;
 }
