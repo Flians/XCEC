@@ -110,7 +110,7 @@ vector<vector<Node *>> &simplify::id_reassign_and_layered(vector<Node *> &PIs, v
     unordered_map<Node *, int> visit;
     queue<Node *> bfs_record;
     // reassign id of each node, and obtain the length of the longest path
-    int i = 0;
+    size_t i = 0;
     for (auto pi : PIs)
     {
         visit[pi] = 1;
