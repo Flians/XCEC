@@ -58,7 +58,7 @@ enum Value
 };
 
 extern FILE *fout;
-extern unsigned init_id;
+extern size_t init_id;
 extern std::unordered_map<string, Gtype> Value_Str;
 extern std::unordered_map<Gtype, string, EnumClassHash> Str_Value;
 extern std::unordered_map<Value, string, EnumClassHash> Const_Str;
@@ -70,9 +70,9 @@ struct Node
     // the type of the gate
     Gtype cell;
     Value val;
-    unsigned id;
+    size_t id;
     // record the number of times the node is visited
-    unsigned vis;
+    size_t vis;
     vector<Node *> *ins;
     vector<Node *> *outs;
 
