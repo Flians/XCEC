@@ -46,6 +46,18 @@ int main(int argc, char *argv[])
         cout << ">>> after: " << endl;
         verilog_parser.printG(miter);
         */
+        /*
+        for (auto &item : *layers)
+        {
+            sort(item->begin(), item->end(), [](const node *A, const node *B) {
+                return A->name < B->name;
+            });
+            for (auto &node : *item)
+            {
+                cout << node->name << " " << (node->ins ? node->ins->size() : 0) << " " << (node->outs ? node->outs->size() : 0) << endl;
+            }
+        }
+        */
         endTime = clock();
         double pre_time = (endTime - startTime) / 1000;
         cout << "The preprocess time is: " << pre_time / 1000 << " S" << endl;
