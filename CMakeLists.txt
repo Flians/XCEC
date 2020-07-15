@@ -88,7 +88,7 @@ if(WINDOWS)
     endif()
 elseif(LINUX)
     # static library
-    target_link_libraries (${PROJECT_NAME} -pthread libz3.a libstp.a croaring)
+    target_link_libraries (${PROJECT_NAME} -pthread libz3.a stp croaring)
     # shared library
     # target_link_libraries (${PROJECT_NAME} z3 stp croaring)
 elseif(MACOS)
