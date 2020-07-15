@@ -52,10 +52,15 @@ endif()
 
 # Create imported target stp
 add_library(stp STATIC IMPORTED)
-
-set_target_properties(stp PROPERTIES
-  INTERFACE_LINK_LIBRARIES "/lib/libminisat.a"
-)
+if(LINUX)
+  set_target_properties(stp PROPERTIES
+    INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/libminisat.a"
+  )
+elseif(MACOS)
+  set_target_properties(stp PROPERTIES
+    INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/libminisat_.a"
+  )
+endif()
 
 if(CMAKE_VERSION VERSION_LESS 2.8.12)
   message(FATAL_ERROR "This file relies on consumers using CMake 2.8.12 or greater.")
