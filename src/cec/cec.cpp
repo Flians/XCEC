@@ -24,7 +24,8 @@ void cec::print_PIs_value(vector<Node *> *PIs, ofstream &output)
         output << pi->name << " " << pi->val << endl;
     }
 }
-void cec::print_PIs_value(vector<Node *> *PIs, FILE *output) {
+void cec::print_PIs_value(vector<Node *> *PIs, FILE *output)
+{
     for (auto pi : *PIs)
     {
         fprintf(output, "%s %d", pi->name.c_str(), pi->val);
@@ -123,7 +124,7 @@ void cec::evaluate_from_POs_to_PIs(vector<Node *> *POs)
 {
 }
 
-void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
+void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
 {
     Z3Prover z3_prover(timeout);
     Z3_solver z3_sol = Z3_mk_solver_for_logic(z3_prover.logic, Z3_mk_string_symbol(z3_prover.logic, "QF_BV"));
@@ -227,10 +228,10 @@ void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
     Z3_solver_dec_ref(z3_prover.logic, z3_sol);
 }
 
-void cec::evaluate_by_stp(vector<vector<Node *> > &layers)
+void cec::evaluate_by_stp(vector<vector<Node *>> &layers)
 {
     STPProver stp_prover;
-
+    stp_prover.init_exprs(layers[0].size());
     vector<Expr> nodes(init_id);
     for (auto &node : layers[0])
     {
@@ -313,13 +314,13 @@ void cec::evaluate_by_stp(vector<vector<Node *> > &layers)
     }
 
     int i = 0;
-    vector<Expr> args(layers.back().size());
+    Expr args[layers.back().size()];
     for (auto &output : layers.back())
     {
-        // Z3_solver_assert(logic, z3_sol, nodes[output->id]);
         args[i++] = nodes[output->id];
     }
+    Expr result = vc_andExprN(stp_prover.handle, args, layers.back().size());
+    stp_prover.handleQuery(result, fout);
+    vc_DeleteExpr(result);
     vector<Expr>().swap(nodes);
-    Expr result = stp_prover.stp_mk_and(args);
-    stp_prover.handleQuery(result);
 }

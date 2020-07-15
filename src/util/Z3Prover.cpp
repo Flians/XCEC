@@ -47,7 +47,7 @@ Z3_context &Z3Prover::get_context()
  */
 void Z3Prover::error_handler(Z3_context c, Z3_error_code e)
 {
-    cerr << "Error code: " << e << "\nBUG: incorrect use of Z3." << endl;
+    printf("Error code: %d\n%s\n", e, "BUG: incorrect use of Z3.");
     exit(1);
 }
 
@@ -56,7 +56,7 @@ void Z3Prover::error_handler(Z3_context c, Z3_error_code e)
 */
 void Z3Prover::unreachable()
 {
-    cerr << "BUG: unreachable code was reached." << endl;
+    printf("BUG: unreachable code was reached.");
     exit(1);
 }
 

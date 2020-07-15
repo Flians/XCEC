@@ -16,6 +16,7 @@ STPProver::~STPProver()
 {
     // Clean up
     vc_Destroy(handle);
+    std::vector<Expr>().swap(this->exprs);
 }
 
 // Error handler
@@ -25,11 +26,18 @@ void STPProver::errorHandler(const char *err_msg)
     exit(1);
 }
 
+std::vector<Expr> &STPProver::init_exprs(std::size_t nums)
+{
+    std::vector<Expr>().swap(this->exprs);
+    this->exprs.reserve(nums);
+    return this->exprs;
+}
+
 Expr STPProver::stp_mk_variable(std::string &name)
 {
-
     Expr var = vc_varExpr(this->handle, name.c_str(), bv_type);
     vc_assertFormula(this->handle, vc_bvLeExpr(this->handle, var, stp_one));
+    this->exprs.push_back(var);
     return var;
 }
 
@@ -122,36 +130,34 @@ Expr STPProver::stp_mk_exor(const Expr &A, const Expr &B)
     return vc_orExpr(this->handle, vc_eqExpr(this->handle, A, stp_x), vc_eqExpr(this->handle, A, B));
 }
 
-void STPProver::handleQuery(Expr queryExpr)
+void STPProver::handleQuery(Expr queryExpr, FILE *fout)
 {
     // Print the assertions
     // printf("Assertions:\n");
     // vc_printAsserts(this->handle, 0);
-
     int result = vc_query(this->handle, queryExpr);
     // printf("Query:\n");
     // vc_printQuery(this->handle);
     switch (result)
     {
-    case 0:
-        printf("Query is INVALID\n");
-
-        // print counter example
-        printf("Counter example:\n");
-        vc_printCounterExample(this->handle);
-        break;
-
+    case 3:
+        printf("Timeout.\n");
     case 1:
-        printf("Query is VALID\n");
+        fprintf(fout, "EQ\n");
         break;
     case 2:
         printf("Could not answer query\n");
-        break;
-    case 3:
-        printf("Timeout.\n");
+    case 0:
+        fprintf(fout, "NEQ\n");
+        // print counter example
+        // printf("Counter example:\n");
+        // vc_printCounterExample(this->handle);
+        for (auto &pi : this->exprs)
+        {
+            fprintf(fout, "%s %d\n", exprString(pi), getBVUnsigned(vc_getCounterExample(this->handle, pi)));
+        }
         break;
     default:
         printf("Unhandled error\n");
     }
-    printf("\n\n");
 }

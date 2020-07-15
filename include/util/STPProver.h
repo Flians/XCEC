@@ -10,7 +10,7 @@
 class STPProver
 {
 private:
-    /* data */
+    std::vector<Expr> exprs;
 public:
     VC handle;
     Type bv_type;
@@ -25,6 +25,7 @@ public:
     // Error handler
     static void errorHandler(const char *err_msg);
 
+    std::vector<Expr> &init_exprs(std::size_t nums);
     Expr stp_mk_variable(std::string &name);
 
     Expr stp_mk_and(const Expr &, const Expr &);
@@ -38,7 +39,7 @@ public:
     Expr stp_mk_HMUX(const Expr &S, const Expr &I0, const Expr &I1);
     Expr stp_mk_exor(const Expr &, const Expr &);
 
-    void handleQuery(Expr queryExpr);
+    void handleQuery(Expr queryExpr, FILE *fout);
 };
 
 #endif
