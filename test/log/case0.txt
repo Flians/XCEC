@@ -1,7 +1,7 @@
 The parsing process is over!
-The parsing time is: 0.001841 S
+The parsing time is: 0.000899 S
 14 14
 The layer assignment is over!
 The preprocess time is: 0.001 S
-The run time is: 0.006633 S
+The run time is: 0.003767 S
 The parser is destroyed!
