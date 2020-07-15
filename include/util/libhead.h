@@ -9,6 +9,7 @@
 #include <queue>
 #include <regex>
 #include <set>
+#include <sstream>
 #include <unordered_map>
 
 #include "libstring.h"
