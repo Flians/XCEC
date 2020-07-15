@@ -2,6 +2,7 @@
 #define _SIMPLIFY_H_
 
 #include "libhead.h"
+#include "roaring.hh"
 
 class simplify
 {

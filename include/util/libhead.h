@@ -12,8 +12,6 @@
 #include <unordered_map>
 
 #include "libstring.h"
-#include "roaring.hh"
-#include "Z3Prover.h"
 
 #define enumtoCharArr(val) #val
 

@@ -229,4 +229,97 @@ void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
 
 void cec::evaluate_by_stp(vector<vector<Node *> > &layers)
 {
+    STPProver stp_prover;
+
+    vector<Expr> nodes(init_id);
+    for (auto &node : layers[0])
+    {
+        if (node->cell == _CONSTANT)
+        {
+            switch (node->val)
+            {
+            case L:
+                nodes[node->id] = stp_prover.stp_zero;
+                break;
+            case H:
+                nodes[node->id] = stp_prover.stp_one;
+                break;
+            default:
+                nodes[node->id] = stp_prover.stp_x;
+                break;
+            }
+        }
+        else
+        {
+            nodes[node->id] = stp_prover.stp_mk_variable(node->name);
+        }
+    }
+
+    for (size_t i = 1; i < layers.size(); ++i)
+    {
+        vector<Node *> layer = layers[i];
+        for (size_t j = 0; j < layer.size(); ++j)
+        {
+            vector<Expr> inputs(layer[j]->ins->size());
+            for (size_t k = 0; k < layer[j]->ins->size(); ++k)
+            {
+                inputs[k] = nodes[layer[j]->ins->at(k)->id];
+            }
+            Expr res;
+            switch (layer[j]->cell)
+            {
+            case _AND:
+                res = stp_prover.stp_mk_and(inputs);
+                break;
+            case _NAND:
+                res = stp_prover.stp_mk_not(stp_prover.stp_mk_and(inputs));
+                break;
+            case _OR:
+                res = stp_prover.stp_mk_or(inputs);
+                break;
+            case _NOR:
+                res = stp_prover.stp_mk_not(stp_prover.stp_mk_or(inputs));
+                break;
+            case _XOR:
+                res = stp_prover.stp_mk_xor(inputs);
+                break;
+            case _XNOR:
+                res = stp_prover.stp_mk_not(stp_prover.stp_mk_xor(inputs));
+                break;
+            case INV:
+                res = stp_prover.stp_mk_not(inputs[0]);
+                break;
+            case _HMUX:
+                res = stp_prover.stp_mk_HMUX(inputs[0], inputs[1], inputs[2]);
+                break;
+            case _DC:
+                // cout << layer[j]->name << ", C: " << layer[j]->ins->front()->name << ", D: " << layer[j]->ins->at(1)->name << endl;
+                res = stp_prover.stp_mk_DC(inputs[0], inputs[1]);
+                break;
+            case _EXOR:
+                res = stp_prover.stp_mk_exor(inputs[0], inputs[1]);
+                break;
+            default:
+                if (inputs.size() == 0)
+                {
+                    cerr << "The inputs is empty! in jec.evaluate_z3!" << endl;
+                    exit(-1);
+                }
+                res = inputs[0];
+                break;
+            }
+            nodes[layer[j]->id] = res;
+        }
+    }
+
+    int i = 0;
+    vector<Expr> args(layers.back().size());
+    for (auto &output : layers.back())
+    {
+        // Z3_solver_assert(logic, z3_sol, nodes[output->id]);
+        args[i++] = nodes[output->id];
+    }
+    vector<Expr>().swap(nodes);
+    Expr result = stp_prover.stp_mk_and(args);
+    stp_prover.handleQuery(result);
 }

@@ -27,7 +27,10 @@ endif()
 add_library(croaring STATIC ${PROJECT_SOURCE_DIR}/include/CRoaring/roaring.c)
 
 #find STP
-# find_package(STP REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/cmake/STP)
+# See the CMake manual on the find_package() command in Config mode.
+set(STP_DIR "" CACHE PATH "Try to use particular STP install (set this to folder where STPConfig.cmake is installed)")
+find_package(STP REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/cmake/STP)
+message("Using STP rooted at ${STP_DIR}")
 
 # Set RPATH
 if(WINDOWS)
@@ -83,9 +86,9 @@ if(WINDOWS)
     endif()
 elseif(LINUX)
     # static library
-    target_link_libraries (${PROJECT_NAME} PRIVATE Threads::Threads ${CMAKE_SOURCE_DIR}/lib/linux/libz3.a croaring)
+    target_link_libraries (${PROJECT_NAME} -pthread ${CMAKE_SOURCE_DIR}/lib/linux/libz3.a stp croaring)
     # shared library
-    # target_link_libraries (${PROJECT_NAME} -lz3 croaring)
+    # target_link_libraries (${PROJECT_NAME} -lz3 stp croaring)
 elseif(MACOS)
     # static library
     # target_link_libraries (${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/macos/libz3.a)

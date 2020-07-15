@@ -2,6 +2,8 @@
 #define _CEC_H_
 
 #include "libhead.h"
+#include "Z3Prover.h"
+#include "STPProver.h"
 
 class cec
 {

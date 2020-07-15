@@ -51,10 +51,10 @@ if(_IMPORT_PREFIX STREQUAL "/")
 endif()
 
 # Create imported target stp
-add_library(stp SHARED IMPORTED)
+add_library(stp STATIC IMPORTED)
 
 set_target_properties(stp PROPERTIES
-  INTERFACE_LINK_LIBRARIES "/usr/local/lib/libminisat.so;cryptominisat5"
+  INTERFACE_LINK_LIBRARIES "/lib/libminisat.a"
 )
 
 if(CMAKE_VERSION VERSION_LESS 2.8.12)
