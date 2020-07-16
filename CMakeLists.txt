@@ -44,16 +44,14 @@ endif()
 
 # Add search path for lib files
 if(WINDOWS)
-    MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib")
-    link_directories(${PROJECT_SOURCE_DIR}/lib/)
+    MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib/win")
+    link_directories(${PROJECT_SOURCE_DIR}/lib/win)
 elseif(LINUX)
-    MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib")
-    link_directories(${PROJECT_SOURCE_DIR}/lib/)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
+    MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib/linux")
+    link_directories(${PROJECT_SOURCE_DIR}/lib//linux)
 elseif(MACOS)
-    MESSAGE("link_directories: ${CMAKE_SOURCE_DIR}/lib")
-    link_directories(${CMAKE_SOURCE_DIR}/lib/)
+    MESSAGE("link_directories: ${CMAKE_SOURCE_DIR}/lib/mac")
+    link_directories(${CMAKE_SOURCE_DIR}/lib/mac)
 endif()
 
 # the function is used to add all header files
@@ -80,23 +78,7 @@ message("Source file: " ${SOURCE_FILES})
 set(XCEC_ALL_SRCS main.cpp ${SOURCE_FILES})
 
 add_executable(${PROJECT_NAME} ${XCEC_ALL_SRCS})
-if(WINDOWS)
-    if(CMAKE_CL_64)
-        target_link_libraries (${PROJECT_NAME} z3 croaring)
-    else()
-        target_link_libraries (${PROJECT_NAME} z3 croaring)
-    endif()
-elseif(LINUX)
-    # static library
-    target_link_libraries (${PROJECT_NAME} -pthread libz3.a stp croaring)
-    # shared library
-    # target_link_libraries (${PROJECT_NAME} z3 stp croaring)
-elseif(MACOS)
-    # static library
-    target_link_libraries (${PROJECT_NAME} -pthread libz3.a libstp.a croaring)
-    # shared library
-    # target_link_libraries (${PROJECT_NAME} z3 stp croaring)
-endif()
+target_link_libraries (${PROJECT_NAME} ${Z3_LIBRARIES} stp croaring)
 
 if(WINDOWS)
     # Copy DLL files to output directory

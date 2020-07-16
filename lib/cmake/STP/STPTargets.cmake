@@ -51,14 +51,15 @@ if(_IMPORT_PREFIX STREQUAL "/")
 endif()
 
 # Create imported target stp
-add_library(stp STATIC IMPORTED)
 if(LINUX)
+  add_library(stp STATIC IMPORTED)
   set_target_properties(stp PROPERTIES
-    INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/libminisat.a"
+    INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/linux/libminisat.a"
   )
 elseif(MACOS)
+  add_library(stp SHARED IMPORTED)
   set_target_properties(stp PROPERTIES
-    INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/libminisat_.a"
+    INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/mac/libminisat.a"
   )
 endif()
 
