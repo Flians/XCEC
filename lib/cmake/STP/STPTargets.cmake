@@ -56,15 +56,15 @@ if(LINUX)
   set_target_properties(stp PROPERTIES
     INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/linux/libminisat.a"
   )
+
+  if(CMAKE_VERSION VERSION_LESS 2.8.12)
+    message(FATAL_ERROR "This file relies on consumers using CMake 2.8.12 or greater.")
+  endif()
 elseif(MACOS)
   add_library(stp SHARED IMPORTED)
   set_target_properties(stp PROPERTIES
     INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/mac/libminisat.a"
   )
-endif()
-
-if(CMAKE_VERSION VERSION_LESS 2.8.12)
-  message(FATAL_ERROR "This file relies on consumers using CMake 2.8.12 or greater.")
 endif()
 
 # Load information for each installed configuration.

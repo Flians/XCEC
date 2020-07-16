@@ -22,6 +22,7 @@ elseif(CMAKE_HOST_APPLE)
     set(MACOS 1)
 elseif(CMAKE_HOST_UNIX)
     set(LINUX 1)
+    message("The enviriment is in linux.")
 endif()
 
 add_library(croaring STATIC ${PROJECT_SOURCE_DIR}/include/CRoaring/roaring.c)
@@ -29,9 +30,10 @@ add_library(croaring STATIC ${PROJECT_SOURCE_DIR}/include/CRoaring/roaring.c)
 option(SHAREDLIBRARY "Use the shared library for z3" OFF)
 if (SHAREDLIBRARY)
     set(USESHARED 1)
+    message("Use the shared library.")
 endif()
 
-#find STP
+# find STP
 # See the CMake manual on the find_package() command in Config mode.
 set(STP_DIR "" CACHE PATH "Try to use particular STP install (set this to folder where STPConfig.cmake is installed)")
 find_package(STP REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/STP")
