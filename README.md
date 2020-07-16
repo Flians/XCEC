@@ -42,3 +42,5 @@ cd build
 ## reference
 
 https://zhuanlan.zhihu.com/p/92659252
+https://www.csee.usf.edu/~haozheng/teach/cda5416/
+https://courses.cs.washington.edu/courses/cse507/17wi/
