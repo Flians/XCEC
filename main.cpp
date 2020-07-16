@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
         cec cec_;
         // pre_time > 112000 ? 1700000 - pre_time : 15 * pre_time
         // cec_.evaluate_by_z3(layers, 1000000);
-        cec_.evaluate_by_stp(layers);
+        cec_.evaluate_by_stp(layers, 1000);
         close_fout();
         endTime = clock();
         cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;

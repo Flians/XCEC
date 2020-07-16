@@ -228,7 +228,7 @@ void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
     Z3_solver_dec_ref(z3_prover.logic, z3_sol);
 }
 
-void cec::evaluate_by_stp(vector<vector<Node *>> &layers)
+void cec::evaluate_by_stp(vector<vector<Node *>> &layers, uint32_t timeout)
 {
     STPProver stp_prover;
     stp_prover.init_exprs(layers[0].size());
@@ -320,7 +320,7 @@ void cec::evaluate_by_stp(vector<vector<Node *>> &layers)
         args[i++] = nodes[output->id];
     }
     Expr result = vc_andExprN(stp_prover.handle, args, layers.back().size());
-    stp_prover.handleQuery(result, fout);
+    stp_prover.handleQuery(result, timeout, fout);
     vc_DeleteExpr(result);
     vector<Expr>().swap(nodes);
 }

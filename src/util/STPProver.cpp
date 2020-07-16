@@ -130,12 +130,13 @@ Expr STPProver::stp_mk_exor(const Expr &A, const Expr &B)
     return vc_orExpr(this->handle, vc_eqExpr(this->handle, A, stp_x), vc_eqExpr(this->handle, A, B));
 }
 
-void STPProver::handleQuery(Expr queryExpr, FILE *fout)
+void STPProver::handleQuery(Expr queryExpr, uint32_t timeout, FILE *fout)
 {
     // Print the assertions
     // printf("Assertions:\n");
     // vc_printAsserts(this->handle, 0);
-    int result = vc_query(this->handle, queryExpr);
+    int max_conflicts = -1;
+    int result = vc_query_with_timeout(this->handle, queryExpr, max_conflicts, timeout);
     // printf("Query:\n");
     // vc_printQuery(this->handle);
     switch (result)

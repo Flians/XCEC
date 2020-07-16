@@ -39,7 +39,7 @@ public:
     Expr stp_mk_HMUX(const Expr &S, const Expr &I0, const Expr &I1);
     Expr stp_mk_exor(const Expr &, const Expr &);
 
-    void handleQuery(Expr queryExpr, FILE *fout);
+    void handleQuery(Expr queryExpr, uint32_t timeout, FILE *fout);
 };
 
 #endif
