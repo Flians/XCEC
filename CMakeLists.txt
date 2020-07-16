@@ -26,13 +26,18 @@ endif()
 
 add_library(croaring STATIC ${PROJECT_SOURCE_DIR}/include/CRoaring/roaring.c)
 
+option(SHAREDLIBRARY "Use the shared library for z3" OFF)
+if (SHAREDLIBRARY)
+    set(USESHARED 1)
+endif()
+
 #find STP
 # See the CMake manual on the find_package() command in Config mode.
 set(STP_DIR "" CACHE PATH "Try to use particular STP install (set this to folder where STPConfig.cmake is installed)")
 find_package(STP REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/STP")
 message("Using STP rooted at ${STP_DIR}")
 
-find_package(Z3 REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/z3_static")
+find_package(Z3 REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/z3")
 
 # Set RPATH
 if(WINDOWS)
