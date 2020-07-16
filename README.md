@@ -38,3 +38,7 @@ make
 cd build
 ./XCEC ../test/case2/gf.v ../test/case2/rf.v ../output/output_2.txt
 ```
+
+## reference
+
+https://zhuanlan.zhihu.com/p/92659252
