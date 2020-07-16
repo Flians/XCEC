@@ -12,9 +12,12 @@ get_filename_component(STP_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 set(STP_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
 
 
-if ("" STREQUAL "ON")
-    include(CMakeFindDependencyMacro)
-    find_dependency(cryptominisat5)
+if ("ON" STREQUAL "ON")
+    # include(CMakeFindDependencyMacro)
+    # find_dependency(cryptominisat5)
+    set(cryptominisat5_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/cryptominisat5")
+    find_package(cryptominisat5 REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/cryptominisat5")
+    message("Using cryptominisat5 rooted at ${cryptominisat5_DIR}")
 endif()
 
 # Our library dependencies (contains definitions for IMPORTED targets)
