@@ -127,8 +127,6 @@ void cec::evaluate_from_POs_to_PIs(vector<Node *> *POs)
 void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
 {
     Z3Prover z3_prover(timeout);
-    Z3_solver z3_sol = Z3_mk_solver_for_logic(z3_prover.logic, Z3_mk_string_symbol(z3_prover.logic, "QF_BV"));
-    Z3_solver_inc_ref(z3_prover.logic, z3_sol);
 
     vector<Z3_ast> nodes(init_id);
     for (auto &node : layers[0])
@@ -150,7 +148,7 @@ void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
         }
         else
         {
-            nodes[node->id] = z3_prover.z3_mk_variable(node->name, z3_sol);
+            nodes[node->id] = z3_prover.z3_mk_variable(node->name);
         }
     }
 
@@ -220,12 +218,8 @@ void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
     }
     vector<Z3_ast>().swap(nodes);
     Z3_ast result = Z3_mk_and(z3_prover.logic, layers.back().size(), args);
-    Z3_solver_assert(z3_prover.logic, z3_sol, Z3_mk_not(z3_prover.logic, result));
     // printf("term: %s\n", Z3_ast_to_string(logic, result));
-
-    z3_prover.check(z3_prover.logic, z3_sol, Z3_L_TRUE, fout);
-    // Z3_solver_pop(logic, z3_sol, 1);
-    Z3_solver_dec_ref(z3_prover.logic, z3_sol);
+    z3_prover.check(result, fout);
 }
 
 void cec::evaluate_by_stp(vector<vector<Node *>> &layers, uint32_t timeout)

@@ -18,6 +18,10 @@ Z3Prover::Z3Prover(unsigned timeout)
     Z3_set_error_handler(logic, error_handler);
     Z3_del_config(cfg);
 
+    // set solver
+    z3_sol = Z3_mk_solver_for_logic(this->logic, Z3_mk_string_symbol(this->logic, "QF_BV"));
+    Z3_solver_inc_ref(this->logic, z3_sol);
+
     // set constraints
     bv_sort = Z3_mk_bv_sort(logic, 2);
     z3_zero = Z3_mk_unsigned_int(logic, 0, bv_sort);
@@ -34,7 +38,8 @@ Z3Prover::Z3Prover()
 
 Z3Prover::~Z3Prover()
 {
-    Z3_del_context(logic);
+    Z3_solver_dec_ref(this->logic, z3_sol);
+    Z3_del_context(this->logic);
 }
 
 Z3_context &Z3Prover::get_context()
@@ -60,7 +65,7 @@ void Z3Prover::unreachable()
     exit(1);
 }
 
-Z3_ast Z3Prover::z3_mk_variable(string &name, Z3_solver &z3_sol)
+Z3_ast Z3Prover::z3_mk_variable(const string &name)
 {
     Z3_ast var = Z3_mk_const(logic, Z3_mk_string_symbol(logic, name.c_str()), bv_sort);
     Z3_solver_assert(logic, z3_sol, Z3_mk_bvule(logic, var, z3_one));
@@ -372,10 +377,11 @@ void Z3Prover::display_model(Z3_context &c, FILE *out, Z3_model m)
     }
 }
 
-void Z3Prover::check(Z3_context &logic, Z3_solver &z3_sol, Z3_lbool expected_result, FILE *fout)
+void Z3Prover::check(const Z3_ast &expr, FILE *fout)
 {
+    Z3_solver_assert(this->logic, this->z3_sol, Z3_mk_not(this->logic, expr));
     Z3_model m = 0;
-    Z3_lbool result = Z3_solver_check(logic, z3_sol);
+    Z3_lbool result = Z3_solver_check(this->logic, z3_sol);
     switch (result)
     {
     case Z3_L_UNDEF:
@@ -397,46 +403,15 @@ void Z3Prover::check(Z3_context &logic, Z3_solver &z3_sol, Z3_lbool expected_res
         }
         break;
     }
-    if (result != expected_result)
-    {
-        printf(">>> unexpected result <<<\n");
-    }
     if (m)
     {
         Z3_model_dec_ref(logic, m);
     }
 }
 
-void Z3Prover::check_(Z3_context &logic, Z3_solver &z3_sol, Z3_lbool expected_result, FILE *fout)
+void Z3Prover::check(const Z3_ast &left, const Z3_ast &right, FILE *fout)
 {
-    Z3_model m = 0;
-    Z3_lbool result = Z3_solver_check(logic, z3_sol);
-    switch (result)
-    {
-    case Z3_L_FALSE:
-        fprintf(fout, "NEQ\n");
-        m = Z3_solver_get_model(logic, z3_sol);
-        if (m)
-        {
-            Z3_model_inc_ref(logic, m);
-            display_model(logic, fout, m);
-        }
-        break;
-    case Z3_L_UNDEF:
-        /* Z3 failed to prove/disprove f. */
-        printf(">>> unknown <<<\n");
-    case Z3_L_TRUE:
-        fprintf(fout, "EQ\n");
-        break;
-    }
-    if (result != expected_result)
-    {
-        printf(">>> unexpected result <<<\n");
-    }
-    if (m)
-    {
-        Z3_model_dec_ref(logic, m);
-    }
+    this->check(Z3_mk_eq(this->logic, left, right), fout);
 }
 
 /**

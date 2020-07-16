@@ -13,6 +13,7 @@ private:
 public:
    Z3_context logic;
    Z3_sort bv_sort;
+   Z3_solver z3_sol;
 
    Z3_ast z3_zero;
    Z3_ast z3_one;
@@ -39,7 +40,7 @@ public:
 */
    void unreachable();
 
-   Z3_ast z3_mk_variable(string &name, Z3_solver &z3_sol);
+   Z3_ast z3_mk_variable(const string &name);
 
    Z3_ast z3_mk_and(const Z3_ast &, const Z3_ast &);
    Z3_ast z3_mk_and(vector<Z3_ast> &);
@@ -79,9 +80,8 @@ public:
    \brief Check whether the logical context is satisfiable, and compare the result with the expected result.
    If the context is satisfiable, then display the model.
 */
-   void check(Z3_context &ctx, Z3_solver &s, Z3_lbool expected_result, FILE *fout);
-   void check_(Z3_context &logic, Z3_solver &z3_sol, Z3_lbool expected_result, FILE *fout);
-
+   void check(const Z3_ast &expr, FILE *fout);
+   void check(const Z3_ast &left, const Z3_ast &right, FILE *fout);
    /**
     * Configure Z3 backend for C++ API
     * 
