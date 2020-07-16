@@ -138,8 +138,8 @@ void STPProver::handleQuery(Expr queryExpr, uint32_t timeout, FILE *fout)
     // printf("Assertions:\n");
     // vc_printAsserts(this->handle, 0);
     int max_conflicts = -1;
-    int result = vc_query(this->handle, queryExpr);
-    // int result = vc_query_with_timeout(this->handle, queryExpr, max_conflicts, timeout);
+    // int result = vc_query(this->handle, queryExpr);
+    int result = vc_query_with_timeout(this->handle, queryExpr, max_conflicts, timeout);
     // printf("Query:\n");
     // vc_printQuery(this->handle);
     switch (result)
