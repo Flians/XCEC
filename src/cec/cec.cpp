@@ -231,6 +231,7 @@ void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
 void cec::evaluate_by_stp(vector<vector<Node *>> &layers, uint32_t timeout)
 {
     STPProver stp_prover;
+    // stp_prover.test();
     stp_prover.init_exprs(layers[0].size());
     vector<Expr> nodes(init_id);
     for (auto &node : layers[0])

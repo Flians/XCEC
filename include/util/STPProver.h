@@ -3,14 +3,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stp/c_interface.h>
 #include <string>
 #include <vector>
-#include <stp/c_interface.h>
 
 class STPProver
 {
 private:
     std::vector<Expr> exprs;
+
 public:
     VC handle;
     Type bv_type;
@@ -36,10 +37,24 @@ public:
     Expr stp_mk_xor(std::vector<Expr> &);
     Expr stp_mk_not(const Expr &);
     Expr stp_mk_DC(const Expr &C, const Expr &D);
-    Expr stp_mk_HMUX(const Expr &S, const Expr &I0, const Expr &I1);
+    Expr stp_mk_HMUX(const Expr &I0, const Expr &I1, const Expr &S);
     Expr stp_mk_exor(const Expr &, const Expr &);
 
     void handleQuery(Expr queryExpr, uint32_t timeout, FILE *fout);
+    void handleQuery(Expr left, Expr right, uint32_t timeout, FILE *fout);
+
+    /***************** test every operators **********************/
+    void test();
+    void test_AND();
+    void test_NAND();
+    void test_OR();
+    void test_NOR();
+    void test_XOR();
+    void test_XNOR();
+    void test_INV();
+    void test_DC();
+    void test_HMUX();
+    void test_EXOR();
 };
 
 #endif

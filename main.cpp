@@ -27,12 +27,12 @@ int main(int argc, char *argv[])
         // sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
         // sim.id_reassign(layers);
 
-/*
-        sim.id_reassign(miter.PIs);
-        vector<vector<Node *> > &layers = sim.layer_assignment(miter.PIs, miter.POs);
-        sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
-        sim.id_reassign(miter.PIs);
-*/
+
+        // sim.id_reassign(miter.PIs);
+        // vector<vector<Node *> > &layers = sim.layer_assignment(miter.PIs, miter.POs);
+        // sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
+        // sim.id_reassign(miter.PIs);
+
 /*
         for (auto &item : layers)
         {

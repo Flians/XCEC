@@ -60,7 +60,8 @@ void Z3Prover::unreachable()
     exit(1);
 }
 
-Z3_ast Z3Prover::z3_mk_variable(string &name, Z3_solver &z3_sol) {
+Z3_ast Z3Prover::z3_mk_variable(string &name, Z3_solver &z3_sol)
+{
     Z3_ast var = Z3_mk_const(logic, Z3_mk_string_symbol(logic, name.c_str()), bv_sort);
     Z3_solver_assert(logic, z3_sol, Z3_mk_bvule(logic, var, z3_one));
     return var;
@@ -459,3 +460,134 @@ z3::params Z3Prover::config_z3(z3::context &logic, string &priority, unsigned ti
 
     return z3_param;
 }
+
+/***************** test every operators **********************/
+/*
+void Z3Prover::test()
+{
+    std::cout << "test AND" << std::endl;
+    test_AND();
+    std::cout << "test NAND" << std::endl;
+    test_NAND();
+    std::cout << "test OR" << std::endl;
+    test_OR();
+    std::cout << "test NOR" << std::endl;
+    test_NOR();
+    std::cout << "test XOR" << std::endl;
+    test_XOR();
+    std::cout << "test XNOR" << std::endl;
+    test_XNOR();
+    std::cout << "test INV" << std::endl;
+    test_INV();
+    std::cout << "test DC" << std::endl;
+    test_DC();
+    std::cout << "test HMUX" << std::endl;
+    test_HMUX();
+    std::cout << "test EXOR" << std::endl;
+    test_EXOR();
+}
+
+void Z3Prover::test_AND()
+{
+    prove(z3_mk_and(z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_and(z3_zero, z3_one), z3_zero);
+    prove(z3_mk_and(z3_zero, z3_x), z3_zero);
+    prove(z3_mk_and(z3_one, z3_zero), z3_zero);
+    prove(z3_mk_and(z3_one, z3_one), z3_one);
+    prove(z3_mk_and(z3_one, z3_x), z3_x);
+    prove(z3_mk_and(z3_x, z3_zero), z3_zero);
+    prove(z3_mk_and(z3_x, z3_one), z3_x);
+    prove(z3_mk_and(z3_x, z3_x), z3_x);
+}
+void Z3Prover::test_NAND()
+{
+}
+void Z3Prover::test_OR()
+{
+    prove(z3_mk_or(z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_or(z3_zero, z3_one), z3_one);
+    prove(z3_mk_or(z3_zero, z3_x), z3_x);
+    prove(z3_mk_or(z3_one, z3_zero), z3_one);
+    prove(z3_mk_or(z3_one, z3_one), z3_one);
+    prove(z3_mk_or(z3_one, z3_x), z3_one);
+    prove(z3_mk_or(z3_x, z3_zero), z3_x);
+    prove(z3_mk_or(z3_x, z3_one), z3_one);
+    prove(z3_mk_or(z3_x, z3_x), z3_x);
+}
+void Z3Prover::test_NOR() {}
+void Z3Prover::test_XOR()
+{
+    prove(z3_mk_xor(z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_xor(z3_zero, z3_one), z3_one);
+    prove(z3_mk_xor(z3_zero, z3_x), z3_x);
+    prove(z3_mk_xor(z3_one, z3_zero), z3_one);
+    prove(z3_mk_xor(z3_one, z3_one), z3_zero);
+    prove(z3_mk_xor(z3_one, z3_x), z3_x);
+    prove(z3_mk_xor(z3_x, z3_zero), z3_x);
+    prove(z3_mk_xor(z3_x, z3_one), z3_x);
+    prove(z3_mk_xor(z3_x, z3_x), z3_x);
+}
+void Z3Prover::test_XNOR() {}
+void Z3Prover::test_INV()
+{
+    prove(z3_mk_not(z3_zero), z3_one);
+    prove(z3_mk_not(z3_one), z3_zero);
+    prove(z3_mk_not(z3_x), z3_x);
+}
+void Z3Prover::test_DC()
+{
+    prove(z3_mk_DC(z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_DC(z3_zero, z3_one), z3_x);
+    prove(z3_mk_DC(z3_zero, z3_x), z3_x);
+    prove(z3_mk_DC(z3_one, z3_zero), z3_one);
+    prove(z3_mk_DC(z3_one, z3_one), z3_x);
+    prove(z3_mk_DC(z3_one, z3_x), z3_x);
+    prove(z3_mk_DC(z3_x, z3_zero), z3_x);
+    prove(z3_mk_DC(z3_x, z3_one), z3_x);
+    prove(z3_mk_DC(z3_x, z3_x), z3_x);
+}
+void Z3Prover::test_HMUX()
+{
+    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_zero), z3_zero);
+    prove(z3_mk_HMUX(z3_zero, z3_one, z3_zero), z3_zero);
+    prove(z3_mk_HMUX(z3_zero, z3_x, z3_zero), z3_zero);
+    prove(z3_mk_HMUX(z3_one, z3_zero, z3_zero), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_one, z3_zero), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_x, z3_zero), z3_one);
+    prove(z3_mk_HMUX(z3_x, z3_zero, z3_zero), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_one, z3_zero), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_x, z3_zero), z3_x);
+
+    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_one), z3_zero);
+    prove(z3_mk_HMUX(z3_zero, z3_one, z3_one), z3_one);
+    prove(z3_mk_HMUX(z3_zero, z3_x, z3_one), z3_x);
+    prove(z3_mk_HMUX(z3_one, z3_zero, z3_one), z3_zero);
+    prove(z3_mk_HMUX(z3_one, z3_one, z3_one), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_x, z3_one), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_zero, z3_one), z3_zero);
+    prove(z3_mk_HMUX(z3_x, z3_one, z3_one), z3_one);
+    prove(z3_mk_HMUX(z3_x, z3_x, z3_one), z3_x);
+
+    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_x), z3_zero);
+    prove(z3_mk_HMUX(z3_zero, z3_one, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_zero, z3_x, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_one, z3_zero, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_one, z3_one, z3_x), z3_one);
+    prove(z3_mk_HMUX(z3_one, z3_x, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_zero, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_one, z3_x), z3_x);
+    prove(z3_mk_HMUX(z3_x, z3_x, z3_x), z3_x);
+}
+void Z3Prover::test_EXOR()
+{
+    prove(Z3_mk_not(logic, z3_mk_exor(z3_zero, z3_zero)));
+    prove(z3_mk_exor(z3_zero, z3_one));
+    prove(z3_mk_exor(z3_zero, z3_x));
+    prove(z3_mk_exor(z3_one, z3_zero));
+    prove(Z3_mk_not(logic, z3_mk_exor(z3_one, z3_one)));
+    prove(z3_mk_exor(z3_one, z3_x));
+    prove(Z3_mk_not(logic, z3_mk_exor(z3_x, z3_zero)));
+    prove(Z3_mk_not(logic, z3_mk_exor(z3_x, z3_one)));
+    prove(Z3_mk_not(logic, z3_mk_exor(z3_x, z3_x)));
+}
+*/

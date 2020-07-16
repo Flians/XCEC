@@ -49,7 +49,7 @@ public:
    Z3_ast z3_mk_xor(vector<Z3_ast> &);
    Z3_ast z3_mk_not(const Z3_ast &);
    Z3_ast z3_mk_DC(const Z3_ast &C, const Z3_ast &D);
-   Z3_ast z3_mk_HMUX(const Z3_ast &S, const Z3_ast &I0, const Z3_ast &I1);
+   Z3_ast z3_mk_HMUX(const Z3_ast &I0, const Z3_ast &I1, const Z3_ast &S);
    Z3_ast z3_mk_exor(const Z3_ast &, const Z3_ast &);
 
    /****** print the information ******/
@@ -89,6 +89,19 @@ public:
     * @param timeout millisecond
     */
    z3::params config_z3(z3::context &logic, string &priority, unsigned timeout);
+
+   /***************** test every operators **********************/
+   void test();
+   void test_AND();
+   void test_NAND();
+   void test_OR();
+   void test_NOR();
+   void test_XOR();
+   void test_XNOR();
+   void test_INV();
+   void test_DC();
+   void test_HMUX();
+   void test_EXOR();
 };
 
 #endif
