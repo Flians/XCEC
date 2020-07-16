@@ -52,6 +52,7 @@ endif()
 
 # Create imported target stp
 if(LINUX)
+  message("Use the static library of stp")
   add_library(stp STATIC IMPORTED)
   set_target_properties(stp PROPERTIES
     INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/linux/libminisat.a"

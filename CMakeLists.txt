@@ -34,12 +34,14 @@ if (SHAREDLIBRARY)
 endif()
 
 # find STP
-# See the CMake manual on the find_package() command in Config mode.
-set(STP_DIR "" CACHE PATH "Try to use particular STP install (set this to folder where STPConfig.cmake is installed)")
+set(STP_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/STP" CACHE PATH "Try to use particular STP install (set this to folder where STPConfig.cmake is installed)")
 find_package(STP REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/STP")
 message("Using STP rooted at ${STP_DIR}")
 
+# find z3
+set(Z3_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/z3")
 find_package(Z3 REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/z3")
+message("Using Z3 rooted at ${Z3_DIR}")
 
 # Set RPATH
 if(WINDOWS)
