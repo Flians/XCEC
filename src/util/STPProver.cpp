@@ -3,6 +3,7 @@
 STPProver::STPProver(/* args */)
 {
     this->handle = vc_createValidityChecker();
+    // vc_useMinisat(this->handle);
     this->bv_type = vc_bvType(handle, 2);
     this->stp_zero = vc_bvConstExprFromInt(handle, 2, 0);
     this->stp_one = vc_bvConstExprFromInt(handle, 2, 1);
@@ -136,7 +137,8 @@ void STPProver::handleQuery(Expr queryExpr, uint32_t timeout, FILE *fout)
     // printf("Assertions:\n");
     // vc_printAsserts(this->handle, 0);
     int max_conflicts = -1;
-    int result = vc_query_with_timeout(this->handle, queryExpr, max_conflicts, timeout);
+    int result = vc_query(this->handle, queryExpr);
+    // int result = vc_query_with_timeout(this->handle, queryExpr, max_conflicts, timeout);
     // printf("Query:\n");
     // vc_printQuery(this->handle);
     switch (result)
