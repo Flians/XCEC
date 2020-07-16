@@ -3,6 +3,7 @@
 STPProver::STPProver(/* args */)
 {
     this->handle = vc_createValidityChecker();
+    vc_useCryptominisat(this->handle);
     // vc_useMinisat(this->handle);
     this->bv_type = vc_bvType(handle, 2);
     this->stp_zero = vc_bvConstExprFromInt(handle, 2, 0);
