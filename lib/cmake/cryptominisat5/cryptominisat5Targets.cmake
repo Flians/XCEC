@@ -51,7 +51,7 @@ if(_IMPORT_PREFIX STREQUAL "/")
 endif()
 
 # Create imported target cryptominisat5
-if (MACROS)
+if (MACOS)
   add_library(cryptominisat5 SHARED IMPORTED)
 
 elseif(LINUX)

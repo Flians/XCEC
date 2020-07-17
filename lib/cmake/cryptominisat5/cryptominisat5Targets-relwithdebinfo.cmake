@@ -7,8 +7,8 @@ set(CMAKE_IMPORT_FILE_VERSION 1)
 
 # Import target "cryptominisat5" for configuration "RelWithDebInfo"
 set_property(TARGET cryptominisat5 APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
-if(WINDOWS)
 
+if(WINDOWS)
 elseif(LINUX)
   set_target_properties(cryptominisat5 PROPERTIES
     IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C;CXX"
