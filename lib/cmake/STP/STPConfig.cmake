@@ -13,11 +13,8 @@ set(STP_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
 
 
 if ("ON" STREQUAL "ON")
-    # include(CMakeFindDependencyMacro)
-    # find_dependency(cryptominisat5)
-    set(cryptominisat5_DIR "${CMAKE_SOURCE_DIR}/lib/cmake/cryptominisat5")
-    find_package(cryptominisat5 REQUIRED PATHS "${CMAKE_SOURCE_DIR}/lib/cmake/cryptominisat5")
-    message("Using cryptominisat5 rooted at ${cryptominisat5_DIR}")
+    include(CMakeFindDependencyMacro)
+    find_dependency(cryptominisat5)
 endif()
 
 # Our library dependencies (contains definitions for IMPORTED targets)

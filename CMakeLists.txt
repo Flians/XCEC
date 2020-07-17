@@ -33,6 +33,11 @@ if (SHAREDLIBRARY)
     message("Use the shared library.")
 endif()
 
+# find cryptominisat5
+set(cryptominisat5_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/cryptominisat5")
+find_package(cryptominisat5 REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/cryptominisat5")
+message("Using cryptominisat5 rooted at ${cryptominisat5_DIR}")
+
 # find STP
 set(STP_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/STP" CACHE PATH "Try to use particular STP install (set this to folder where STPConfig.cmake is installed)")
 find_package(STP REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/STP")
