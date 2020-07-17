@@ -54,26 +54,23 @@ endif()
 if (MACROS)
   add_library(cryptominisat5 SHARED IMPORTED)
 
-  # Load information for each installed configuration.
-  get_filename_component(_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-  file(GLOB CONFIG_FILES "${_DIR}/cryptominisat5Targets-*.cmake")
-  foreach(f ${CONFIG_FILES})
-    include(${f})
-  endforeach()
-
-  # Cleanup temporary variables.
-  set(_IMPORT_PREFIX)
 elseif(LINUX)
   add_library(cryptominisat5 STATIC IMPORTED)
 
   set_target_properties(cryptominisat5 PROPERTIES
     INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/linux/libm4ri.a;-pthread"
   )
-
-  if(CMAKE_VERSION VERSION_LESS 2.8.12)
-    message(FATAL_ERROR "This file relies on consumers using CMake 2.8.12 or greater.")
-  endif()
 endif()
+
+# Load information for each installed configuration.
+get_filename_component(_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+file(GLOB CONFIG_FILES "${_DIR}/cryptominisat5Targets-*.cmake")
+foreach(f ${CONFIG_FILES})
+  include(${f})
+endforeach()
+
+# Cleanup temporary variables.
+set(_IMPORT_PREFIX)
 
 # Loop over all imported files and verify that they actually exist
 foreach(target ${_IMPORT_CHECK_TARGETS} )

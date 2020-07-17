@@ -35,17 +35,25 @@ endif()
 
 # find cryptominisat5
 set(cryptominisat5_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/cryptominisat5")
-find_package(cryptominisat5 REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/cryptominisat5")
+find_package(cryptominisat5 REQUIRED PATHS ${cryptominisat5_DIR})
 message("Using cryptominisat5 rooted at ${cryptominisat5_DIR}")
+if (cryptominisat5_FOUND)
+    message(STATUS "Found CryptoMiniSat 5.x and C++11, allowing --cryptominisat5 option")
+    message(STATUS "CryptoMiniSat5 dynamic lib: ${CRYPTOMINISAT5_LIBRARIES}")
+    message(STATUS "CryptoMiniSat5 static lib:  ${CRYPTOMINISAT5_STATIC_LIBRARIES}")
+    message(STATUS "CryptoMiniSat5 static lib deps: ${CRYPTOMINISAT5_STATIC_LIBRARIES_DEPS}")
+else()
+    message(WARNING "CryptoMiniSat5 (5.0 or above) or C++11 support not found, not allowing --cryptominisat option")
+endif()
 
 # find STP
 set(STP_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/STP" CACHE PATH "Try to use particular STP install (set this to folder where STPConfig.cmake is installed)")
-find_package(STP REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/STP")
+find_package(STP REQUIRED PATHS ${STP_DIR})
 message("Using STP rooted at ${STP_DIR}")
 
 # find z3
 set(Z3_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/z3")
-find_package(Z3 REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/z3")
+find_package(Z3 REQUIRED PATHS ${Z3_DIR})
 message("Using Z3 rooted at ${Z3_DIR}")
 
 # Set RPATH
