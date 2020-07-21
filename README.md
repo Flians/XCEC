@@ -5,22 +5,25 @@ A three-valued logic equivalence checking approach based on FSM
 ## build z3
 
 ```
-sudo apt install musl-tools
-cd z3
 mkdir build & cd build
 cmake -DCMAKE_INSTALL_PREFIX=~/XCEC -DCMAKE_INSTALL_INCLUDEDIR=include/z3 -DCMAKE_BUILD_TYPE=Release -DZ3_BUILD_LIBZ3_SHARED=ON -DZ3_SINGLE_THREADED=ON ..
-make
+make install
+```
+
+## build cryptominisat
+
+```
+mkdir build & cd build
+cmake -DSTATICCOMPILE=ON -DREQUIRE_M4RI=OFF -DCMAKE_INSTALL_PREFIX=../../stp ..
 make install
 ```
 
 ## build stp
 
 ```
-sudo apt install libm4ri-dev
-cd z3
+sudo apt-get install bison flex libboost-all-dev minisat
 mkdir build & cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=~/XCEC -DSTATICCOMPILE=ON ..
-make
+cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON_INTERFACE=OFF  -DSTATICCOMPILE=ON -DCMAKE_INSTALL_PREFIX=../../XCEC ..
 make install
 ```
 
