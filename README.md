@@ -16,7 +16,7 @@ make install
 ## build stp
 
 ```
-sudo apt install musl-tools
+sudo apt install libm4ri-dev
 cd z3
 mkdir build & cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=~/XCEC -DSTATICCOMPILE=ON ..
