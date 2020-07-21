@@ -9,7 +9,7 @@
 
 # Compute paths
 get_filename_component(STP_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-set(STP_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
+set(STP_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
 
 
 if ("ON" STREQUAL "ON")

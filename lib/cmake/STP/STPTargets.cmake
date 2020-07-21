@@ -51,18 +51,14 @@ if(_IMPORT_PREFIX STREQUAL "/")
 endif()
 
 # Create imported target stp
-if(LINUX)
-  message("Use the static library of stp")
-  add_library(stp STATIC IMPORTED)
-  set_target_properties(stp PROPERTIES
-    INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/linux/libminisat.a;${CMAKE_SOURCE_DIR}/lib/linux/libcryptominisat5.a;${CMAKE_SOURCE_DIR}/lib/linux/libm4ri.a;-pthread"
-  )
-elseif(MACOS)
-  message("Use the shared library of stp")
-  add_library(stp SHARED IMPORTED)
-  set_target_properties(stp PROPERTIES
-    INTERFACE_LINK_LIBRARIES "${CMAKE_SOURCE_DIR}/lib/mac/libminisat.a;cryptominisat5"
-  )
+add_library(stp STATIC IMPORTED)
+
+set_target_properties(stp PROPERTIES
+  INTERFACE_LINK_LIBRARIES "${PROJECT_SOURCE_DIR}/lib/linux/libminisat.a;cryptominisat5"
+)
+
+if(CMAKE_VERSION VERSION_LESS 2.8.12)
+  message(FATAL_ERROR "This file relies on consumers using CMake 2.8.12 or greater.")
 endif()
 
 # Load information for each installed configuration.
