@@ -22,12 +22,39 @@ elseif(CMAKE_HOST_APPLE)
     set(MACOS 1)
 elseif(CMAKE_HOST_UNIX)
     set(LINUX 1)
+    message("The enviriment is in linux.")
 endif()
 
 add_library(croaring STATIC ${PROJECT_SOURCE_DIR}/include/CRoaring/roaring.c)
 
-#find STP
-# find_package(STP REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/cmake/STP)
+option(SHAREDLIBRARY "Use the shared library for z3" OFF)
+if (SHAREDLIBRARY)
+    set(USESHARED 1)
+    message("Use the shared library.")
+endif()
+
+# find cryptominisat5
+set(cryptominisat5_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/cryptominisat5")
+find_package(cryptominisat5 REQUIRED PATHS ${cryptominisat5_DIR})
+message("Using cryptominisat5 rooted at ${cryptominisat5_DIR}")
+if (cryptominisat5_FOUND)
+    message(STATUS "Found CryptoMiniSat 5.x and C++11, allowing --cryptominisat5 option")
+    message(STATUS "CryptoMiniSat5 dynamic lib: ${CRYPTOMINISAT5_LIBRARIES}")
+    message(STATUS "CryptoMiniSat5 static lib:  ${CRYPTOMINISAT5_STATIC_LIBRARIES}")
+    message(STATUS "CryptoMiniSat5 static lib deps: ${CRYPTOMINISAT5_STATIC_LIBRARIES_DEPS}")
+else()
+    message(WARNING "CryptoMiniSat5 (5.0 or above) or C++11 support not found, not allowing --cryptominisat option")
+endif()
+
+# find STP
+set(STP_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/STP" CACHE PATH "Try to use particular STP install (set this to folder where STPConfig.cmake is installed)")
+find_package(STP REQUIRED PATHS ${STP_DIR})
+message("Using STP rooted at ${STP_DIR}")
+
+# find z3
+set(Z3_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/z3")
+find_package(Z3 REQUIRED PATHS ${Z3_DIR})
+message("Using Z3 rooted at ${Z3_DIR}")
 
 # Set RPATH
 if(WINDOWS)
@@ -40,15 +67,13 @@ endif()
 # Add search path for lib files
 if(WINDOWS)
     MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib/win")
-    link_directories(${PROJECT_SOURCE_DIR}/lib/win/)
+    link_directories(${PROJECT_SOURCE_DIR}/lib/win)
 elseif(LINUX)
     MESSAGE("link_directories: ${PROJECT_SOURCE_DIR}/lib/linux")
-    link_directories(${PROJECT_SOURCE_DIR}/lib/linux/)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
+    link_directories(${PROJECT_SOURCE_DIR}/lib//linux)
 elseif(MACOS)
-    MESSAGE("link_directories: ${CMAKE_SOURCE_DIR}/lib/macos")
-    link_directories(${CMAKE_SOURCE_DIR}/lib/macos/)
+    MESSAGE("link_directories: ${CMAKE_SOURCE_DIR}/lib/mac")
+    link_directories(${CMAKE_SOURCE_DIR}/lib/mac)
 endif()
 
 # the function is used to add all header files
@@ -75,23 +100,7 @@ message("Source file: " ${SOURCE_FILES})
 set(XCEC_ALL_SRCS main.cpp ${SOURCE_FILES})
 
 add_executable(${PROJECT_NAME} ${XCEC_ALL_SRCS})
-if(WINDOWS)
-    if(CMAKE_CL_64)
-        target_link_libraries (${PROJECT_NAME} z3 croaring)
-    else()
-        target_link_libraries (${PROJECT_NAME} z3 croaring)
-    endif()
-elseif(LINUX)
-    # static library
-    # target_link_libraries (${PROJECT_NAME} PRIVATE Threads::Threads ${CMAKE_SOURCE_DIR}/lib/linux/libz3.a)
-    # shared library
-    target_link_libraries (${PROJECT_NAME} -lz3 croaring)
-elseif(MACOS)
-    # static library
-    # target_link_libraries (${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/macos/libz3.a)
-    # shared library
-    target_link_libraries (${PROJECT_NAME} -lz3 -lstp croaring)
-endif()
+target_link_libraries (${PROJECT_NAME} ${Z3_LIBRARIES} stp croaring)
 
 if(WINDOWS)
     # Copy DLL files to output directory

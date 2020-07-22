@@ -19,7 +19,7 @@ vector<vector<Node *>> &simplify::get_layers()
     return this->layers;
 }
 
-bool simplify::replace_node_by_id(vector<Node *> *nodes, Node *new_node, unsigned id)
+bool simplify::replace_node_by_id(vector<Node *> *nodes, Node *new_node, size_t id)
 {
     for (auto &node : *nodes)
     {
@@ -40,8 +40,8 @@ void simplify::clean_wire_buf(vector<Node *> *PIs)
 {
     if (!PIs || PIs->empty())
         return;
-    unsigned len = PIs->size();
-    for (unsigned i = 0; i < len; ++i)
+    size_t len = PIs->size();
+    for (size_t i = 0; i < len; ++i)
     {
         Node *pi = PIs->at(i);
         if (!(pi->outs) || pi->outs->size() == 0)
@@ -102,15 +102,16 @@ void simplify::clean_wire_buf(vector<Node *> *PIs)
 
 vector<vector<Node *>> &simplify::id_reassign_and_layered(vector<Node *> &PIs, vector<Node *> &POs)
 {
+    vector<vector<Node *>>().swap(this->layers);
     if (PIs.empty())
     {
         std::cout << "PIs is empty in simplify.id_reassign." << endl;
         return this->layers;
     }
-    map<Node *, int> visit;
+    unordered_map<Node *, int> visit;
     queue<Node *> bfs_record;
     // reassign id of each node, and obtain the length of the longest path
-    int i = 0;
+    size_t i = 0;
     for (auto pi : PIs)
     {
         visit[pi] = 1;
@@ -156,14 +157,8 @@ vector<vector<Node *>> &simplify::id_reassign_and_layered(vector<Node *> &PIs, v
 
     // layer assignment
     this->layers.resize(longest_path);
-    int layer_size = ceil(init_id / longest_path) * 2;
-    for (i = 0; i < longest_path; ++i)
-    {
-        vector<Node *> layer;
-        layer.reserve(layer_size);
-    }
-    std::map<Node *, int>::iterator iter = visit.begin();
-    std::map<Node *, int>::iterator iter_end = visit.end();
+    std::unordered_map<Node *, int>::iterator iter = visit.begin();
+    std::unordered_map<Node *, int>::iterator iter_end = visit.end();
     for (; iter != iter_end; ++iter)
     {
         this->layers[iter->second - 1].emplace_back(iter->first);
@@ -180,9 +175,9 @@ void simplify::id_reassign(vector<vector<Node *>> &layers)
         return;
     }
     int id = 0;
-    for (unsigned i = 0; i < layers.size(); ++i)
+    for (size_t i = 0; i < layers.size(); ++i)
     {
-        for (unsigned j = 0; j < layers[i].size(); ++j)
+        for (size_t j = 0; j < layers[i].size(); ++j)
         {
             layers[i][j]->id = id++;
         }
@@ -229,21 +224,22 @@ void simplify::id_reassign(vector<Node *> &PIs)
 
 vector<vector<Node *>> &simplify::layer_assignment(vector<Node *> &PIs, vector<Node *> &POs)
 {
+    vector<vector<Node *>>().swap(this->layers);
     if (PIs.empty())
     {
         std::cout << "PIs is empty in simplify.layer_assignment." << std::endl;
         return this->layers;
     }
-    vector<unsigned> visit(init_id, 0);
+    vector<size_t> visit(init_id, 0);
     vector<int> logic_depth(init_id, 0);
     this->layers.emplace_back(PIs);
-    unsigned i = 0;
-    unsigned nums = PIs.size();
+    size_t i = 0;
+    size_t nums = PIs.size();
     // layer assignment, and calculate the logic depth of each node
     while (i < this->layers.size())
     {
         vector<Node *> layer;
-        for (unsigned j = 0; j < this->layers[i].size(); ++j)
+        for (size_t j = 0; j < this->layers[i].size(); ++j)
         {
             if (this->layers[i][j]->outs)
             {
@@ -265,7 +261,7 @@ vector<vector<Node *>> &simplify::layer_assignment(vector<Node *> &PIs, vector<N
     }
     this->layers.emplace_back(POs);
     nums += POs.size();
-    vector<unsigned>().swap(visit);
+    vector<size_t>().swap(visit);
     vector<int>().swap(logic_depth);
     std::cout << "The layer assignment is over!" << std::endl;
     return layers;
@@ -329,7 +325,7 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
     }
     vector<int> level(init_id, 0);
     vector<Roaring> nbrs(init_id);
-    for (unsigned i = 0; i < layers.size(); ++i)
+    for (size_t i = 0; i < layers.size(); ++i)
     {
         for (auto &node_ : layers[i])
         {
@@ -344,14 +340,14 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
         }
     }
     int reduce = 0;
-    for (unsigned i = 0; i < layers.size() - 2; ++i)
+    for (size_t i = 0; i < layers.size() - 2; ++i)
     {
         vector<vector<Node *>> record(15);
         for (auto &item : layers[i])
         {
             if (item->outs && item->outs->size() > 0)
             {
-                for (unsigned j = 0; j < item->outs->size(); ++j)
+                for (size_t j = 0; j < item->outs->size(); ++j)
                 {
                     // not including output
                     if (item->outs->at(j)->cell != _EXOR)
@@ -376,7 +372,7 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
 
             if (item[0]->cell == BUF || item[0]->cell == INV)
             {
-                for (unsigned d = 1; d < item.size(); ++d)
+                for (size_t d = 1; d < item.size(); ++d)
                 {
                     this->deduplicate(level[item[d]->id], item.front(), item[d], layers, nbrs);
                     ++reduce;
@@ -384,10 +380,10 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
             }
             else
             {
-                for (unsigned si = 0; si < item.size(); ++si)
+                for (size_t si = 0; si < item.size(); ++si)
                 {
-                    unsigned candidate_size = item.size();
-                    for (unsigned ri = si + 1; ri < candidate_size; ++ri)
+                    size_t candidate_size = item.size();
+                    for (size_t ri = si + 1; ri < candidate_size; ++ri)
                     {
                         if (nbrs[item[si]->id] == nbrs[item[ri]->id])
                         {
@@ -410,7 +406,7 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
         }
         record.clear();
     }
-    for (unsigned i = 0; i < layers.size(); ++i)
+    for (size_t i = 0; i < layers.size(); ++i)
     {
         if (layers[i].empty())
         {

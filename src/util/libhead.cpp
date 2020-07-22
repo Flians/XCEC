@@ -1,7 +1,7 @@
 #include "libhead.h"
 
 /* initial */
-unsigned init_id = 0;
+size_t init_id = 0;
 FILE *fout = nullptr;
 std::unordered_map<string, Gtype> Value_Str = {
     {"constant", _CONSTANT},
@@ -249,11 +249,18 @@ void cleanVP(vector<Node *> vecPtr)
     vector<Node *>().swap(vecPtr);
 }
 
-void init_fout(const string &path_output) {
+void init_fout(const string &path_output)
+{
     fout = fopen(path_output.c_str(), "w");
+    if (NULL == fout)
+    {
+        cerr << "The output file can not be open!" << endl;
+        exit(-1);
+    }
 }
 
-int close_fout() {
+int close_fout()
+{
     return fclose(fout);
 }
 

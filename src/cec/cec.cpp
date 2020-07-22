@@ -24,14 +24,15 @@ void cec::print_PIs_value(vector<Node *> *PIs, ofstream &output)
         output << pi->name << " " << pi->val << endl;
     }
 }
-void cec::print_PIs_value(vector<Node *> *PIs, FILE *output) {
+void cec::print_PIs_value(vector<Node *> *PIs, FILE *output)
+{
     for (auto pi : *PIs)
     {
         fprintf(output, "%s %d", pi->name.c_str(), pi->val);
     }
 }
 
-bool cec::assign_PIs_value(vector<Node *> *PIs, unsigned i)
+bool cec::assign_PIs_value(vector<Node *> *PIs, size_t i)
 {
     if (i == PIs->size())
     {
@@ -123,33 +124,41 @@ void cec::evaluate_from_POs_to_PIs(vector<Node *> *POs)
 {
 }
 
-void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
+void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
 {
-    init_z3(timeout);
-    Z3_solver z3_sol = Z3_mk_solver_for_logic(logic, Z3_mk_string_symbol(logic, "QF_BV"));
-    Z3_solver_inc_ref(logic, z3_sol);
+    Z3Prover z3_prover(timeout);
 
     vector<Z3_ast> nodes(init_id);
     for (auto &node : layers[0])
     {
         if (node->cell == _CONSTANT)
         {
-            nodes[node->id] = Z3_mk_unsigned_int(logic, node->val, bv_sort);
+            switch (node->val)
+            {
+            case L:
+                nodes[node->id] = z3_prover.z3_zero;
+                break;
+            case H:
+                nodes[node->id] = z3_prover.z3_one;
+                break;
+            default:
+                nodes[node->id] = z3_prover.z3_x;
+                break;
+            }
         }
         else
         {
-            nodes[node->id] = Z3_mk_const(logic, Z3_mk_string_symbol(logic, node->name.c_str()), bv_sort);
-            Z3_solver_assert(logic, z3_sol, Z3_mk_bvule(logic, nodes[node->id], z3_one));
+            nodes[node->id] = z3_prover.z3_mk_variable(node->name);
         }
     }
 
-    for (unsigned i = 1; i < layers.size(); ++i)
+    for (size_t i = 1; i < layers.size(); ++i)
     {
         vector<Node *> layer = layers[i];
-        for (unsigned j = 0; j < layer.size(); ++j)
+        for (size_t j = 0; j < layer.size(); ++j)
         {
             vector<Z3_ast> inputs(layer[j]->ins->size());
-            for (unsigned k = 0; k < layer[j]->ins->size(); ++k)
+            for (size_t k = 0; k < layer[j]->ins->size(); ++k)
             {
                 inputs[k] = nodes[layer[j]->ins->at(k)->id];
             }
@@ -157,35 +166,35 @@ void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
             switch (layer[j]->cell)
             {
             case _AND:
-                res = z3_mk_and(inputs);
+                res = z3_prover.z3_mk_and(inputs);
                 break;
             case _NAND:
-                res = z3_mk_not(z3_mk_and(inputs));
+                res = z3_prover.z3_mk_not(z3_prover.z3_mk_and(inputs));
                 break;
             case _OR:
-                res = z3_mk_or(inputs);
+                res = z3_prover.z3_mk_or(inputs);
                 break;
             case _NOR:
-                res = z3_mk_not(z3_mk_or(inputs));
+                res = z3_prover.z3_mk_not(z3_prover.z3_mk_or(inputs));
                 break;
             case _XOR:
-                res = z3_mk_xor(inputs);
+                res = z3_prover.z3_mk_xor(inputs);
                 break;
             case _XNOR:
-                res = z3_mk_not(z3_mk_xor(inputs));
+                res = z3_prover.z3_mk_not(z3_prover.z3_mk_xor(inputs));
                 break;
             case INV:
-                res = z3_mk_not(inputs[0]);
+                res = z3_prover.z3_mk_not(inputs[0]);
                 break;
             case _HMUX:
-                res = z3_mk_HMUX(inputs[0], inputs[1], inputs[2]);
+                res = z3_prover.z3_mk_HMUX(inputs[0], inputs[1], inputs[2]);
                 break;
             case _DC:
                 // cout << layer[j]->name << ", C: " << layer[j]->ins->front()->name << ", D: " << layer[j]->ins->at(1)->name << endl;
-                res = z3_mk_DC(inputs[0], inputs[1]);
+                res = z3_prover.z3_mk_DC(inputs[0], inputs[1]);
                 break;
             case _EXOR:
-                res = z3_mk_exor(inputs[0], inputs[1]);
+                res = z3_prover.z3_mk_exor(inputs[0], inputs[1]);
                 break;
             default:
                 if (inputs.size() == 0)
@@ -208,16 +217,105 @@ void cec::evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout)
         args[i++] = nodes[output->id];
     }
     vector<Z3_ast>().swap(nodes);
-    Z3_ast result = Z3_mk_and(logic, layers.back().size(), args);
-    Z3_solver_assert(logic, z3_sol, Z3_mk_not(logic, result));
+    Z3_ast result = Z3_mk_and(z3_prover.logic, layers.back().size(), args);
     // printf("term: %s\n", Z3_ast_to_string(logic, result));
-
-    check(logic, z3_sol, Z3_L_TRUE, fout);
-    // Z3_solver_pop(logic, z3_sol, 1);
-    Z3_solver_dec_ref(logic, z3_sol);
-    Z3_del_context(logic);
+    z3_prover.check(result, fout);
 }
 
-void cec::evaluate_by_stp(vector<vector<Node *> > &layers)
+void cec::evaluate_by_stp(vector<vector<Node *>> &layers, uint32_t timeout)
 {
+    STPProver stp_prover;
+    // stp_prover.test();
+    stp_prover.init_exprs(layers[0].size());
+    vector<Expr> nodes(init_id);
+    for (auto &node : layers[0])
+    {
+        if (node->cell == _CONSTANT)
+        {
+            switch (node->val)
+            {
+            case L:
+                nodes[node->id] = stp_prover.stp_zero;
+                break;
+            case H:
+                nodes[node->id] = stp_prover.stp_one;
+                break;
+            default:
+                nodes[node->id] = stp_prover.stp_x;
+                break;
+            }
+        }
+        else
+        {
+            nodes[node->id] = stp_prover.stp_mk_variable(node->name);
+        }
+    }
+
+    for (size_t i = 1; i < layers.size(); ++i)
+    {
+        vector<Node *> layer = layers[i];
+        for (size_t j = 0; j < layer.size(); ++j)
+        {
+            vector<Expr> inputs(layer[j]->ins->size());
+            for (size_t k = 0; k < layer[j]->ins->size(); ++k)
+            {
+                inputs[k] = nodes[layer[j]->ins->at(k)->id];
+            }
+            Expr res;
+            switch (layer[j]->cell)
+            {
+            case _AND:
+                res = stp_prover.stp_mk_and(inputs);
+                break;
+            case _NAND:
+                res = stp_prover.stp_mk_not(stp_prover.stp_mk_and(inputs));
+                break;
+            case _OR:
+                res = stp_prover.stp_mk_or(inputs);
+                break;
+            case _NOR:
+                res = stp_prover.stp_mk_not(stp_prover.stp_mk_or(inputs));
+                break;
+            case _XOR:
+                res = stp_prover.stp_mk_xor(inputs);
+                break;
+            case _XNOR:
+                res = stp_prover.stp_mk_not(stp_prover.stp_mk_xor(inputs));
+                break;
+            case INV:
+                res = stp_prover.stp_mk_not(inputs[0]);
+                break;
+            case _HMUX:
+                res = stp_prover.stp_mk_HMUX(inputs[0], inputs[1], inputs[2]);
+                break;
+            case _DC:
+                // cout << layer[j]->name << ", C: " << layer[j]->ins->front()->name << ", D: " << layer[j]->ins->at(1)->name << endl;
+                res = stp_prover.stp_mk_DC(inputs[0], inputs[1]);
+                break;
+            case _EXOR:
+                res = stp_prover.stp_mk_exor(inputs[0], inputs[1]);
+                break;
+            default:
+                if (inputs.size() == 0)
+                {
+                    cerr << "The inputs is empty! in jec.evaluate_z3!" << endl;
+                    exit(-1);
+                }
+                res = inputs[0];
+                break;
+            }
+            nodes[layer[j]->id] = res;
+        }
+    }
+
+    int i = 0;
+    Expr args[layers.back().size()];
+    for (auto &output : layers.back())
+    {
+        args[i++] = nodes[output->id];
+    }
+    Expr result = vc_andExprN(stp_prover.handle, args, layers.back().size());
+    stp_prover.handleQuery(result, timeout, fout);
+    vc_DeleteExpr(result);
+    vector<Expr>().swap(nodes);
 }
