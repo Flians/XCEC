@@ -208,20 +208,23 @@ Value calculate(Node *g)
 void unique_element_in_vector(vector<Node *> &v)
 {
     sort(v.begin(), v.end(), [](const Node *A, const Node *B) {
-        if (A->outs)
+        if (A->id == B->id)
         {
-            if (B->outs)
+            if (A->outs)
             {
-                return A->outs->size() == B->outs->size() ? A->id < B->id : A->outs->size() > B->outs->size();
+                if (B->outs)
+                {
+                    return A->outs->size() > B->outs->size();
+                }
+                return true;
             }
-            return true;
-        }
-        else
-        {
-            if (B->outs)
+            else
             {
                 return false;
             }
+        }
+        else
+        {
             return A->id < B->id;
         }
     });

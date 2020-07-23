@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
         sim.clean_wire_buf(&miter.PIs);
 
         vector<vector<Node *>> &layers = sim.id_reassign_and_layered(miter.PIs, miter.POs);
-        // sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
-        // sim.id_reassign(layers);
+        sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
+        sim.id_reassign(layers);
 
 
         // sim.id_reassign(miter.PIs);

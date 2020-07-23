@@ -342,6 +342,7 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
     int reduce = 0;
     for (size_t i = 0; i < layers.size() - 2; ++i)
     {
+        // the number of the Gtype
         vector<vector<Node *>> record(15);
         for (auto &item : layers[i])
         {
@@ -370,38 +371,28 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
                 continue;
             }
 
-            if (item[0]->cell == BUF || item[0]->cell == INV)
+            for (size_t si = 0; si < item.size(); ++si)
             {
-                for (size_t d = 1; d < item.size(); ++d)
+                size_t candidate_size = item.size();
+                for (size_t ri = si + 1; ri < candidate_size; ++ri)
                 {
-                    this->deduplicate(level[item[d]->id], item.front(), item[d], layers, nbrs);
-                    ++reduce;
-                }
-            }
-            else
-            {
-                for (size_t si = 0; si < item.size(); ++si)
-                {
-                    size_t candidate_size = item.size();
-                    for (size_t ri = si + 1; ri < candidate_size; ++ri)
+                    if (nbrs[item[si]->id] == nbrs[item[ri]->id])
                     {
-                        if (nbrs[item[si]->id] == nbrs[item[ri]->id])
-                        {
-                            this->deduplicate(level[item[ri]->id], item[si], item[ri], layers, nbrs);
-                            // item.erase(it.begin() + ri);
-                            --candidate_size;
-                            *(item.begin() + ri) = *(item.begin() + candidate_size);
-                            *(item.begin() + candidate_size) = nullptr;
-                            --ri;
-                        }
-                    }
-                    if (item.size() > candidate_size)
-                    {
-                        reduce += item.size() - candidate_size;
-                        item.resize(candidate_size);
+                        this->deduplicate(level[item[ri]->id], item[si], item[ri], layers, nbrs);
+                        // item.erase(it.begin() + ri);
+                        --candidate_size;
+                        *(item.begin() + ri) = *(item.begin() + candidate_size);
+                        *(item.begin() + candidate_size) = nullptr;
+                        --ri;
                     }
                 }
+                if (item.size() > candidate_size)
+                {
+                    reduce += item.size() - candidate_size;
+                    item.resize(candidate_size);
+                }
             }
+
             item.clear();
         }
         record.clear();
