@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 project(XCEC VERSION 0.1.0)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -31,19 +31,6 @@ option(SHAREDLIBRARY "Use the shared library for z3" OFF)
 if (SHAREDLIBRARY)
     set(USESHARED 1)
     message("Use the shared library.")
-endif()
-
-# find cryptominisat5
-set(cryptominisat5_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/cryptominisat5")
-find_package(cryptominisat5 REQUIRED PATHS ${cryptominisat5_DIR})
-message("Using cryptominisat5 rooted at ${cryptominisat5_DIR}")
-if (cryptominisat5_FOUND)
-    message(STATUS "Found CryptoMiniSat 5.x and C++11, allowing --cryptominisat5 option")
-    message(STATUS "CryptoMiniSat5 dynamic lib: ${CRYPTOMINISAT5_LIBRARIES}")
-    message(STATUS "CryptoMiniSat5 static lib:  ${CRYPTOMINISAT5_STATIC_LIBRARIES}")
-    message(STATUS "CryptoMiniSat5 static lib deps: ${CRYPTOMINISAT5_STATIC_LIBRARIES_DEPS}")
-else()
-    message(WARNING "CryptoMiniSat5 (5.0 or above) or C++11 support not found, not allowing --cryptominisat option")
 endif()
 
 # find STP

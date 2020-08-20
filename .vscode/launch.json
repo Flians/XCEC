@@ -12,7 +12,8 @@
             "args": [
                 "./test/cases/case1/gf.v",
                 "./test/cases/case1/rf.v",
-                "./test/output/output_case1.txt"
+                "./test/output/output_case1.txt",
+                "z3"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -27,7 +28,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "build_mac"
+            "preLaunchTask": "build_sh"
         },
         {
             "name": "lldb_mac_launch",
@@ -37,7 +38,8 @@
             "args": [
                 "./test/cases/case3/gf.v",
                 "./test/cases/case3/rf.v",
-                "./test/output/output_case3.txt"
+                "./test/output/output_case3.txt",
+                "z3"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -51,7 +53,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "build_mac"
+            "preLaunchTask": "build_sh"
         },
         {
             "name": "gdb_win_launch",
@@ -61,7 +63,8 @@
             "args": [
                 "./test/golden/gf.v",
                 "./test/revise/rf.v",
-                "./output/output.txt"
+                "./output/output.txt",
+                "z3"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

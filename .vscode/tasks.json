@@ -3,7 +3,7 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "build_mac",
+            "label": "build_sh",
             "command": "./build.sh",
             "args": [],
             "group": {

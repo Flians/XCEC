@@ -1412,6 +1412,15 @@ typedef enum
 */
 typedef void Z3_error_handler(Z3_context c, Z3_error_code e);
 
+
+/**
+   \brief callback functions for user propagator.
+*/
+typedef void Z3_push_eh(void* ctx);
+typedef void Z3_pop_eh(void* ctx, unsigned num_scopes);
+typedef void Z3_fixed_eh(void* ctx, unsigned id, Z3_ast value);
+typedef void* Z3_fresh_eh(void* ctx);
+
 /**
    \brief A Goal is essentially a set of formulas.
    Z3 provide APIs for building strategies/tactics for solving and transforming Goals.
@@ -6485,6 +6494,69 @@ extern "C" {
        def_API('Z3_solver_get_levels', VOID, (_in(CONTEXT), _in(SOLVER), _in(AST_VECTOR), _in(UINT), _in_array(3, UINT)))
     */
     void Z3_API Z3_solver_get_levels(Z3_context c, Z3_solver s, Z3_ast_vector literals, unsigned sz,  unsigned levels[]);
+
+    /**
+       \brief retrieve implied value for expression, if any is implied by solver at search level.
+       The method works for expressions that are known to the solver state, such as Boolean and
+       arithmetical variables.
+       
+       def_API('Z3_solver_get_implied_value', AST, (_in(CONTEXT), _in(SOLVER), _in(AST)))
+    */
+    Z3_ast Z3_API Z3_solver_get_implied_value(Z3_context c, Z3_solver s, Z3_ast e);
+
+    /**
+       \brief retrieve implied lower bound value for arithmetic expression.
+       If a lower bound is implied at search level, the arithmetic expression returned
+       is a constant representing the bound.
+       
+       def_API('Z3_solver_get_implied_lower', AST, (_in(CONTEXT), _in(SOLVER), _in(AST)))
+    */
+    Z3_ast Z3_API Z3_solver_get_implied_lower(Z3_context c, Z3_solver s, Z3_ast e);
+
+    /**
+       \brief retrieve implied upper bound value for arithmetic expression.
+       If an upper bound is implied at search level, the arithmetic expression returned
+       is a constant representing the bound.
+       
+       def_API('Z3_solver_get_implied_upper', AST, (_in(CONTEXT), _in(SOLVER), _in(AST)))
+    */
+
+    Z3_ast Z3_API Z3_solver_get_implied_upper(Z3_context c, Z3_solver s, Z3_ast e);
+
+
+
+    /**
+       \brief register a user-properator with the solver.
+     */
+
+    void Z3_API Z3_solver_propagate_init(
+        Z3_context  c, 
+        Z3_solver   s, 
+        void*       user_context,
+        Z3_push_eh  push_eh,
+        Z3_pop_eh   pop_eh,
+        Z3_fixed_eh fixed_eh,
+        Z3_fresh_eh fresh_eh);
+
+    /**
+       \brief register an expression to propagate on with the solver.
+       Only expressions of type Bool and type Bit-Vector can be registered for propagation.
+
+       def_API('Z3_solver_propagate_register', UINT, (_in(CONTEXT), _in(SOLVER), _in(AST)))
+    */
+
+    unsigned Z3_API Z3_solver_propagate_register(Z3_context c, Z3_solver s, Z3_ast e);
+
+    /**
+       \brief propagate a consequence based on fixed values.
+       This is a callback a client may invoke during the fixed_eh callback. 
+       The callback adds a propagation consequence based on the fixed values of the
+       \c ids. 
+       
+       def_API('Z3_solver_propagate_consequence', VOID, (_in(CONTEXT), _in(SOLVER), _in(UINT), _in_array(2, UINT), _in(AST)))
+    */
+    
+    void Z3_API Z3_solver_propagate_consequence(Z3_context c, Z3_solver, unsigned sz, unsigned const* ids, Z3_ast conseq);
 
     /**
        \brief Check whether the assertions in a given solver are consistent or not.

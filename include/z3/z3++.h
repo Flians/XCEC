@@ -1672,21 +1672,21 @@ namespace z3 {
     inline expr operator>(expr const & a, int b) { return a > a.ctx().num_val(b, a.get_sort()); }
     inline expr operator>(int a, expr const & b) { return b.ctx().num_val(a, b.get_sort()) > b; }
 
-    inline expr operator&(expr const & a, expr const & b) { check_context(a, b); Z3_ast r = Z3_mk_bvand(a.ctx(), a, b); return expr(a.ctx(), r); }
+    inline expr operator&(expr const & a, expr const & b) { if (a.is_bool()) return a && b; check_context(a, b); Z3_ast r = Z3_mk_bvand(a.ctx(), a, b); return expr(a.ctx(), r); }
     inline expr operator&(expr const & a, int b) { return a & a.ctx().num_val(b, a.get_sort()); }
     inline expr operator&(int a, expr const & b) { return b.ctx().num_val(a, b.get_sort()) & b; }
 
-    inline expr operator^(expr const & a, expr const & b) { check_context(a, b); Z3_ast r = Z3_mk_bvxor(a.ctx(), a, b); return expr(a.ctx(), r); }
+    inline expr operator^(expr const & a, expr const & b) { check_context(a, b); Z3_ast r = a.is_bool() ? Z3_mk_xor(a.ctx(), a, b) : Z3_mk_bvxor(a.ctx(), a, b); return expr(a.ctx(), r); }
     inline expr operator^(expr const & a, int b) { return a ^ a.ctx().num_val(b, a.get_sort()); }
     inline expr operator^(int a, expr const & b) { return b.ctx().num_val(a, b.get_sort()) ^ b; }
 
-    inline expr operator|(expr const & a, expr const & b) { check_context(a, b); Z3_ast r = Z3_mk_bvor(a.ctx(), a, b); return expr(a.ctx(), r); }
+    inline expr operator|(expr const & a, expr const & b) { if (a.is_bool()) return a || b; check_context(a, b); Z3_ast r = Z3_mk_bvor(a.ctx(), a, b); return expr(a.ctx(), r); }
     inline expr operator|(expr const & a, int b) { return a | a.ctx().num_val(b, a.get_sort()); }
     inline expr operator|(int a, expr const & b) { return b.ctx().num_val(a, b.get_sort()) | b; }
 
-    inline expr nand(expr const& a, expr const& b) { check_context(a, b); Z3_ast r = Z3_mk_bvnand(a.ctx(), a, b); return expr(a.ctx(), r); }
-    inline expr nor(expr const& a, expr const& b) { check_context(a, b); Z3_ast r = Z3_mk_bvnor(a.ctx(), a, b); return expr(a.ctx(), r); }
-    inline expr xnor(expr const& a, expr const& b) { check_context(a, b); Z3_ast r = Z3_mk_bvxnor(a.ctx(), a, b); return expr(a.ctx(), r); }
+    inline expr nand(expr const& a, expr const& b) { if (a.is_bool()) return !(a && b); check_context(a, b); Z3_ast r = Z3_mk_bvnand(a.ctx(), a, b); return expr(a.ctx(), r); }
+    inline expr nor(expr const& a, expr const& b) { if (a.is_bool()) return !(a || b); check_context(a, b); Z3_ast r = Z3_mk_bvnor(a.ctx(), a, b); return expr(a.ctx(), r); }
+    inline expr xnor(expr const& a, expr const& b) { if (a.is_bool()) return !(a ^ b); check_context(a, b); Z3_ast r = Z3_mk_bvxnor(a.ctx(), a, b); return expr(a.ctx(), r); }
     inline expr min(expr const& a, expr const& b) { 
         check_context(a, b); 
         Z3_ast r;
@@ -2379,11 +2379,24 @@ namespace z3 {
         }
         void add(expr const & e, char const * p) {
             add(e, ctx().bool_const(p));
+        }        
+        void add(expr_vector const& v) { 
+            check_context(*this, v); 
+            for (unsigned i = 0; i < v.size(); ++i) 
+                add(v[i]); 
         }
-        // fails for some compilers:
-        // void add(expr_vector const& v) { check_context(*this, v); for (expr e : v) add(e); }
         void from_file(char const* file) { Z3_solver_from_file(ctx(), m_solver, file); ctx().check_parser_error(); }
         void from_string(char const* s) { Z3_solver_from_string(ctx(), m_solver, s); ctx().check_parser_error(); }
+
+        expr lower(expr const& e) { 
+            Z3_ast r = Z3_solver_get_implied_lower(ctx(), m_solver, e); check_error(); return expr(ctx(), r); 
+        }
+        expr upper(expr const& e) { 
+            Z3_ast r = Z3_solver_get_implied_upper(ctx(), m_solver, e); check_error(); return expr(ctx(), r); 
+        }
+        expr value(expr const& e) { 
+            Z3_ast r = Z3_solver_get_implied_value(ctx(), m_solver, e); check_error(); return expr(ctx(), r); 
+        }
 
         check_result check() { Z3_lbool r = Z3_solver_check(ctx(), m_solver); check_error(); return to_check_result(r); }
         check_result check(unsigned n, expr * const assumptions) {
@@ -2835,19 +2848,22 @@ namespace z3 {
         void add(expr_vector const& es) {
             for (expr_vector::iterator it = es.begin(); it != es.end(); ++it) add(*it);
         }
-        handle add(expr const& e, unsigned weight) {
-            assert(e.is_bool());
-            auto str = std::to_string(weight);
-            return handle(Z3_optimize_assert_soft(ctx(), m_opt, e, str.c_str(), 0));
-        }
         void add(expr const& e, expr const& t) {
             assert(e.is_bool());
             Z3_optimize_assert_and_track(ctx(), m_opt, e, t);
         }
 
-        handle add(expr const& e, char const* weight) {
+        handle add_soft(expr const& e, unsigned weight) {
+            assert(e.is_bool());
+            auto str = std::to_string(weight);
+            return handle(Z3_optimize_assert_soft(ctx(), m_opt, e, str.c_str(), 0));
+        }
+        handle add_soft(expr const& e, char const* weight) {
             assert(e.is_bool());
             return handle(Z3_optimize_assert_soft(ctx(), m_opt, e, weight, 0));
+        }
+        handle add(expr const& e, unsigned weight) {
+            return add_soft(e, weight);
         }
         handle maximize(expr const& e) {
             return handle(Z3_optimize_maximize(ctx(), m_opt, e));

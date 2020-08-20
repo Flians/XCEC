@@ -4,6 +4,16 @@
 
 using namespace std;
 
+enum SMT
+{
+    Z3,
+    STP,
+    BOOLECTOR
+};
+
+unordered_map<string, SMT> smt_str = {
+    {"z3", Z3}, {"stp", STP}, {"boolector", BOOLECTOR}};
+
 // cd build && cmake -G"Unix Makefiles && make" ../
 int main(int argc, char *argv[])
 {
@@ -27,13 +37,12 @@ int main(int argc, char *argv[])
         sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
         sim.id_reassign(layers);
 
-
         // sim.id_reassign(miter.PIs);
         // vector<vector<Node *> > &layers = sim.layer_assignment(miter.PIs, miter.POs);
         // sim.reduce_repeat_nodes(layers); // no considering the positions of ports for DC and HUMX
         // sim.id_reassign(miter.PIs);
 
-/*
+        /*
         for (auto &item : layers)
         {
             sort(item.begin(), item.end(), [](const Node *A, const Node *B) {
@@ -50,9 +59,26 @@ int main(int argc, char *argv[])
         cout << "The preprocess time is: " << pre_time / 1000 << " S" << endl;
         /* evaluate the graph */
         cec cec_;
-        // pre_time > 112000 ? 1700000 - pre_time : 15 * pre_time
-        // cec_.evaluate_by_z3(layers, 1000000);
-        cec_.evaluate_by_stp(layers, 1000);
+        if (argc >= 5)
+        {
+            switch (smt_str[argv[4]])
+            {
+            case Z3:
+                // pre_time > 112000 ? 1700000 - pre_time : 15 * pre_time
+                cec_.evaluate_by_z3(layers, 1000000);
+                break;
+            case BOOLECTOR:
+                /* code */
+                break;
+            default:
+                cec_.evaluate_by_stp(layers, 1000);
+                break;
+            }
+        }
+        else
+        {
+            cec_.evaluate_by_stp(layers, 1000);
+        }
         close_fout();
         endTime = clock();
         cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
