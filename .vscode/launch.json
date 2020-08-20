@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "gdb_ubuntu_Attach",
+            "name": "gdb_ubuntu_Launch",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/XCEC",
@@ -19,6 +19,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

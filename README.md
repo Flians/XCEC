@@ -14,7 +14,7 @@ make install
 
 ```
 mkdir build & cd build
-cmake -DSTATICCOMPILE=ON -DREQUIRE_M4RI=OFF -DCMAKE_INSTALL_PREFIX=../../stp ..
+cmake -DSTATICCOMPILE=ON -DSTATS=OFF -DENABLE_TESTING=OFF -DMIT=OFF -DNOM4RI=ON -DREQUIRE_M4RI=OFF -DONLY_SIMPLE=ON -DLARGEMEM=OFF -DCMAKE_INSTALL_PREFIX=../../stp ..
 make install
 ```
 
@@ -23,8 +23,19 @@ make install
 ```
 sudo apt-get install bison flex libboost-all-dev minisat
 mkdir build & cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON_INTERFACE=OFF  -DSTATICCOMPILE=ON -DCMAKE_INSTALL_PREFIX=../../XCEC ..
+cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON_INTERFACE=OFF -DPYTHON_EXECUTABLE=OFF -DENABLE_TESTING=OFF -DSTATICCOMPILE=ON -DCMAKE_INSTALL_PREFIX=../../XCEC ..
 make install
+```
+
+## build boolector
+
+```
+cd boolector
+./contrib/setup-btor2tools.sh
+./contrib/setup-cadical.sh 
+./contrib/setup-cms.sh 
+./configure.sh --prefix ../install 
+cd build && make install
 ```
 
 ## build

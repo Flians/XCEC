@@ -1,5 +1,6 @@
 The parsing process is over!
-The parsing time is: 0.139571 S
-The preprocess time is: 0.199 S
-The run time is: 4.52295 S
+The parsing time is: 0.288686 S
+The number of INV, BUF, and others reduction is 1075
+The preprocess time is: 0.664 S
+The run time is: 5.36784 S
 The parser is destroyed!
