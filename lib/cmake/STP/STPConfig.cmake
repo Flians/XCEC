@@ -12,7 +12,7 @@ get_filename_component(STP_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 set(STP_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
 
 
-if ("" STREQUAL "ON")
+if ("ON" STREQUAL "ON")
     include(CMakeFindDependencyMacro)
     find_dependency(cryptominisat5)
 endif()
