@@ -75,7 +75,10 @@ Z3_ast Z3Prover::z3_mk_variable(const string &name)
 Z3_ast Z3Prover::z3_mk_and(const Z3_ast &A, const Z3_ast &B)
 {
     // return z3::ite(A == z3_zero || B == z3_zero, z3_zero, z3::max(A, B));
-    return Z3_mk_ite(logic, Z3_mk_eq(logic, Z3_mk_bvxor(logic, A, B), z3_undefined), z3_x, Z3_mk_bvand(logic, A, B));
+    return Z3_mk_ite(logic, 
+                    Z3_mk_eq(logic, Z3_mk_bvxor(logic, A, B), z3_undefined), 
+                    z3_x, 
+                    Z3_mk_bvand(logic, A, B));
 }
 
 Z3_ast Z3Prover::z3_mk_and(vector<Z3_ast> &exprs)
@@ -379,9 +382,10 @@ void Z3Prover::display_model(Z3_context &c, FILE *out, Z3_model m)
 
 void Z3Prover::check(const Z3_ast &expr, FILE *fout)
 {
-    Z3_solver_assert(this->logic, this->z3_sol, Z3_mk_not(this->logic, expr));
+    Z3_ast not_f = Z3_mk_not(this->logic, expr);
+    Z3_solver_assert(this->logic, this->z3_sol, not_f);
     Z3_model m = 0;
-    Z3_lbool result = Z3_solver_check(this->logic, z3_sol);
+    Z3_lbool result = Z3_solver_check(this->logic, this->z3_sol);
     switch (result)
     {
     case Z3_L_UNDEF:
@@ -395,17 +399,17 @@ void Z3Prover::check(const Z3_ast &expr, FILE *fout)
         /* disproved */
         fprintf(fout, "NEQ\n");
         // fout << "NEQ" << endl;
-        m = Z3_solver_get_model(logic, z3_sol);
+        m = Z3_solver_get_model(this->logic, this->z3_sol);
         if (m)
         {
-            Z3_model_inc_ref(logic, m);
-            display_model(logic, fout, m);
+            Z3_model_inc_ref(this->logic, m);
+            display_model(this->logic, fout, m);
         }
         break;
     }
     if (m)
     {
-        Z3_model_dec_ref(logic, m);
+        Z3_model_dec_ref(this->logic, m);
     }
 }
 
@@ -437,7 +441,48 @@ z3::params Z3Prover::config_z3(z3::context &logic, string &priority, unsigned ti
 }
 
 /***************** test every operators **********************/
-/*
+void Z3Prover::check_without_sol(const Z3_ast &expr, FILE *fout)
+{
+    Z3_solver tmp_sol = Z3_mk_solver_for_logic(this->logic, Z3_mk_string_symbol(this->logic, "QF_BV"));
+    Z3_solver_inc_ref(this->logic, tmp_sol);
+
+    Z3_ast not_f = Z3_mk_not(this->logic, expr);
+    Z3_solver_assert(this->logic, tmp_sol, not_f);
+    Z3_model m = 0;
+    Z3_lbool result = Z3_solver_check(this->logic, tmp_sol);
+    switch (result)
+    {
+    case Z3_L_UNDEF:
+        /* Z3 failed to prove/disprove f. */
+        printf(">>> unknown <<<\n");
+    case Z3_L_FALSE:
+        fprintf(fout, "EQ\n");
+        // fout << "EQ" << endl;
+        break;
+    case Z3_L_TRUE:
+        /* disproved */
+        fprintf(fout, "NEQ\n");
+        // fout << "NEQ" << endl;
+        m = Z3_solver_get_model(this->logic, tmp_sol);
+        if (m)
+        {
+            Z3_model_inc_ref(this->logic, m);
+            display_model(this->logic, fout, m);
+        }
+        break;
+    }
+    if (m)
+    {
+        Z3_model_dec_ref(this->logic, m);
+    }
+    Z3_solver_dec_ref(this->logic, tmp_sol);
+}
+
+void Z3Prover::check_without_sol(const Z3_ast &left, const Z3_ast &right, FILE *fout)
+{
+    this->check_without_sol(Z3_mk_eq(this->logic, left, right), fout);
+}
+
 void Z3Prover::test()
 {
     std::cout << "test AND" << std::endl;
@@ -464,105 +509,104 @@ void Z3Prover::test()
 
 void Z3Prover::test_AND()
 {
-    prove(z3_mk_and(z3_zero, z3_zero), z3_zero);
-    prove(z3_mk_and(z3_zero, z3_one), z3_zero);
-    prove(z3_mk_and(z3_zero, z3_x), z3_zero);
-    prove(z3_mk_and(z3_one, z3_zero), z3_zero);
-    prove(z3_mk_and(z3_one, z3_one), z3_one);
-    prove(z3_mk_and(z3_one, z3_x), z3_x);
-    prove(z3_mk_and(z3_x, z3_zero), z3_zero);
-    prove(z3_mk_and(z3_x, z3_one), z3_x);
-    prove(z3_mk_and(z3_x, z3_x), z3_x);
+    check_without_sol(z3_mk_and(z3_zero, z3_zero), z3_zero, stdout);
+    check_without_sol(z3_mk_and(z3_zero, z3_one), z3_zero, stdout);
+    check_without_sol(z3_mk_and(z3_zero, z3_x), z3_zero, stdout);
+    check_without_sol(z3_mk_and(z3_one, z3_zero), z3_zero, stdout);
+    check_without_sol(z3_mk_and(z3_one, z3_one), z3_one, stdout);
+    check_without_sol(z3_mk_and(z3_one, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_and(z3_x, z3_zero), z3_zero, stdout);
+    check_without_sol(z3_mk_and(z3_x, z3_one), z3_x, stdout);
+    check_without_sol(z3_mk_and(z3_x, z3_x), z3_x, stdout);
 }
 void Z3Prover::test_NAND()
 {
 }
 void Z3Prover::test_OR()
 {
-    prove(z3_mk_or(z3_zero, z3_zero), z3_zero);
-    prove(z3_mk_or(z3_zero, z3_one), z3_one);
-    prove(z3_mk_or(z3_zero, z3_x), z3_x);
-    prove(z3_mk_or(z3_one, z3_zero), z3_one);
-    prove(z3_mk_or(z3_one, z3_one), z3_one);
-    prove(z3_mk_or(z3_one, z3_x), z3_one);
-    prove(z3_mk_or(z3_x, z3_zero), z3_x);
-    prove(z3_mk_or(z3_x, z3_one), z3_one);
-    prove(z3_mk_or(z3_x, z3_x), z3_x);
+    check_without_sol(z3_mk_or(z3_zero, z3_zero), z3_zero, stdout);
+    check_without_sol(z3_mk_or(z3_zero, z3_one), z3_one, stdout);
+    check_without_sol(z3_mk_or(z3_zero, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_or(z3_one, z3_zero), z3_one, stdout);
+    check_without_sol(z3_mk_or(z3_one, z3_one), z3_one, stdout);
+    check_without_sol(z3_mk_or(z3_one, z3_x), z3_one, stdout);
+    check_without_sol(z3_mk_or(z3_x, z3_zero), z3_x, stdout);
+    check_without_sol(z3_mk_or(z3_x, z3_one), z3_one, stdout);
+    check_without_sol(z3_mk_or(z3_x, z3_x), z3_x, stdout);
 }
 void Z3Prover::test_NOR() {}
 void Z3Prover::test_XOR()
 {
-    prove(z3_mk_xor(z3_zero, z3_zero), z3_zero);
-    prove(z3_mk_xor(z3_zero, z3_one), z3_one);
-    prove(z3_mk_xor(z3_zero, z3_x), z3_x);
-    prove(z3_mk_xor(z3_one, z3_zero), z3_one);
-    prove(z3_mk_xor(z3_one, z3_one), z3_zero);
-    prove(z3_mk_xor(z3_one, z3_x), z3_x);
-    prove(z3_mk_xor(z3_x, z3_zero), z3_x);
-    prove(z3_mk_xor(z3_x, z3_one), z3_x);
-    prove(z3_mk_xor(z3_x, z3_x), z3_x);
+    check_without_sol(z3_mk_xor(z3_zero, z3_zero), z3_zero, stdout);
+    check_without_sol(z3_mk_xor(z3_zero, z3_one), z3_one, stdout);
+    check_without_sol(z3_mk_xor(z3_zero, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_xor(z3_one, z3_zero), z3_one, stdout);
+    check_without_sol(z3_mk_xor(z3_one, z3_one), z3_zero, stdout);
+    check_without_sol(z3_mk_xor(z3_one, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_xor(z3_x, z3_zero), z3_x, stdout);
+    check_without_sol(z3_mk_xor(z3_x, z3_one), z3_x, stdout);
+    check_without_sol(z3_mk_xor(z3_x, z3_x), z3_x, stdout);
 }
 void Z3Prover::test_XNOR() {}
 void Z3Prover::test_INV()
 {
-    prove(z3_mk_not(z3_zero), z3_one);
-    prove(z3_mk_not(z3_one), z3_zero);
-    prove(z3_mk_not(z3_x), z3_x);
+    check_without_sol(z3_mk_not(z3_zero), z3_one, stdout);
+    check_without_sol(z3_mk_not(z3_one), z3_zero, stdout);
+    check_without_sol(z3_mk_not(z3_x), z3_x, stdout);
 }
 void Z3Prover::test_DC()
 {
-    prove(z3_mk_DC(z3_zero, z3_zero), z3_zero);
-    prove(z3_mk_DC(z3_zero, z3_one), z3_x);
-    prove(z3_mk_DC(z3_zero, z3_x), z3_x);
-    prove(z3_mk_DC(z3_one, z3_zero), z3_one);
-    prove(z3_mk_DC(z3_one, z3_one), z3_x);
-    prove(z3_mk_DC(z3_one, z3_x), z3_x);
-    prove(z3_mk_DC(z3_x, z3_zero), z3_x);
-    prove(z3_mk_DC(z3_x, z3_one), z3_x);
-    prove(z3_mk_DC(z3_x, z3_x), z3_x);
+    check_without_sol(z3_mk_DC(z3_zero, z3_zero), z3_zero, stdout);
+    check_without_sol(z3_mk_DC(z3_zero, z3_one), z3_x, stdout);
+    check_without_sol(z3_mk_DC(z3_zero, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_DC(z3_one, z3_zero), z3_one, stdout);
+    check_without_sol(z3_mk_DC(z3_one, z3_one), z3_x, stdout);
+    check_without_sol(z3_mk_DC(z3_one, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_DC(z3_x, z3_zero), z3_x, stdout);
+    check_without_sol(z3_mk_DC(z3_x, z3_one), z3_x, stdout);
+    check_without_sol(z3_mk_DC(z3_x, z3_x), z3_x, stdout);
 }
 void Z3Prover::test_HMUX()
 {
-    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_zero), z3_zero);
-    prove(z3_mk_HMUX(z3_zero, z3_one, z3_zero), z3_zero);
-    prove(z3_mk_HMUX(z3_zero, z3_x, z3_zero), z3_zero);
-    prove(z3_mk_HMUX(z3_one, z3_zero, z3_zero), z3_one);
-    prove(z3_mk_HMUX(z3_one, z3_one, z3_zero), z3_one);
-    prove(z3_mk_HMUX(z3_one, z3_x, z3_zero), z3_one);
-    prove(z3_mk_HMUX(z3_x, z3_zero, z3_zero), z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_one, z3_zero), z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_x, z3_zero), z3_x);
+    check_without_sol(z3_mk_HMUX(z3_zero, z3_zero, z3_zero), z3_zero, stdout);
+    check_without_sol(z3_mk_HMUX(z3_zero, z3_one, z3_zero), z3_zero, stdout);
+    check_without_sol(z3_mk_HMUX(z3_zero, z3_x, z3_zero), z3_zero, stdout);
+    check_without_sol(z3_mk_HMUX(z3_one, z3_zero, z3_zero), z3_one, stdout);
+    check_without_sol(z3_mk_HMUX(z3_one, z3_one, z3_zero), z3_one, stdout);
+    check_without_sol(z3_mk_HMUX(z3_one, z3_x, z3_zero), z3_one, stdout);
+    check_without_sol(z3_mk_HMUX(z3_x, z3_zero, z3_zero), z3_x, stdout);
+    check_without_sol(z3_mk_HMUX(z3_x, z3_one, z3_zero), z3_x, stdout);
+    check_without_sol(z3_mk_HMUX(z3_x, z3_x, z3_zero), z3_x, stdout);
 
-    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_one), z3_zero);
-    prove(z3_mk_HMUX(z3_zero, z3_one, z3_one), z3_one);
-    prove(z3_mk_HMUX(z3_zero, z3_x, z3_one), z3_x);
-    prove(z3_mk_HMUX(z3_one, z3_zero, z3_one), z3_zero);
-    prove(z3_mk_HMUX(z3_one, z3_one, z3_one), z3_one);
-    prove(z3_mk_HMUX(z3_one, z3_x, z3_one), z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_zero, z3_one), z3_zero);
-    prove(z3_mk_HMUX(z3_x, z3_one, z3_one), z3_one);
-    prove(z3_mk_HMUX(z3_x, z3_x, z3_one), z3_x);
+    check_without_sol(z3_mk_HMUX(z3_zero, z3_zero, z3_one), z3_zero, stdout);
+    check_without_sol(z3_mk_HMUX(z3_zero, z3_one, z3_one), z3_one, stdout);
+    check_without_sol(z3_mk_HMUX(z3_zero, z3_x, z3_one), z3_x, stdout);
+    check_without_sol(z3_mk_HMUX(z3_one, z3_zero, z3_one), z3_zero, stdout);
+    check_without_sol(z3_mk_HMUX(z3_one, z3_one, z3_one), z3_one, stdout);
+    check_without_sol(z3_mk_HMUX(z3_one, z3_x, z3_one), z3_x, stdout);
+    check_without_sol(z3_mk_HMUX(z3_x, z3_zero, z3_one), z3_zero, stdout);
+    check_without_sol(z3_mk_HMUX(z3_x, z3_one, z3_one), z3_one, stdout);
+    check_without_sol(z3_mk_HMUX(z3_x, z3_x, z3_one), z3_x, stdout);
 
-    prove(z3_mk_HMUX(z3_zero, z3_zero, z3_x), z3_zero);
-    prove(z3_mk_HMUX(z3_zero, z3_one, z3_x), z3_x);
-    prove(z3_mk_HMUX(z3_zero, z3_x, z3_x), z3_x);
-    prove(z3_mk_HMUX(z3_one, z3_zero, z3_x), z3_x);
-    prove(z3_mk_HMUX(z3_one, z3_one, z3_x), z3_one);
-    prove(z3_mk_HMUX(z3_one, z3_x, z3_x), z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_zero, z3_x), z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_one, z3_x), z3_x);
-    prove(z3_mk_HMUX(z3_x, z3_x, z3_x), z3_x);
+    check_without_sol(z3_mk_HMUX(z3_zero, z3_zero, z3_x), z3_zero, stdout);
+    check_without_sol(z3_mk_HMUX(z3_zero, z3_one, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_HMUX(z3_zero, z3_x, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_HMUX(z3_one, z3_zero, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_HMUX(z3_one, z3_one, z3_x), z3_one, stdout);
+    check_without_sol(z3_mk_HMUX(z3_one, z3_x, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_HMUX(z3_x, z3_zero, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_HMUX(z3_x, z3_one, z3_x), z3_x, stdout);
+    check_without_sol(z3_mk_HMUX(z3_x, z3_x, z3_x), z3_x, stdout);
 }
 void Z3Prover::test_EXOR()
 {
-    prove(Z3_mk_not(logic, z3_mk_exor(z3_zero, z3_zero)));
-    prove(z3_mk_exor(z3_zero, z3_one));
-    prove(z3_mk_exor(z3_zero, z3_x));
-    prove(z3_mk_exor(z3_one, z3_zero));
-    prove(Z3_mk_not(logic, z3_mk_exor(z3_one, z3_one)));
-    prove(z3_mk_exor(z3_one, z3_x));
-    prove(Z3_mk_not(logic, z3_mk_exor(z3_x, z3_zero)));
-    prove(Z3_mk_not(logic, z3_mk_exor(z3_x, z3_one)));
-    prove(Z3_mk_not(logic, z3_mk_exor(z3_x, z3_x)));
+    check_without_sol(z3_mk_exor(z3_zero, z3_zero), stdout);
+    check_without_sol(Z3_mk_not(logic, z3_mk_exor(z3_zero, z3_one)), stdout);
+    check_without_sol(Z3_mk_not(logic, z3_mk_exor(z3_zero, z3_x)), stdout);
+    check_without_sol(Z3_mk_not(logic, z3_mk_exor(z3_one, z3_zero)), stdout);
+    check_without_sol(z3_mk_exor(z3_one, z3_one), stdout);
+    check_without_sol(Z3_mk_not(logic, z3_mk_exor(z3_one, z3_x)), stdout);
+    check_without_sol(z3_mk_exor(z3_x, z3_zero), stdout);
+    check_without_sol(z3_mk_exor(z3_x, z3_one), stdout);
+    check_without_sol(z3_mk_exor(z3_x, z3_x), stdout);
 }
-*/

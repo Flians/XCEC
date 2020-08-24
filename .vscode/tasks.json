@@ -5,7 +5,9 @@
             "type": "shell",
             "label": "build_sh",
             "command": "./build.sh",
-            "args": [],
+            "args": [
+                "Debug"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true

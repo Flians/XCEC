@@ -91,6 +91,8 @@ public:
    z3::params config_z3(z3::context &logic, string &priority, unsigned timeout);
 
    /***************** test every operators **********************/
+   void check_without_sol(const Z3_ast &expr, FILE *fout);
+   void check_without_sol(const Z3_ast &left, const Z3_ast &right, FILE *fout);
    void test();
    void test_AND();
    void test_NAND();

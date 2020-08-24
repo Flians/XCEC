@@ -127,7 +127,7 @@ void cec::evaluate_from_POs_to_PIs(vector<Node *> *POs)
 void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
 {
     Z3Prover z3_prover(timeout);
-
+    // z3_prover.test();
     vector<Z3_ast> nodes(init_id);
     for (auto &node : layers[0])
     {
@@ -190,7 +190,6 @@ void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
                 res = z3_prover.z3_mk_HMUX(inputs[0], inputs[1], inputs[2]);
                 break;
             case _DC:
-                // cout << layer[j]->name << ", C: " << layer[j]->ins->front()->name << ", D: " << layer[j]->ins->at(1)->name << endl;
                 res = z3_prover.z3_mk_DC(inputs[0], inputs[1]);
                 break;
             case _EXOR:
