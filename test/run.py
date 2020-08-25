@@ -5,6 +5,7 @@ import subprocess
 
 
 def test_XCEC(exePath, smt='stp', root='./', output='./output/'):
+    print("The prover is", smt)
     files = os.listdir(os.path.join(root, 'cases'))
     files.sort(key= lambda x:int(x[4:]))
     if not os.path.exists(os.path.join(root, 'log')):
