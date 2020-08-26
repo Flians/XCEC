@@ -63,19 +63,23 @@ int main(int argc, char *argv[])
             switch (smt_str[argv[4]])
             {
             case Z3:
+                printf("The prover is %s\n", argv[4]);
                 // pre_time > 112000 ? 1700000 - pre_time : 15 * pre_time
                 cec_.evaluate_by_z3(layers, 1000000);
                 break;
             case BOOLECTOR:
+                printf("The prover is %s\n", argv[4]);
                 cec_.evaluate_by_boolector(layers, 1000000);
                 break;
             default:
+                printf("The prover is stp\n");
                 cec_.evaluate_by_stp(layers, 1000);
                 break;
             }
         }
         else
         {
+            printf("The prover is stp\n");
             cec_.evaluate_by_stp(layers, 1000);
         }
         close_fout();
