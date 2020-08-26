@@ -318,3 +318,100 @@ void cec::evaluate_by_stp(vector<vector<Node *>> &layers, uint32_t timeout)
     vc_DeleteExpr(result);
     vector<Expr>().swap(nodes);
 }
+
+void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, uint32_t timeout)
+{
+    BoolectorProver ble_prover;
+
+    vector<BoolectorNode *> nodes(init_id);
+    for (auto &node : layers[0])
+    {
+        if (node->cell == _CONSTANT)
+        {
+            switch (node->val)
+            {
+            case L:
+                nodes[node->id] = ble_prover.ble_zero;
+                break;
+            case H:
+                nodes[node->id] = ble_prover.ble_one;
+                break;
+            default:
+                nodes[node->id] = ble_prover.ble_x;
+                break;
+            }
+        }
+        else
+        {
+            nodes[node->id] = ble_prover.boolector_mk_variable(node->name);
+        }
+    }
+
+    for (size_t i = 1; i < layers.size(); ++i)
+    {
+        vector<Node *> layer = layers[i];
+        for (size_t j = 0; j < layer.size(); ++j)
+        {
+            vector<BoolectorNode *> inputs(layer[j]->ins->size());
+            for (size_t k = 0; k < layer[j]->ins->size(); ++k)
+            {
+                inputs[k] = nodes[layer[j]->ins->at(k)->id];
+            }
+            BoolectorNode *res;
+            switch (layer[j]->cell)
+            {
+            case _AND:
+                res = ble_prover.boolector_mk_and(inputs);
+                break;
+            case _NAND:
+                res = ble_prover.boolector_mk_not(ble_prover.boolector_mk_and(inputs));
+                break;
+            case _OR:
+                res = ble_prover.boolector_mk_or(inputs);
+                break;
+            case _NOR:
+                res = ble_prover.boolector_mk_not(ble_prover.boolector_mk_or(inputs));
+                break;
+            case _XOR:
+                res = ble_prover.boolector_mk_xor(inputs);
+                break;
+            case _XNOR:
+                res = ble_prover.boolector_mk_not(ble_prover.boolector_mk_xor(inputs));
+                break;
+            case INV:
+                res = ble_prover.boolector_mk_not(inputs[0]);
+                break;
+            case _HMUX:
+                res = ble_prover.boolector_mk_HMUX(inputs[0], inputs[1], inputs[2]);
+                break;
+            case _DC:
+                // cout << layer[j]->name << ", C: " << layer[j]->ins->front()->name << ", D: " << layer[j]->ins->at(1)->name << endl;
+                res = ble_prover.boolector_mk_DC(inputs[0], inputs[1]);
+                break;
+            case _EXOR:
+                res = ble_prover.boolector_mk_exor(inputs[0], inputs[1]);
+                break;
+            default:
+                if (inputs.size() == 0)
+                {
+                    cerr << "The inputs is empty! in jec.evaluate_z3!" << endl;
+                    exit(-1);
+                }
+                res = inputs[0];
+                break;
+            }
+            nodes[layer[j]->id] = res;
+            vector<BoolectorNode *>().swap(inputs);
+        }
+    }
+
+    int i = 0;
+    std::vector<BoolectorNode *> args(layers.back().size(), NULL);
+    for (auto &output : layers.back())
+    {
+        args[i++] = nodes[output->id];
+    }
+    ble_prover.handleQuery(ble_prover.boolector_mk_and_exor(args), timeout, fout);
+    vector<BoolectorNode *>().swap(nodes);
+    vector<BoolectorNode *>().swap(args);
+}

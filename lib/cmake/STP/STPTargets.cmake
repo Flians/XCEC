@@ -54,7 +54,7 @@ endif()
 add_library(stp STATIC IMPORTED)
 
 set_target_properties(stp PROPERTIES
-  INTERFACE_LINK_LIBRARIES "${PROJECT_SOURCE_DIR}/lib/linux/libminisat.a;cryptominisat5"
+  INTERFACE_LINK_LIBRARIES "${PROJECT_SOURCE_DIR}/lib/linux/libminisat.a;${PROJECT_SOURCE_DIR}/lib/linux/libcryptominisat5.a"
 )
 
 if(CMAKE_VERSION VERSION_LESS 2.8.12)

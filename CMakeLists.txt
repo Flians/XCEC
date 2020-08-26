@@ -33,6 +33,11 @@ if (SHAREDLIBRARY)
     message("Use the shared library.")
 endif()
 
+# find Boolector
+set(Boolector_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/Boolector")
+find_package(Boolector REQUIRED PATHS ${Boolector_DIR})
+message("Using Boolector rooted at ${Boolector_DIR}")
+
 # find STP
 set(STP_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/cmake/STP" CACHE PATH "Try to use particular STP install (set this to folder where STPConfig.cmake is installed)")
 find_package(STP REQUIRED PATHS ${STP_DIR})
@@ -87,7 +92,7 @@ message("Source file: " ${SOURCE_FILES})
 set(XCEC_ALL_SRCS main.cpp ${SOURCE_FILES})
 
 add_executable(${PROJECT_NAME} ${XCEC_ALL_SRCS})
-target_link_libraries (${PROJECT_NAME} ${Z3_LIBRARIES} stp croaring)
+target_link_libraries (${PROJECT_NAME} ${Z3_LIBRARIES} stp croaring Boolector::boolector)
 
 if(WINDOWS)
     # Copy DLL files to output directory

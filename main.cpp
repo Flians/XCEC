@@ -17,7 +17,6 @@ unordered_map<string, SMT> smt_str = {
 // cd build && cmake -G"Unix Makefiles && make" ../
 int main(int argc, char *argv[])
 {
-    // testOp::test();
     if (argc >= 4)
     {
         clock_t startTime, endTime;
@@ -68,7 +67,7 @@ int main(int argc, char *argv[])
                 cec_.evaluate_by_z3(layers, 1000000);
                 break;
             case BOOLECTOR:
-                /* code */
+                cec_.evaluate_by_boolector(layers, 1000000);
                 break;
             default:
                 cec_.evaluate_by_stp(layers, 1000);

@@ -1,8 +1,0 @@
-/home/flynn/Desktop/XCEC/build/CMakeFiles/install/strip.dir
-/home/flynn/Desktop/XCEC/build/CMakeFiles/install/local.dir
-/home/flynn/Desktop/XCEC/build/CMakeFiles/XCEC.dir
-/home/flynn/Desktop/XCEC/build/CMakeFiles/croaring.dir
-/home/flynn/Desktop/XCEC/build/CMakeFiles/edit_cache.dir
-/home/flynn/Desktop/XCEC/build/CMakeFiles/rebuild_cache.dir
-/home/flynn/Desktop/XCEC/build/CMakeFiles/list_install_components.dir
-/home/flynn/Desktop/XCEC/build/CMakeFiles/install.dir

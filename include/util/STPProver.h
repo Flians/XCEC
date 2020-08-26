@@ -11,7 +11,7 @@
 class STPProver
 {
 private:
-    std::vector<Expr> exprs;
+    std::vector<Expr> in_exprs;
 
 public:
     VC handle;

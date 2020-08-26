@@ -18,7 +18,7 @@ STPProver::~STPProver()
 {
     // Clean up
     vc_Destroy(handle);
-    std::vector<Expr>().swap(this->exprs);
+    std::vector<Expr>().swap(this->in_exprs);
 }
 
 // Error handler
@@ -30,16 +30,16 @@ void STPProver::errorHandler(const char *err_msg)
 
 std::vector<Expr> &STPProver::init_exprs(std::size_t nums)
 {
-    std::vector<Expr>().swap(this->exprs);
-    this->exprs.reserve(nums);
-    return this->exprs;
+    std::vector<Expr>().swap(this->in_exprs);
+    this->in_exprs.reserve(nums);
+    return this->in_exprs;
 }
 
 Expr STPProver::stp_mk_variable(std::string &name)
 {
     Expr var = vc_varExpr(this->handle, name.c_str(), bv_type);
     vc_assertFormula(this->handle, vc_bvLeExpr(this->handle, var, stp_one));
-    this->exprs.push_back(var);
+    this->in_exprs.push_back(var);
     return var;
 }
 
@@ -156,7 +156,7 @@ void STPProver::handleQuery(const Expr &queryExpr, uint32_t timeout, FILE *fout)
         // print counter example
         // printf("Counter example:\n");
         // vc_printCounterExample(this->handle);
-        for (auto &pi : this->exprs)
+        for (auto &pi : this->in_exprs)
         {
             fprintf(fout, "%s %d\n", exprString(pi), getBVUnsigned(vc_getCounterExample(this->handle, pi)));
         }

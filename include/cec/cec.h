@@ -4,6 +4,7 @@
 #include "libhead.h"
 #include "Z3Prover.h"
 #include "STPProver.h"
+#include "BoolectorProver.h"
 
 class cec
 {
@@ -28,6 +29,8 @@ public:
     void evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout);
     // evaluate using stp, timeout is second
     void evaluate_by_stp(vector<vector<Node *> > &layers, uint32_t timeout);
+    // evaluate using boolector, timeout is second
+    void evaluate_by_boolector(vector<vector<Node *> > &layers, uint32_t timeout);
 };
 
 #endif

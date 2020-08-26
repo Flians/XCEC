@@ -110,8 +110,9 @@ struct Node
                 if (out && out->ins)
                 {
                     vector<Node *>::iterator temp = find(out->ins->begin(), out->ins->end(), this);
-                    if (temp != out->ins->end())
+                    if (temp != out->ins->end()) {
                         out->ins->erase(temp);
+                    }
                 }
             }
             vector<Node *>().swap(*this->outs);
