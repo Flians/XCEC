@@ -12,6 +12,7 @@ class STPProver
 {
 private:
     std::vector<Expr> in_exprs;
+    std::vector<Expr> assert_exprs;
 
 public:
     VC handle;
@@ -40,9 +41,12 @@ public:
     Expr stp_mk_DC(const Expr &C, const Expr &D);
     Expr stp_mk_HMUX(const Expr &I0, const Expr &I1, const Expr &S);
     Expr stp_mk_exor(const Expr &, const Expr &);
+    Expr stp_mk_and_exor(Expr *exprs, int size);
 
     void handleQuery(const Expr &queryExpr, uint32_t timeout, FILE *fout);
     void handleQuery(const Expr &left, const Expr &right, uint32_t timeout, FILE *fout);
+    void handleQuery_Impl(const Expr &left, const Expr &right, uint32_t timeout, FILE *fout);
+    void handleQuery_Impl(const Expr &right, uint32_t timeout, FILE *fout);
 
     /***************** test every operators **********************/
     void test();

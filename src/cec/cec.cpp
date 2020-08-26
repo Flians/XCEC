@@ -313,9 +313,7 @@ void cec::evaluate_by_stp(vector<vector<Node *>> &layers, uint32_t timeout)
     {
         args[i++] = nodes[output->id];
     }
-    Expr result = vc_andExprN(stp_prover.handle, args, layers.back().size());
-    stp_prover.handleQuery(result, timeout, fout);
-    vc_DeleteExpr(result);
+    stp_prover.handleQuery_Impl(stp_prover.stp_mk_and_exor(args, layers.back().size()), timeout, fout);
     vector<Expr>().swap(nodes);
 }
 

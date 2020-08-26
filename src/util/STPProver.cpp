@@ -19,6 +19,7 @@ STPProver::~STPProver()
     // Clean up
     vc_Destroy(handle);
     std::vector<Expr>().swap(this->in_exprs);
+    std::vector<Expr>().swap(this->assert_exprs);
 }
 
 // Error handler
@@ -32,14 +33,17 @@ std::vector<Expr> &STPProver::init_exprs(std::size_t nums)
 {
     std::vector<Expr>().swap(this->in_exprs);
     this->in_exprs.reserve(nums);
+    std::vector<Expr>().swap(this->assert_exprs);
+    this->assert_exprs.reserve(nums);
     return this->in_exprs;
 }
 
 Expr STPProver::stp_mk_variable(std::string &name)
 {
     Expr var = vc_varExpr(this->handle, name.c_str(), bv_type);
-    vc_assertFormula(this->handle, vc_bvLeExpr(this->handle, var, stp_one));
-    this->in_exprs.push_back(var);
+    // vc_assertFormula(this->handle, vc_bvLeExpr(this->handle, var, stp_one));
+    this->in_exprs.emplace_back(var);
+    this->assert_exprs.push_back(vc_bvLeExpr(this->handle, var, stp_one));
     return var;
 }
 
@@ -132,6 +136,11 @@ Expr STPProver::stp_mk_exor(const Expr &A, const Expr &B)
     return vc_orExpr(this->handle, vc_eqExpr(this->handle, A, stp_x), vc_eqExpr(this->handle, A, B));
 }
 
+Expr STPProver::stp_mk_and_exor(Expr *exprs, int size)
+{
+    return vc_andExprN(this->handle, exprs, size);
+}
+
 void STPProver::handleQuery(const Expr &queryExpr, uint32_t timeout, FILE *fout)
 {
     // Print the assertions
@@ -164,12 +173,24 @@ void STPProver::handleQuery(const Expr &queryExpr, uint32_t timeout, FILE *fout)
     default:
         printf("Unhandled error\n");
     }
+    vc_DeleteExpr(queryExpr);
 }
 
 void STPProver::handleQuery(const Expr &left, const Expr &right, uint32_t timeout, FILE *fout)
 {
     this->handleQuery(vc_eqExpr(this->handle, left, right), timeout, fout);
 }
+
+void STPProver::handleQuery_Impl(const Expr &left, const Expr &right, uint32_t timeout, FILE *fout) {
+    this->handleQuery(vc_impliesExpr(this->handle, left, right), timeout, fout);
+}
+
+void STPProver::handleQuery_Impl(const Expr &right, uint32_t timeout, FILE *fout) {
+    Expr left[this->assert_exprs.size()];
+    std::copy(this->assert_exprs.begin(), this->assert_exprs.end(), left);
+    this->handleQuery(vc_impliesExpr(this->handle, stp_mk_and_exor(left, this->assert_exprs.size()), right), timeout, fout);
+}
+
 
 /***************** test every operators **********************/
 void STPProver::test()
