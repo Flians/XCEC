@@ -11,12 +11,12 @@
 class STPProver
 {
 private:
+    VC handle;
+    Type bv_type;
     std::vector<Expr> in_exprs;
     std::vector<Expr> assert_exprs;
 
 public:
-    VC handle;
-    Type bv_type;
     Expr stp_zero;
     Expr stp_one;
     Expr stp_x;
