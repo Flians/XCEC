@@ -34,7 +34,7 @@ cd boolector
 ./contrib/setup-btor2tools.sh
 ./contrib/setup-cadical.sh 
 ./contrib/setup-cms.sh 
-./configure.sh --prefix ../install 
+./configure.sh --prefix ../../../../XCEC
 cd build && make install
 ```
 
