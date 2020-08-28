@@ -37,7 +37,7 @@ BoolectorNode *BoolectorProver::boolector_mk_variable(std::string &name)
     boolector_assert(this->btor, t_assert);
     this->exprs.insert(var);
     this->assert_exprs.emplace_back(t_assert);
-    this->in_exprs[name] = var;
+    this->in_exprs.emplace_back(var);
     return var;
 }
 
@@ -210,9 +210,11 @@ void BoolectorProver::handleQuery(BoolectorNode *queryExpr, uint32_t timeout, FI
         fprintf(fout, "NEQ\n");
         for (auto &pi : this->in_exprs)
         {
-            const char *assign = boolector_bv_assignment(this->btor, pi.second);
-            fprintf(fout, "%s %s\n", pi.first.c_str(), assign);
+            const char *assign = boolector_bv_assignment(this->btor, pi);
+            const char *symbol = boolector_get_symbol(this->btor, pi);
+            fprintf(fout, "%s %s\n", symbol, assign);
             boolector_free_bv_assignment(this->btor, assign);
+            boolector_free_bv_assignment(this->btor, symbol);
         }
         break;
     default:

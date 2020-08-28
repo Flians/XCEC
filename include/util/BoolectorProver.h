@@ -18,7 +18,7 @@ private:
     BoolectorSort bsort;
     std::unordered_set<BoolectorNode *> exprs;
     std::vector<BoolectorNode *> assert_exprs;
-    std::unordered_map<std::string, BoolectorNode *> in_exprs;
+    std::vector<BoolectorNode *> in_exprs;
 
 public:
     BoolectorNode *ble_zero;
