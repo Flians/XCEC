@@ -1,6 +1,7 @@
 The parsing process is over!
-The parsing time is: 0.123812 S
+The parsing time is: 0.421509 S
 The number of INV, BUF, and others reduction is 4750
-The prover is boolector
-The run time is: 2.46689 S
+The prover is stp
+Timeout.
+The run time is: 1009.7 S
 The parser is destroyed!
