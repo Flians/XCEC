@@ -204,9 +204,9 @@ void BoolectorProver::test()
     Prover::test();
 }
 
-void STPProver::test_NAND() {}
-void STPProver::test_NOR() {}
-void STPProver::test_XNOR() {}
+void BoolectorProver::test_NAND() {}
+void BoolectorProver::test_NOR() {}
+void BoolectorProver::test_XNOR() {}
 
 void BoolectorProver::test_EXOR()
 {
