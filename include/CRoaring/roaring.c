@@ -7546,8 +7546,8 @@ int run_container_rank(const run_container_t *container, uint16_t x) {
 
 extern inline bool roaring_bitmap_contains(const roaring_bitmap_t *r,
                                            uint32_t val);
-extern inline bool roaring_bitmap_get_copy_on_write(const roaring_bitmap_t* r);
-extern inline void roaring_bitmap_set_copy_on_write(roaring_bitmap_t* r, bool cow);
+// extern inline bool roaring_bitmap_get_copy_on_write(const roaring_bitmap_t* r);
+// extern inline void roaring_bitmap_set_copy_on_write(roaring_bitmap_t* r, bool cow);
 
 static inline bool is_cow(const roaring_bitmap_t *r) {
     return r->high_low_container.flags & ROARING_FLAG_COW;
@@ -7806,7 +7806,7 @@ void roaring_bitmap_remove_range_closed(roaring_bitmap_t *ra, uint32_t min, uint
     }
 }
 
-extern inline void roaring_bitmap_add_range(roaring_bitmap_t *ra, uint64_t min, uint64_t max);
+// extern inline void roaring_bitmap_add_range(roaring_bitmap_t *ra, uint64_t min, uint64_t max);
 extern inline void roaring_bitmap_remove_range(roaring_bitmap_t *ra, uint64_t min, uint64_t max);
 
 void roaring_bitmap_printf(const roaring_bitmap_t *ra) {
