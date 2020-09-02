@@ -70,7 +70,7 @@ void *BoolectorProver::prover_mk_or(void *const &A, void *const &B)
 
 void *BoolectorProver::prover_mk_xor(void *const &A, void *const &B)
 {
-    BoolectorNode *t_and = boolector_xor((Btor *)this->handle, (BoolectorNode *)A, (BoolectorNode *)B);
+    BoolectorNode *t_and = boolector_and((Btor *)this->handle, (BoolectorNode *)A, (BoolectorNode *)B);
     BoolectorNode *t_eq = boolector_eq((Btor *)this->handle, t_and, (BoolectorNode *)this->prover_one);
     BoolectorNode *t_uge = boolector_ugte((Btor *)this->handle, (BoolectorNode *)A, (BoolectorNode *)B);
     BoolectorNode *t_cond = boolector_cond((Btor *)this->handle, t_uge, (BoolectorNode *)A, (BoolectorNode *)B);

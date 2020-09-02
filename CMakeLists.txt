@@ -25,7 +25,9 @@ elseif(CMAKE_HOST_UNIX)
     message("The enviriment is in linux.")
 endif()
 
+# add croaring
 add_library(croaring STATIC ${PROJECT_SOURCE_DIR}/include/CRoaring/roaring.c)
+target_include_directories(croaring PUBLIC ${PROJECT_SOURCE_DIR}/include/CRoaring/)
 
 option(SHAREDLIBRARY "Use the shared library for z3" OFF)
 if (SHAREDLIBRARY)
@@ -77,7 +79,7 @@ function(include_sub_directories_recursively root_dir)
 
     file(GLOB ALL_SUB RELATIVE ${root_dir} ${root_dir}/*)
     foreach(sub ${ALL_SUB})
-        if (IS_DIRECTORY ${root_dir}/${sub})
+        if (IS_DIRECTORY ${root_dir}/${sub} AND NOT(${sub} STREQUAL "CRoaring"))
             include_sub_directories_recursively(${root_dir}/${sub})
         endif()
     endforeach()
