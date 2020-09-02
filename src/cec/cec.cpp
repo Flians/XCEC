@@ -321,7 +321,7 @@ void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, uint32_t timeout
 {
     Prover *ble_prover = new BoolectorProver();
 
-    vector<void *> nodes(init_id);
+    vector<std::shared_ptr<void>> nodes(init_id);
     for (auto &node : layers[0])
     {
         if (node->cell == _CONSTANT)
@@ -350,12 +350,12 @@ void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, uint32_t timeout
         vector<Node *> layer = layers[i];
         for (size_t j = 0; j < layer.size(); ++j)
         {
-            vector<void *> inputs(layer[j]->ins->size());
+            vector<std::shared_ptr<void>> inputs(layer[j]->ins->size());
             for (size_t k = 0; k < layer[j]->ins->size(); ++k)
             {
                 inputs[k] = nodes[layer[j]->ins->at(k)->id];
             }
-            void *res;
+            std::shared_ptr<void>res;
             switch (layer[j]->cell)
             {
             case _AND:
@@ -399,18 +399,18 @@ void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, uint32_t timeout
                 break;
             }
             nodes[layer[j]->id] = res;
-            vector<void *>().swap(inputs);
+            vector<std::shared_ptr<void>>().swap(inputs);
         }
     }
 
     int i = 0;
-    std::vector<void *> args(layers.back().size(), NULL);
+    std::vector<std::shared_ptr<void>> args(layers.back().size(), NULL);
     for (auto &output : layers.back())
     {
         args[i++] = nodes[output->id];
     }
     ble_prover->handleQuery(ble_prover->prover_mk_and_exor(args), timeout, fout);
-    vector<void *>().swap(nodes);
-    vector<void *>().swap(args);
+    vector<std::shared_ptr<void>>().swap(nodes);
+    vector<std::shared_ptr<void>>().swap(args);
     delete ble_prover;
 }

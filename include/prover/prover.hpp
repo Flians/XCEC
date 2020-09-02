@@ -5,50 +5,51 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <memory>
 #include <assert.h>
 #include <unordered_set>
 
 class Prover
 {
 protected:
-    std::unordered_set<void *> exprs;
-    std::vector<void *> assert_exprs;
-    std::vector<void *> in_exprs;
+    std::unordered_set<std::shared_ptr<void>> exprs;
+    std::vector<std::shared_ptr<void>> assert_exprs;
+    std::vector<std::shared_ptr<void>> in_exprs;
 
 public:
-    void *prover_zero;
-    void *prover_one;
-    void *prover_x;
-    void *prover_undefined;
+    std::shared_ptr<void> prover_zero;
+    std::shared_ptr<void> prover_one;
+    std::shared_ptr<void> prover_x;
+    std::shared_ptr<void> prover_undefined;
 
     Prover()
     {
         exprs.clear();
-        std::vector<void *>().swap(assert_exprs);
-        std::vector<void *>().swap(in_exprs);
+        std::vector<std::shared_ptr<void> >().swap(assert_exprs);
+        std::vector<std::shared_ptr<void> >().swap(in_exprs);
     }
 
     virtual ~Prover()
     {
         this->exprs.clear();
-        std::vector<void *>().swap(this->assert_exprs);
-        std::vector<void *>().swap(this->in_exprs);
+        std::vector<std::shared_ptr<void> >().swap(this->assert_exprs);
+        std::vector<std::shared_ptr<void> >().swap(this->in_exprs);
         printf("The Prover is destroyed!\n");
     }
 
-    virtual void *prover_mk_variable(const std::string &name) = 0;
+    virtual std::shared_ptr<void> prover_mk_variable(const std::string &name) = 0;
 
-    virtual void *prover_mk_and(void *const &, void *const &) = 0;
+    virtual std::shared_ptr<void> prover_mk_and(std::shared_ptr<void> const &, std::shared_ptr<void> const &) = 0;
 
-    virtual void *prover_mk_and(std::vector<void *> &exprs)
+    virtual std::shared_ptr<void> prover_mk_and(std::vector<std::shared_ptr<void> > &exprs)
     {
         if (exprs.empty())
         {
             return NULL;
         }
-        void *res = exprs[0];
-        std::vector<void *>::iterator it_ = exprs.begin() + 1;
-        std::vector<void *>::iterator it_end = exprs.end();
+        std::shared_ptr<void> res = exprs[0];
+        std::vector<std::shared_ptr<void> >::iterator it_ = exprs.begin() + 1;
+        std::vector<std::shared_ptr<void> >::iterator it_end = exprs.end();
         while (it_ != it_end)
         {
             res = prover_mk_and(res, *(it_++));
@@ -57,16 +58,16 @@ public:
         return res;
     }
 
-    virtual void *prover_mk_or(void *const &, void *const &) = 0;
-    virtual void *prover_mk_or(std::vector<void *> &exprs)
+    virtual std::shared_ptr<void> prover_mk_or(std::shared_ptr<void> const &, std::shared_ptr<void> const &) = 0;
+    virtual std::shared_ptr<void> prover_mk_or(std::vector<std::shared_ptr<void> > &exprs)
     {
         if (exprs.empty())
         {
             return NULL;
         }
-        void *res = exprs[0];
-        std::vector<void *>::iterator it_ = exprs.begin() + 1;
-        std::vector<void *>::iterator it_end = exprs.end();
+        std::shared_ptr<void> res = exprs[0];
+        std::vector<std::shared_ptr<void> >::iterator it_ = exprs.begin() + 1;
+        std::vector<std::shared_ptr<void> >::iterator it_end = exprs.end();
         while (it_ != it_end)
         {
             res = prover_mk_or(res, *(it_++));
@@ -75,16 +76,16 @@ public:
         return res;
     }
 
-    virtual void *prover_mk_xor(void *const &, void *const &) = 0;
-    virtual void *prover_mk_xor(std::vector<void *> &exprs)
+    virtual std::shared_ptr<void> prover_mk_xor(std::shared_ptr<void> const &, std::shared_ptr<void> const &) = 0;
+    virtual std::shared_ptr<void> prover_mk_xor(std::vector<std::shared_ptr<void> > &exprs)
     {
         if (exprs.empty())
         {
             return NULL;
         }
-        void *res = exprs[0];
-        std::vector<void *>::iterator it_ = exprs.begin() + 1;
-        std::vector<void *>::iterator it_end = exprs.end();
+        std::shared_ptr<void> res = exprs[0];
+        std::vector<std::shared_ptr<void> >::iterator it_ = exprs.begin() + 1;
+        std::vector<std::shared_ptr<void> >::iterator it_end = exprs.end();
         while (it_ != it_end)
         {
             res = prover_mk_xor(res, *(it_++));
@@ -93,16 +94,16 @@ public:
         return res;
     }
 
-    virtual void *prover_mk_not(void *const &) = 0;
-    virtual void *prover_mk_DC(void *const &C, void *const &D) = 0;
-    virtual void *prover_mk_HMUX(void *const &I0, void *const &I1, void *const &s) = 0;
-    virtual void *prover_mk_exor(void *const &, void *const &) = 0;
-    virtual void *prover_mk_and_exor(std::vector<void *> &exprs) = 0;
+    virtual std::shared_ptr<void> prover_mk_not(std::shared_ptr<void> const &) = 0;
+    virtual std::shared_ptr<void> prover_mk_DC(std::shared_ptr<void> const &C, std::shared_ptr<void> const &D) = 0;
+    virtual std::shared_ptr<void> prover_mk_HMUX(std::shared_ptr<void> const &I0, std::shared_ptr<void> const &I1, std::shared_ptr<void> const &s) = 0;
+    virtual std::shared_ptr<void> prover_mk_exor(std::shared_ptr<void> const &, std::shared_ptr<void> const &) = 0;
+    virtual std::shared_ptr<void> prover_mk_and_exor(std::vector<std::shared_ptr<void> > &exprs) = 0;
 
-    virtual void handleQuery(void *const &queryExpr, uint32_t timeout, FILE *fout) = 0;
-    virtual void handleQuery_EQ(void *const &left, void *const &right, uint32_t timeout, FILE *fout) = 0;
-    virtual void handleQuery_Impl(void *const &left, void *const &right, uint32_t timeout, FILE *fout) = 0;
-    virtual void handleQuery_Impl(void *const &right, uint32_t timeout, FILE *fout) = 0;
+    virtual void handleQuery(std::shared_ptr<void> const &queryExpr, uint32_t timeout, FILE *fout) = 0;
+    virtual void handleQuery_EQ(std::shared_ptr<void> const &left, std::shared_ptr<void> const &right, uint32_t timeout, FILE *fout) = 0;
+    virtual void handleQuery_Impl(std::shared_ptr<void> const &left, std::shared_ptr<void> const &right, uint32_t timeout, FILE *fout) = 0;
+    virtual void handleQuery_Impl(std::shared_ptr<void> const &right, uint32_t timeout, FILE *fout) = 0;
 
     /***************** test every operators **********************/
     virtual void test()
