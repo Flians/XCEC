@@ -99,10 +99,10 @@ public:
     virtual void *prover_mk_exor(void *const &, void *const &) = 0;
     virtual void *prover_mk_and_exor(std::vector<void *> &exprs) = 0;
 
-    virtual void handleQuery(void *const &queryExpr, uint32_t timeout, FILE *fout) = 0;
-    virtual void handleQuery_EQ(void *const &left, void *const &right, uint32_t timeout, FILE *fout) = 0;
-    virtual void handleQuery_Impl(void *const &left, void *const &right, uint32_t timeout, FILE *fout) = 0;
-    virtual void handleQuery_Impl(void *const &right, uint32_t timeout, FILE *fout) = 0;
+    virtual void handleQuery(void *const &queryExpr, uint32_t timeout, uint32_t max_conflicts, FILE *fout) = 0;
+    virtual void handleQuery_EQ(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout) = 0;
+    virtual void handleQuery_Impl(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout) = 0;
+    virtual void handleQuery_Impl(void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout) = 0;
 
     /***************** test every operators **********************/
     virtual void test()
@@ -125,94 +125,94 @@ public:
 
     void test_AND()
     {
-        this->handleQuery_EQ(prover_mk_and(this->prover_zero, this->prover_zero), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_and(this->prover_zero, this->prover_one), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_and(this->prover_zero, this->prover_x), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_and(this->prover_one, this->prover_zero), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_and(this->prover_one, this->prover_one), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_and(this->prover_one, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_and(this->prover_x, this->prover_zero), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_and(this->prover_x, this->prover_one), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_and(this->prover_x, this->prover_x), this->prover_x, 10, stdout);
+        this->handleQuery_EQ(prover_mk_and(this->prover_zero, this->prover_zero), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_and(this->prover_zero, this->prover_one), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_and(this->prover_zero, this->prover_x), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_and(this->prover_one, this->prover_zero), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_and(this->prover_one, this->prover_one), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_and(this->prover_one, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_and(this->prover_x, this->prover_zero), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_and(this->prover_x, this->prover_one), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_and(this->prover_x, this->prover_x), this->prover_x, 1000, 10000, stdout);
     }
 
     void test_OR()
     {
-        this->handleQuery_EQ(prover_mk_or(this->prover_zero, this->prover_zero), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_or(this->prover_zero, this->prover_one), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_or(this->prover_zero, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_or(this->prover_one, this->prover_zero), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_or(this->prover_one, this->prover_one), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_or(this->prover_one, this->prover_x), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_or(this->prover_x, this->prover_zero), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_or(this->prover_x, this->prover_one), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_or(this->prover_x, this->prover_x), this->prover_x, 10, stdout);
+        this->handleQuery_EQ(prover_mk_or(this->prover_zero, this->prover_zero), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_or(this->prover_zero, this->prover_one), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_or(this->prover_zero, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_or(this->prover_one, this->prover_zero), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_or(this->prover_one, this->prover_one), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_or(this->prover_one, this->prover_x), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_or(this->prover_x, this->prover_zero), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_or(this->prover_x, this->prover_one), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_or(this->prover_x, this->prover_x), this->prover_x, 1000, 10000, stdout);
     }
 
     void test_XOR()
     {
-        this->handleQuery_EQ(prover_mk_xor(this->prover_zero, this->prover_zero), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_xor(this->prover_zero, this->prover_one), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_xor(this->prover_zero, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_xor(this->prover_one, this->prover_zero), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_xor(this->prover_one, this->prover_one), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_xor(this->prover_one, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_xor(this->prover_x, this->prover_zero), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_xor(this->prover_x, this->prover_one), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_xor(this->prover_x, this->prover_x), this->prover_x, 10, stdout);
+        this->handleQuery_EQ(prover_mk_xor(this->prover_zero, this->prover_zero), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_xor(this->prover_zero, this->prover_one), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_xor(this->prover_zero, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_xor(this->prover_one, this->prover_zero), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_xor(this->prover_one, this->prover_one), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_xor(this->prover_one, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_xor(this->prover_x, this->prover_zero), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_xor(this->prover_x, this->prover_one), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_xor(this->prover_x, this->prover_x), this->prover_x, 1000, 10000, stdout);
     }
 
     void test_INV()
     {
-        this->handleQuery_EQ(prover_mk_not(this->prover_zero), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_not(this->prover_one), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_not(this->prover_x), this->prover_x, 10, stdout);
+        this->handleQuery_EQ(prover_mk_not(this->prover_zero), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_not(this->prover_one), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_not(this->prover_x), this->prover_x, 1000, 10000, stdout);
     }
 
     void test_DC()
     {
-        this->handleQuery_EQ(prover_mk_DC(this->prover_zero, this->prover_zero), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_DC(this->prover_zero, this->prover_one), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_DC(this->prover_zero, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_DC(this->prover_one, this->prover_zero), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_DC(this->prover_one, this->prover_one), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_DC(this->prover_one, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_DC(this->prover_x, this->prover_zero), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_DC(this->prover_x, this->prover_one), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_DC(this->prover_x, this->prover_x), this->prover_x, 10, stdout);
+        this->handleQuery_EQ(prover_mk_DC(this->prover_zero, this->prover_zero), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_DC(this->prover_zero, this->prover_one), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_DC(this->prover_zero, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_DC(this->prover_one, this->prover_zero), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_DC(this->prover_one, this->prover_one), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_DC(this->prover_one, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_DC(this->prover_x, this->prover_zero), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_DC(this->prover_x, this->prover_one), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_DC(this->prover_x, this->prover_x), this->prover_x, 1000, 10000, stdout);
     }
 
     void test_HMUX()
     {
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_zero, this->prover_zero), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_one, this->prover_zero), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_x, this->prover_zero), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_zero, this->prover_zero), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_one, this->prover_zero), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_x, this->prover_zero), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_zero, this->prover_zero), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_one, this->prover_zero), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_x, this->prover_zero), this->prover_x, 10, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_zero, this->prover_zero), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_one, this->prover_zero), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_x, this->prover_zero), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_zero, this->prover_zero), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_one, this->prover_zero), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_x, this->prover_zero), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_zero, this->prover_zero), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_one, this->prover_zero), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_x, this->prover_zero), this->prover_x, 1000, 10000, stdout);
 
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_zero, this->prover_one), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_one, this->prover_one), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_x, this->prover_one), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_zero, this->prover_one), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_one, this->prover_one), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_x, this->prover_one), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_zero, this->prover_one), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_one, this->prover_one), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_x, this->prover_one), this->prover_x, 10, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_zero, this->prover_one), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_one, this->prover_one), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_x, this->prover_one), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_zero, this->prover_one), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_one, this->prover_one), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_x, this->prover_one), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_zero, this->prover_one), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_one, this->prover_one), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_x, this->prover_one), this->prover_x, 1000, 10000, stdout);
 
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_zero, this->prover_x), this->prover_zero, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_one, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_x, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_zero, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_one, this->prover_x), this->prover_one, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_x, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_zero, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_one, this->prover_x), this->prover_x, 10, stdout);
-        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_x, this->prover_x), this->prover_x, 10, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_zero, this->prover_x), this->prover_zero, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_one, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_zero, this->prover_x, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_zero, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_one, this->prover_x), this->prover_one, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_one, this->prover_x, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_zero, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_one, this->prover_x), this->prover_x, 1000, 10000, stdout);
+        this->handleQuery_EQ(prover_mk_HMUX(this->prover_x, this->prover_x, this->prover_x), this->prover_x, 1000, 10000, stdout);
     }
 
     virtual void test_EXOR() = 0;

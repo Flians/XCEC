@@ -5,6 +5,7 @@ BoolectorProver::BoolectorProver()
     this->handle = boolector_new();
     boolector_set_opt((Btor *)this->handle, BTOR_OPT_MODEL_GEN, 1);
     boolector_set_opt((Btor *)this->handle, BTOR_OPT_OUTPUT_NUMBER_FORMAT, 2);
+    boolector_set_opt((Btor *)this->handle, BTOR_OPT_AUTO_CLEANUP, 1);
     this->bv_sort = boolector_bitvec_sort((Btor *)this->handle, 2);
     this->prover_zero = boolector_zero((Btor *)this->handle, this->bv_sort);
     this->prover_one = boolector_one((Btor *)this->handle, this->bv_sort);
@@ -39,7 +40,7 @@ void *BoolectorProver::prover_mk_variable(const std::string &name)
 {
     BoolectorNode *var = boolector_var((Btor *)this->handle, this->bv_sort, name.c_str());
     BoolectorNode *t_assert = boolector_ult((Btor *)this->handle, var, (BoolectorNode *)this->prover_x);
-    boolector_assert((Btor *)this->handle, t_assert);
+    // boolector_assert((Btor *)this->handle, t_assert);
     this->exprs.insert(var);
     this->assert_exprs.emplace_back(t_assert);
     this->in_exprs.emplace_back(var);
@@ -148,11 +149,11 @@ void *BoolectorProver::prover_mk_and_exor(std::vector<void *> &exors)
     return res;
 }
 
-void BoolectorProver::handleQuery(void *const &queryExpr, uint32_t timeout, FILE *fout)
+void BoolectorProver::handleQuery(void *const &queryExpr, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
 {
     BoolectorNode *formula = boolector_not((Btor *)this->handle, (BoolectorNode *)queryExpr);
     boolector_assert((Btor *)this->handle, formula);
-    int result = boolector_limited_sat((Btor *)this->handle, -1, -1);
+    int result = boolector_limited_sat((Btor *)this->handle, timeout, max_conflicts);
     switch (result)
     {
     case BOOLECTOR_UNKNOWN:
@@ -176,31 +177,31 @@ void BoolectorProver::handleQuery(void *const &queryExpr, uint32_t timeout, FILE
     boolector_release((Btor *)this->handle, formula);
 }
 
-void BoolectorProver::handleQuery_EQ(void *const &left, void *const &right, uint32_t timeout, FILE *fout)
+void BoolectorProver::handleQuery_EQ(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
 {
     BoolectorNode *t_eq = boolector_eq((Btor *)this->handle, (BoolectorNode *)left, (BoolectorNode *)right);
-    this->handleQuery(t_eq, timeout, fout);
+    this->handleQuery(t_eq, timeout, max_conflicts, fout);
     boolector_release((Btor *)this->handle, t_eq);
 }
 
-void BoolectorProver::handleQuery_Impl(void *const &left, void *const &right, uint32_t timeout, FILE *fout)
+void BoolectorProver::handleQuery_Impl(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
 {
     BoolectorNode *t_eq = boolector_implies((Btor *)this->handle, (BoolectorNode *)left, (BoolectorNode *)right);
-    this->handleQuery(t_eq, timeout, fout);
+    this->handleQuery(t_eq, timeout, max_conflicts, fout);
     boolector_release((Btor *)this->handle, t_eq);
 }
 
-void BoolectorProver::handleQuery_Impl(void *const &right, uint32_t timeout, FILE *fout)
+void BoolectorProver::handleQuery_Impl(void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
 {
     BoolectorNode *t_eq = boolector_implies((Btor *)this->handle, (BoolectorNode *)prover_mk_and_exor(this->assert_exprs), (BoolectorNode *)right);
-    this->handleQuery(t_eq, timeout, fout);
+    this->handleQuery(t_eq, timeout, max_conflicts, fout);
     boolector_release((Btor *)this->handle, t_eq);
 }
 
 /***************** test every operators **********************/
 void BoolectorProver::test()
 {
-    boolector_set_opt((Btor *)this->handle, BTOR_OPT_INCREMENTAL, 1);
+    // boolector_set_opt((Btor *)this->handle, BTOR_OPT_INCREMENTAL, 1);
     Prover::test();
 }
 
@@ -210,13 +211,13 @@ void BoolectorProver::test_XNOR() {}
 
 void BoolectorProver::test_EXOR()
 {
-    this->handleQuery(prover_mk_exor(this->prover_zero, this->prover_zero), 10, stdout);
-    this->handleQuery(boolector_not((Btor *)this->handle, (BoolectorNode *)prover_mk_exor(this->prover_zero, this->prover_one)), 10, stdout);
-    this->handleQuery(boolector_not((Btor *)this->handle, (BoolectorNode *)prover_mk_exor(this->prover_zero, this->prover_x)), 10, stdout);
-    this->handleQuery(boolector_not((Btor *)this->handle, (BoolectorNode *)prover_mk_exor(this->prover_one, this->prover_zero)), 10, stdout);
-    this->handleQuery(prover_mk_exor(this->prover_one, this->prover_one), 10, stdout);
-    this->handleQuery(boolector_not((Btor *)this->handle, (BoolectorNode *)prover_mk_exor(this->prover_one, this->prover_x)), 10, stdout);
-    this->handleQuery(prover_mk_exor(this->prover_x, this->prover_zero), 10, stdout);
-    this->handleQuery(prover_mk_exor(this->prover_x, this->prover_one), 10, stdout);
-    this->handleQuery(prover_mk_exor(this->prover_x, this->prover_x), 10, stdout);
+    this->handleQuery(prover_mk_exor(this->prover_zero, this->prover_zero), 1000, 10000, stdout);
+    this->handleQuery(boolector_not((Btor *)this->handle, (BoolectorNode *)prover_mk_exor(this->prover_zero, this->prover_one)), 0, 10000, stdout);
+    this->handleQuery(boolector_not((Btor *)this->handle, (BoolectorNode *)prover_mk_exor(this->prover_zero, this->prover_x)), 0, 10000, stdout);
+    this->handleQuery(boolector_not((Btor *)this->handle, (BoolectorNode *)prover_mk_exor(this->prover_one, this->prover_zero)), 0, 10000, stdout);
+    this->handleQuery(prover_mk_exor(this->prover_one, this->prover_one), 1000, 10000, stdout);
+    this->handleQuery(boolector_not((Btor *)this->handle, (BoolectorNode *)prover_mk_exor(this->prover_one, this->prover_x)), 0, 10000, stdout);
+    this->handleQuery(prover_mk_exor(this->prover_x, this->prover_zero), 1000, 10000, stdout);
+    this->handleQuery(prover_mk_exor(this->prover_x, this->prover_one), 1000, 10000, stdout);
+    this->handleQuery(prover_mk_exor(this->prover_x, this->prover_x), 1000, 10000, stdout);
 }

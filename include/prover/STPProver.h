@@ -43,10 +43,10 @@ public:
     Expr stp_mk_exor(const Expr &, const Expr &);
     Expr stp_mk_and_exor(Expr *exprs, int size);
 
-    void handleQuery(const Expr &queryExpr, uint32_t timeout, FILE *fout);
-    void handleQuery(const Expr &left, const Expr &right, uint32_t timeout, FILE *fout);
-    void handleQuery_Impl(const Expr &left, const Expr &right, uint32_t timeout, FILE *fout);
-    void handleQuery_Impl(const Expr &right, uint32_t timeout, FILE *fout);
+    void handleQuery(const Expr &queryExpr, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
+    void handleQuery(const Expr &left, const Expr &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
+    void handleQuery_Impl(const Expr &left, const Expr &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
+    void handleQuery_Impl(const Expr &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
 
     /***************** test every operators **********************/
     void test();

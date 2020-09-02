@@ -124,7 +124,7 @@ void cec::evaluate_from_POs_to_PIs(vector<Node *> *POs)
 {
 }
 
-void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
+void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout, uint32_t max_conflicts)
 {
     Z3Prover z3_prover(timeout);
     // z3_prover.test();
@@ -221,7 +221,7 @@ void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout)
     z3_prover.check(result, fout);
 }
 
-void cec::evaluate_by_stp(vector<vector<Node *>> &layers, uint32_t timeout)
+void cec::evaluate_by_stp(vector<vector<Node *>> &layers, uint32_t timeout, uint32_t max_conflicts)
 {
     STPProver stp_prover;
     // stp_prover.test();
@@ -313,11 +313,11 @@ void cec::evaluate_by_stp(vector<vector<Node *>> &layers, uint32_t timeout)
     {
         args[i++] = nodes[output->id];
     }
-    stp_prover.handleQuery_Impl(stp_prover.stp_mk_and_exor(args, layers.back().size()), timeout, fout);
+    stp_prover.handleQuery_Impl(stp_prover.stp_mk_and_exor(args, layers.back().size()), timeout, max_conflicts, fout);
     vector<Expr>().swap(nodes);
 }
 
-void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, uint32_t timeout)
+void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, uint32_t timeout, uint32_t max_conflicts)
 {
     Prover *ble_prover = new BoolectorProver();
 
@@ -409,7 +409,7 @@ void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, uint32_t timeout
     {
         args[i++] = nodes[output->id];
     }
-    ble_prover->handleQuery(ble_prover->prover_mk_and_exor(args), timeout, fout);
+    ble_prover->handleQuery_Impl(ble_prover->prover_mk_and_exor(args), timeout, max_conflicts, fout);
     vector<void *>().swap(nodes);
     vector<void *>().swap(args);
     delete ble_prover;

@@ -141,12 +141,11 @@ Expr STPProver::stp_mk_and_exor(Expr *exprs, int size)
     return vc_andExprN(this->handle, exprs, size);
 }
 
-void STPProver::handleQuery(const Expr &queryExpr, uint32_t timeout, FILE *fout)
+void STPProver::handleQuery(const Expr &queryExpr, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
 {
     // Print the assertions
     // printf("Assertions:\n");
     // vc_printAsserts(this->handle, 0);
-    int max_conflicts = -1;
     // int result = vc_query(this->handle, queryExpr);
     int result = vc_query_with_timeout(this->handle, queryExpr, max_conflicts, timeout);
     // printf("Query:\n");
@@ -176,19 +175,19 @@ void STPProver::handleQuery(const Expr &queryExpr, uint32_t timeout, FILE *fout)
     vc_DeleteExpr(queryExpr);
 }
 
-void STPProver::handleQuery(const Expr &left, const Expr &right, uint32_t timeout, FILE *fout)
+void STPProver::handleQuery(const Expr &left, const Expr &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
 {
-    this->handleQuery(vc_eqExpr(this->handle, left, right), timeout, fout);
+    this->handleQuery(vc_eqExpr(this->handle, left, right), timeout, max_conflicts, fout);
 }
 
-void STPProver::handleQuery_Impl(const Expr &left, const Expr &right, uint32_t timeout, FILE *fout) {
-    this->handleQuery(vc_impliesExpr(this->handle, left, right), timeout, fout);
+void STPProver::handleQuery_Impl(const Expr &left, const Expr &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout) {
+    this->handleQuery(vc_impliesExpr(this->handle, left, right), timeout, max_conflicts, fout);
 }
 
-void STPProver::handleQuery_Impl(const Expr &right, uint32_t timeout, FILE *fout) {
+void STPProver::handleQuery_Impl(const Expr &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout) {
     Expr left[this->assert_exprs.size()];
     std::copy(this->assert_exprs.begin(), this->assert_exprs.end(), left);
-    this->handleQuery(vc_impliesExpr(this->handle, stp_mk_and_exor(left, this->assert_exprs.size()), right), timeout, fout);
+    this->handleQuery(vc_impliesExpr(this->handle, stp_mk_and_exor(left, this->assert_exprs.size()), right), timeout, max_conflicts, fout);
 }
 
 
@@ -219,104 +218,104 @@ void STPProver::test()
 
 void STPProver::test_AND()
 {
-    this->handleQuery(stp_mk_and(stp_zero, stp_zero), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_and(stp_zero, stp_one), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_and(stp_zero, stp_x), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_and(stp_one, stp_zero), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_and(stp_one, stp_one), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_and(stp_one, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_and(stp_x, stp_zero), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_and(stp_x, stp_one), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_and(stp_x, stp_x), stp_x, 10, stdout);
+    this->handleQuery(stp_mk_and(stp_zero, stp_zero), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_and(stp_zero, stp_one), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_and(stp_zero, stp_x), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_and(stp_one, stp_zero), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_and(stp_one, stp_one), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_and(stp_one, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_and(stp_x, stp_zero), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_and(stp_x, stp_one), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_and(stp_x, stp_x), stp_x, 1000, 10000, stdout);
 }
 void STPProver::test_NAND()
 {
 }
 void STPProver::test_OR()
 {
-    this->handleQuery(stp_mk_or(stp_zero, stp_zero), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_or(stp_zero, stp_one), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_or(stp_zero, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_or(stp_one, stp_zero), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_or(stp_one, stp_one), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_or(stp_one, stp_x), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_or(stp_x, stp_zero), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_or(stp_x, stp_one), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_or(stp_x, stp_x), stp_x, 10, stdout);
+    this->handleQuery(stp_mk_or(stp_zero, stp_zero), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_or(stp_zero, stp_one), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_or(stp_zero, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_or(stp_one, stp_zero), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_or(stp_one, stp_one), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_or(stp_one, stp_x), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_or(stp_x, stp_zero), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_or(stp_x, stp_one), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_or(stp_x, stp_x), stp_x, 1000, 10000, stdout);
 }
 void STPProver::test_NOR() {}
 void STPProver::test_XOR()
 {
-    this->handleQuery(stp_mk_xor(stp_zero, stp_zero), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_xor(stp_zero, stp_one), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_xor(stp_zero, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_xor(stp_one, stp_zero), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_xor(stp_one, stp_one), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_xor(stp_one, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_xor(stp_x, stp_zero), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_xor(stp_x, stp_one), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_xor(stp_x, stp_x), stp_x, 10, stdout);
+    this->handleQuery(stp_mk_xor(stp_zero, stp_zero), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_xor(stp_zero, stp_one), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_xor(stp_zero, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_xor(stp_one, stp_zero), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_xor(stp_one, stp_one), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_xor(stp_one, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_xor(stp_x, stp_zero), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_xor(stp_x, stp_one), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_xor(stp_x, stp_x), stp_x, 1000, 10000, stdout);
 }
 void STPProver::test_XNOR() {}
 void STPProver::test_INV()
 {
-    this->handleQuery(stp_mk_not(stp_zero), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_not(stp_one), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_not(stp_x), stp_x, 10, stdout);
+    this->handleQuery(stp_mk_not(stp_zero), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_not(stp_one), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_not(stp_x), stp_x, 1000, 10000, stdout);
 }
 void STPProver::test_DC()
 {
-    this->handleQuery(stp_mk_DC(stp_zero, stp_zero), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_DC(stp_zero, stp_one), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_DC(stp_zero, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_DC(stp_one, stp_zero), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_DC(stp_one, stp_one), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_DC(stp_one, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_DC(stp_x, stp_zero), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_DC(stp_x, stp_one), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_DC(stp_x, stp_x), stp_x, 10, stdout);
+    this->handleQuery(stp_mk_DC(stp_zero, stp_zero), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_DC(stp_zero, stp_one), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_DC(stp_zero, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_DC(stp_one, stp_zero), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_DC(stp_one, stp_one), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_DC(stp_one, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_DC(stp_x, stp_zero), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_DC(stp_x, stp_one), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_DC(stp_x, stp_x), stp_x, 1000, 10000, stdout);
 }
 void STPProver::test_HMUX()
 {
-    this->handleQuery(stp_mk_HMUX(stp_zero, stp_zero, stp_zero), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_zero, stp_one, stp_zero), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_zero, stp_x, stp_zero), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_one, stp_zero, stp_zero), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_one, stp_one, stp_zero), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_one, stp_x, stp_zero), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_x, stp_zero, stp_zero), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_x, stp_one, stp_zero), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_x, stp_x, stp_zero), stp_x, 10, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_zero, stp_zero, stp_zero), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_zero, stp_one, stp_zero), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_zero, stp_x, stp_zero), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_one, stp_zero, stp_zero), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_one, stp_one, stp_zero), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_one, stp_x, stp_zero), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_x, stp_zero, stp_zero), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_x, stp_one, stp_zero), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_x, stp_x, stp_zero), stp_x, 1000, 10000, stdout);
 
-    this->handleQuery(stp_mk_HMUX(stp_zero, stp_zero, stp_one), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_zero, stp_one, stp_one), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_zero, stp_x, stp_one), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_one, stp_zero, stp_one), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_one, stp_one, stp_one), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_one, stp_x, stp_one), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_x, stp_zero, stp_one), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_x, stp_one, stp_one), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_x, stp_x, stp_one), stp_x, 10, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_zero, stp_zero, stp_one), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_zero, stp_one, stp_one), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_zero, stp_x, stp_one), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_one, stp_zero, stp_one), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_one, stp_one, stp_one), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_one, stp_x, stp_one), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_x, stp_zero, stp_one), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_x, stp_one, stp_one), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_x, stp_x, stp_one), stp_x, 1000, 10000, stdout);
 
-    this->handleQuery(stp_mk_HMUX(stp_zero, stp_zero, stp_x), stp_zero, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_zero, stp_one, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_zero, stp_x, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_one, stp_zero, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_one, stp_one, stp_x), stp_one, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_one, stp_x, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_x, stp_zero, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_x, stp_one, stp_x), stp_x, 10, stdout);
-    this->handleQuery(stp_mk_HMUX(stp_x, stp_x, stp_x), stp_x, 10, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_zero, stp_zero, stp_x), stp_zero, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_zero, stp_one, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_zero, stp_x, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_one, stp_zero, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_one, stp_one, stp_x), stp_one, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_one, stp_x, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_x, stp_zero, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_x, stp_one, stp_x), stp_x, 1000, 10000, stdout);
+    this->handleQuery(stp_mk_HMUX(stp_x, stp_x, stp_x), stp_x, 1000, 10000, stdout);
 }
 void STPProver::test_EXOR()
 {
-    this->handleQuery(stp_mk_exor(stp_zero, stp_zero), 10, stdout);
-    this->handleQuery(vc_notExpr(this->handle, stp_mk_exor(stp_zero, stp_one)), 10, stdout);
-    this->handleQuery(vc_notExpr(this->handle, stp_mk_exor(stp_zero, stp_x)), 10, stdout);
-    this->handleQuery(vc_notExpr(this->handle, stp_mk_exor(stp_one, stp_zero)), 10, stdout);
-    this->handleQuery(stp_mk_exor(stp_one, stp_one), 10, stdout);
-    this->handleQuery(vc_notExpr(this->handle, stp_mk_exor(stp_one, stp_x)), 10, stdout);
-    this->handleQuery(stp_mk_exor(stp_x, stp_zero), 10, stdout);
-    this->handleQuery(stp_mk_exor(stp_x, stp_one), 10, stdout);
-    this->handleQuery(stp_mk_exor(stp_x, stp_x), 10, stdout);
+    this->handleQuery(stp_mk_exor(stp_zero, stp_zero), 1000, 10000, stdout);
+    this->handleQuery(vc_notExpr(this->handle, stp_mk_exor(stp_zero, stp_one)), 1000, 10000, stdout);
+    this->handleQuery(vc_notExpr(this->handle, stp_mk_exor(stp_zero, stp_x)), 1000, 10000, stdout);
+    this->handleQuery(vc_notExpr(this->handle, stp_mk_exor(stp_one, stp_zero)), 1000, 10000, stdout);
+    this->handleQuery(stp_mk_exor(stp_one, stp_one), 1000, 10000, stdout);
+    this->handleQuery(vc_notExpr(this->handle, stp_mk_exor(stp_one, stp_x)), 1000, 10000, stdout);
+    this->handleQuery(stp_mk_exor(stp_x, stp_zero), 1000, 10000, stdout);
+    this->handleQuery(stp_mk_exor(stp_x, stp_one), 1000, 10000, stdout);
+    this->handleQuery(stp_mk_exor(stp_x, stp_x), 1000, 10000, stdout);
 }

@@ -64,22 +64,22 @@ int main(int argc, char *argv[])
             {
             case Z3:
                 printf("The prover is %s\n", argv[4]);
-                cec_.evaluate_by_z3(layers, 1000000);
+                cec_.evaluate_by_z3(layers, 1000000, 10000);
                 break;
             case BOOLECTOR:
                 printf("The prover is %s\n", argv[4]);
-                cec_.evaluate_by_boolector(layers, 1000000);
+                cec_.evaluate_by_boolector(layers, 1000, 10000);
                 break;
             default:
                 printf("The prover is stp\n");
-                cec_.evaluate_by_stp(layers, 1000);
+                cec_.evaluate_by_stp(layers, 1000, 10000);
                 break;
             }
         }
         else
         {
             printf("The prover is stp\n");
-            cec_.evaluate_by_stp(layers, 1000);
+            cec_.evaluate_by_stp(layers, 1000, 10000);
         }
         close_fout();
         endTime = clock();

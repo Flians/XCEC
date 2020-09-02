@@ -32,10 +32,10 @@ public:
     void *prover_mk_exor(void *const &, void *const &);
     void *prover_mk_and_exor(std::vector<void *> &exors);
 
-    void handleQuery(void *const &queryExpr, uint32_t timeout, FILE *fout);
-    void handleQuery_EQ(void *const &left, void *const &right, uint32_t timeout, FILE *fout);
-    void handleQuery_Impl(void *const &left, void *const &right, uint32_t timeout, FILE *fout);
-    void handleQuery_Impl(void *const &right, uint32_t timeout, FILE *fout);
+    void handleQuery(void *const &queryExpr, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
+    void handleQuery_EQ(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
+    void handleQuery_Impl(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
+    void handleQuery_Impl(void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
 
     /***************** test every operators **********************/
     void test();
