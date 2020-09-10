@@ -343,7 +343,7 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
     for (size_t i = 0; i < layers.size() - 2; ++i)
     {
         // the number of the Gtype
-        vector<vector<Node *>> record(15);
+        vector<vector<Node *>> record(COUNT);
         for (auto &item : layers[i])
         {
             if (item->outs && item->outs->size() > 0)

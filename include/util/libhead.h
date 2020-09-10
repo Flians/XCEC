@@ -46,7 +46,8 @@ enum Gtype
     _HMUX, // _HMUX \U$1 ( .O(\282 ), .I0(1'b1), .I1(\277 ), .S(\281 ));
     _DC,   // _DC \n6_5[9] ( .O(\108 ), .C(\96 ), .D(\107 ));
     _EXOR,
-    _MODULE
+    _MODULE,
+    COUNT
 };
 
 enum Value
