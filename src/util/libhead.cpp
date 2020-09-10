@@ -137,7 +137,7 @@ Value calculate(Node *g)
     {
         temp_g.val = g->ins->front()->val;
         vector<Node *>::iterator it_ = g->ins->begin();
-        vector<Node *>::iterator it_end = g->ins->end();
+        vector<Node *>::iterator it_end = g->ins->end()-1;
         switch (g->cell)
         {
         case _AND:
