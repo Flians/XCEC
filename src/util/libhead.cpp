@@ -106,7 +106,7 @@ inline Value DC(const Value &C, const Value &D)
     }
 }
 
-inline Value HMUX(const Value &S, const Value &I0, const Value &I1)
+inline Value HMUX(const Value &I0, const Value &I1, const Value &S)
 {
     if (S == H)
     {

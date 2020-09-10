@@ -240,7 +240,7 @@ Value operator~(const Value &);
 Value DC(const Value &C, const Value &D);
 
 /* O=S?I1:I0 */
-Value HMUX(const Value &S, const Value &I0, const Value &I1);
+Value HMUX(const Value &I0, const Value &I1, const Value &S);
 
 // exor
 Value EXOR(const Value &, const Value &);
