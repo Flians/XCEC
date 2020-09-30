@@ -6,6 +6,7 @@ BoolectorProver::BoolectorProver()
     boolector_set_opt((Btor *)this->handle, BTOR_OPT_MODEL_GEN, 1);
     boolector_set_opt((Btor *)this->handle, BTOR_OPT_OUTPUT_NUMBER_FORMAT, 2);
     boolector_set_opt((Btor *)this->handle, BTOR_OPT_AUTO_CLEANUP, 1);
+    boolector_set_opt((Btor *)this->handle, BTOR_OPT_INCREMENTAL, 1);
     this->bv_sort = boolector_bitvec_sort((Btor *)this->handle, 2);
     this->prover_zero = boolector_zero((Btor *)this->handle, this->bv_sort);
     this->prover_one = boolector_one((Btor *)this->handle, this->bv_sort);
@@ -198,10 +199,45 @@ void BoolectorProver::handleQuery_Impl(void *const &right, uint32_t timeout, uin
     boolector_release((Btor *)this->handle, t_eq);
 }
 
+void BoolectorProver::handleQuery_incremental(std::vector<void *> &exors, uint32_t timeout, uint32_t max_conflicts, FILE *fout) {
+    int result;
+    BoolectorNode *prover_true = boolector_true((Btor *)this->handle);
+    for (auto &output : exors)
+    {
+        BoolectorNode *t_eq = boolector_eq((Btor *)this->handle, (BoolectorNode *)output, prover_true);
+        this->exprs.insert(t_eq);
+        boolector_assert((Btor *)this->handle, t_eq);
+        result = boolector_limited_sat((Btor *)this->handle, timeout, max_conflicts);
+        if (result == BOOLECTOR_SAT) {
+            break;
+        }
+    }
+    switch (result)
+    {
+    case BOOLECTOR_UNKNOWN:
+        printf("Could not answer query\n");
+    case BOOLECTOR_UNSAT:
+        fprintf(fout, "EQ\n");
+        break;
+    case BOOLECTOR_SAT:
+        fprintf(fout, "NEQ\n");
+        for (auto &pi : this->in_exprs)
+        {
+            const char *assign = boolector_bv_assignment((Btor *)this->handle, (BoolectorNode *)pi);
+            const char *symbol = boolector_get_symbol((Btor *)this->handle, (BoolectorNode *)pi);
+            fprintf(fout, "%s %s\n", symbol, assign);
+            boolector_free_bv_assignment((Btor *)this->handle, assign);
+        }
+        break;
+    default:
+        printf("Unhandled error\n");
+    }
+    boolector_release((Btor *)this->handle, prover_true);
+}
+
 /***************** test every operators **********************/
 void BoolectorProver::test()
 {
-    // boolector_set_opt((Btor *)this->handle, BTOR_OPT_INCREMENTAL, 1);
     Prover::test();
 }
 

@@ -36,6 +36,7 @@ public:
     void handleQuery_EQ(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
     void handleQuery_Impl(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
     void handleQuery_Impl(void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
+    void handleQuery_incremental(std::vector<void *> &exors, uint32_t timeout, uint32_t max_conflicts, FILE *fout);
 
     /***************** test every operators **********************/
     void test();

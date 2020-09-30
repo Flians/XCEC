@@ -134,19 +134,23 @@ inline Value EXOR(const Value &A, const Value &B)
 Node* delete_node(Node *cur) {
     if (!cur)
         return nullptr;
-    if (!cur->ins || cur->ins->size() != 1)
+    if (cur->ins.empty() && cur->outs.empty() && cur->cell == WIRE) {
+        // cout << cur->name << " Wire is useless in delete_node!" << endl;
+        return nullptr;
+    }
+    if (cur->ins.size() != 1 || cur->ins.empty())
     {
         error_fout(cur->name + " Node have none or more one inputs in delete_node!");
     }
-    Node *tin = cur->ins->front();
-    if (cur->outs && !cur->outs->empty())
+    Node *tin = cur->ins.front();
+    if (!cur->outs.empty())
     {
-        vector<Node *>::iterator it = cur->outs->begin();
-        vector<Node *>::iterator it_end = cur->outs->end();
+        vector<Node *>::iterator it = cur->outs.begin();
+        vector<Node *>::iterator it_end = cur->outs.end();
         while (it != it_end)
         {
-            vector<Node *>::iterator temp_in = (*it)->ins->begin();
-            vector<Node *>::iterator temp_in_end = (*it)->ins->end();
+            vector<Node *>::iterator temp_in = (*it)->ins.begin();
+            vector<Node *>::iterator temp_in_end = (*it)->ins.end();
             while (temp_in != temp_in_end)
             {
                 if (cur == (*temp_in))
@@ -158,7 +162,7 @@ Node* delete_node(Node *cur) {
             }
             if (temp_in != temp_in_end)
             {
-                tin->outs->emplace_back(*it);
+                tin->outs.emplace_back(*it);
             }
             else
             {
@@ -166,8 +170,7 @@ Node* delete_node(Node *cur) {
             }
             ++it;
         }
-        vector<Node *>().swap(*cur->outs);
-        cur->outs = nullptr;
+        vector<Node *>().swap(cur->outs);
     }
     delete cur;
     cur = nullptr;
@@ -184,11 +187,11 @@ void merge_node (Node *node, Node *repeat) {
         cout << "Both nodes are the same in libhead.merge_node!" << endl;
         return;
     }
-    for (auto &out : *repeat->outs)
+    for (auto &out : repeat->outs)
     {
         // grandson.ins.push(son)
-        vector<Node *>::iterator temp_in = out->ins->begin();
-        vector<Node *>::iterator temp_in_end = out->ins->end();
+        vector<Node *>::iterator temp_in = out->ins.begin();
+        vector<Node *>::iterator temp_in_end = out->ins.end();
         while (temp_in != temp_in_end)
         {
             if (repeat == (*temp_in))
@@ -201,81 +204,81 @@ void merge_node (Node *node, Node *repeat) {
         if (temp_in != temp_in_end)
         {
             // son.outs.push(grandson)
-            node->outs->emplace_back(out);
+            node->outs.emplace_back(out);
         }
         else
         {
             cout << "repeat can't be found in the inputs of repeat's outputs in libhead.merge_node!" << endl;
         }
     }
-    vector<Node *>().swap(*repeat->outs);
-    repeat->outs = nullptr;
+    vector<Node *>().swap(repeat->outs);
     delete repeat;
     repeat = nullptr;
 }
 
 Value calculate(Node *g)
 {
-    Node temp_g;
+    Value res = X;
     if (g)
     {
-        temp_g.val = g->ins->front()->val;
-        vector<Node *>::iterator it_ = g->ins->begin();
-        vector<Node *>::iterator it_end = g->ins->end()-1;
+        res = g->ins.front()->val;
+        vector<Node *>::iterator it_ = g->ins.begin();
+        vector<Node *>::iterator it_end = g->ins.end() - 1;
         switch (g->cell)
         {
         case _AND:
             while (it_ != it_end)
             {
-                temp_g = temp_g & *(*(++it_));
+                res = res & (*(++it_))->val;
             }
             break;
         case _NAND:
             while (it_ != it_end)
             {
-                temp_g = temp_g & *(*(++it_));
+                res = res & (*(++it_))->val;
             }
-            temp_g = ~temp_g;
+            res = ~res;
             break;
         case _OR:
             while (it_ != it_end)
             {
-                temp_g = temp_g | *(*(++it_));
+                res = res | (*(++it_))->val;
             }
             break;
         case _NOR:
             while (it_ != it_end)
             {
-                temp_g = temp_g | *(*(++it_));
+                res = res | (*(++it_))->val;
             }
-            temp_g = ~temp_g;
+            res = ~res;
             break;
         case _XOR:
             while (it_ != it_end)
             {
-                temp_g = temp_g ^ *(*(++it_));
+                res = res ^ (*(++it_))->val;
             }
             break;
         case _XNOR:
             while (it_ != it_end)
             {
-                temp_g = temp_g ^ *(*(++it_));
+                res = res ^ (*(++it_))->val;
             }
-            temp_g = ~temp_g;
+            res = ~res;
             break;
         case INV:
-            temp_g = ~temp_g;
+            res = ~res;
             break;
         case BUF:
             break;
         case _HMUX:
-            temp_g.val = HMUX(temp_g.val, (*it_)->val, (*(it_ + 1))->val);
+            ++it_;
+            res = HMUX(res, (*it_)->val, (*(it_ + 1))->val);
             break;
         case _DC:
-            temp_g.val = DC(temp_g.val, (*it_)->val);
+            res = DC(res, (*(it_ + 1))->val);
             break;
         case _EXOR:
-            temp_g.val = EXOR(temp_g.val, (*it_)->val);
+            res = EXOR(res, (*(it_ + 1))->val);
             break;
         default:
             break;
@@ -283,10 +286,9 @@ Value calculate(Node *g)
     }
     else
     {
-        cerr << "The node g is empty in libhead.cpp: Value calculate(node *g)" << endl;
-        exit(-1);
+        error_fout("The node g is empty in libhead.cpp: Value calculate(node *g)");
     }
-    return temp_g.val;
+    return res;
 }
 
 void unique_element_in_vector(vector<Node *> &v)
@@ -294,25 +296,14 @@ void unique_element_in_vector(vector<Node *> &v)
     sort(v.begin(), v.end(), [](const Node *A, const Node *B) {
         if (A->id == B->id)
         {
-            if (A->outs)
-            {
-                if (B->outs)
-                {
-                    return A->outs->size() > B->outs->size();
-                }
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return A->outs.size() > B->outs.size();
         }
         else
         {
             return A->id < B->id;
         }
     });
-    typename vector<Node *>::iterator vector_iterator = unique(v.begin(), v.end());
+    vector<Node *>::iterator vector_iterator = unique(v.begin(), v.end());
     if (vector_iterator != v.end())
     {
         v.erase(vector_iterator, v.end());
@@ -354,6 +345,5 @@ int close_fout()
 void error_fout(const string &message)
 {
     cerr << "Error: " << message << endl;
-    fprintf(fout, "NEQ\n%s", message.c_str());
     exit(-1);
 }

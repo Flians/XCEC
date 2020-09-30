@@ -73,52 +73,45 @@ struct Node
     size_t id;
     // record the number of times the node is visited
     size_t vis;
-    vector<Node *> *ins;
-    vector<Node *> *outs;
+    vector<Node *> ins;
+    vector<Node *> outs;
 
     // constructor
-    Node() : val(X), id(init_id++), vis(0), ins(nullptr), outs(nullptr) {}
-    Node(string _name, Gtype _cell = WIRE, Value _val = L, int _id = (init_id++)) : name(_name), cell(_cell), val(_val), id(_id), vis(0), ins(nullptr), outs(nullptr) {}
+    Node() : val(X), id(init_id++), vis(0) {}
+    Node(string _name, Gtype _cell = WIRE, Value _val = L, int _id = (init_id++)) : name(_name), cell(_cell), val(_val), id(_id), vis(0) {}
 
     // destructor
     // delete this node and all edges connected to this node.
     ~Node()
     {
         // cout << "~delete node: " << this->name << endl;
-        if (this->ins)
+        for (auto &in : this->ins)
         {
-            for (auto &in : (*this->ins))
+            if (in && !in->outs.empty())
             {
-                if (in && in->outs)
+                vector<Node *>::iterator temp = find(in->outs.begin(), in->outs.end(), this);
+                if (temp != in->outs.end())
                 {
-                    vector<Node *>::iterator temp = find(in->outs->begin(), in->outs->end(), this);
-                    if (temp != in->outs->end())
-                    {
-                        // in->outs->erase(temp);
-                        *temp = *(in->outs->end() - 1);
-                        *(in->outs->end() - 1) = nullptr;
-                        in->outs->resize(in->outs->size() - 1);
-                    }
+                    // in->outs.erase(temp);
+                    *temp = *(in->outs.end() - 1);
+                    *(in->outs.end() - 1) = nullptr;
+                    in->outs.resize(in->outs.size() - 1);
                 }
             }
-            vector<Node *>().swap(*this->ins);
-            this->ins = nullptr;
         }
-        if (this->outs)
+        vector<Node *>().swap(this->ins);
+
+        for (auto &out : this->outs)
         {
-            for (auto &out : (*this->outs))
+            if (out && !out->ins.empty())
             {
-                if (out && out->ins)
-                {
-                    vector<Node *>::iterator temp = find(out->ins->begin(), out->ins->end(), this);
-                    if (temp != out->ins->end()) {
-                        out->ins->erase(temp);
-                    }
+                vector<Node *>::iterator temp = find(out->ins.begin(), out->ins.end(), this);
+                if (temp != out->ins.end()) {
+                    out->ins.erase(temp);
                 }
             }
-            vector<Node *>().swap(*this->outs);
-            this->outs = nullptr;
         }
+        vector<Node *>().swap(this->outs);
     }
 
     /* operator overload */
@@ -204,20 +197,12 @@ struct Node
     // for sort
     bool operator<(const Node &B)
     {
-        if (this->outs)
+        if (this->outs.size() != B.outs.size())
         {
-            if (B.outs)
-            {
-                return this->outs->size() > B.outs->size();
-            }
-            return true;
+            return this->outs.size() > B.outs.size();
         }
         else
         {
-            if (B.outs)
-            {
-                return false;
-            }
             return this->id < B.id;
         }
     }

@@ -19,14 +19,14 @@ cec::~cec()
 
 void cec::print_PIs_value(vector<Node *> *PIs, ofstream &output)
 {
-    for (auto pi : *PIs)
+    for (auto &pi : *PIs)
     {
         output << pi->name << " " << pi->val << endl;
     }
 }
 void cec::print_PIs_value(vector<Node *> *PIs, FILE *output)
 {
-    for (auto pi : *PIs)
+    for (auto &pi : *PIs)
     {
         fprintf(output, "%s %d", pi->name.c_str(), pi->val);
     }
@@ -85,35 +85,28 @@ bool cec::evaluate(vector<Node *> nodes)
     vector<Node *> qu;
     for (auto &g : nodes)
     {
-        if (g->outs)
+        for (auto &out : g->outs)
         {
-            for (auto &out : *(g->outs))
+            ++out->vis;
+            if (out->vis == out->ins.size())
             {
-                ++out->vis;
-                if (out->vis == out->ins->size())
+                out->vis = 0;
+                out->val = calculate(out);
+                if (!out->outs.empty())
                 {
-                    out->vis = 0;
-                    out->val = calculate(out);
-                    if (out->outs)
-                    {
-                        qu.emplace_back(out);
-                    }
-                    else if (out->cell == _EXOR)
-                    {
-                        if (out->val == H)
-                            return false;
-                    }
-                    else
-                    {
-                        cerr << out->name << " Gate have no outputs!" << endl;
-                        exit(-1);
-                    }
+                    qu.emplace_back(out);
+                }
+                else if (out->cell == _EXOR)
+                {
+                    if (out->val == H)
+                        return false;
+                }
+                else
+                {
+                    cerr << out->name << " Gate have no outputs!" << endl;
+                    exit(-1);
                 }
             }
-        }
-        else
-        {
-            cout << "The outputs of the gate " << g->name << " are empty!" << endl;
         }
     }
     unique_element_in_vector(qu);
@@ -157,10 +150,10 @@ void cec::evaluate_by_z3(vector<vector<Node *>> &layers, unsigned timeout, uint3
         vector<Node *> layer = layers[i];
         for (size_t j = 0; j < layer.size(); ++j)
         {
-            vector<Z3_ast> inputs(layer[j]->ins->size());
-            for (size_t k = 0; k < layer[j]->ins->size(); ++k)
+            vector<Z3_ast> inputs(layer[j]->ins.size());
+            for (size_t k = 0; k < layer[j]->ins.size(); ++k)
             {
-                inputs[k] = nodes[layer[j]->ins->at(k)->id];
+                inputs[k] = nodes[layer[j]->ins[k]->id];
             }
             Z3_ast res;
             switch (layer[j]->cell)
@@ -255,10 +248,10 @@ void cec::evaluate_by_stp(vector<vector<Node *>> &layers, uint32_t timeout, uint
         vector<Node *> layer = layers[i];
         for (size_t j = 0; j < layer.size(); ++j)
         {
-            vector<Expr> inputs(layer[j]->ins->size());
-            for (size_t k = 0; k < layer[j]->ins->size(); ++k)
+            vector<Expr> inputs(layer[j]->ins.size());
+            for (size_t k = 0; k < layer[j]->ins.size(); ++k)
             {
-                inputs[k] = nodes[layer[j]->ins->at(k)->id];
+                inputs[k] = nodes[layer[j]->ins[k]->id];
             }
             Expr res;
             switch (layer[j]->cell)
@@ -350,10 +343,10 @@ void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, uint32_t timeout
         vector<Node *> layer = layers[i];
         for (size_t j = 0; j < layer.size(); ++j)
         {
-            vector<void *> inputs(layer[j]->ins->size());
-            for (size_t k = 0; k < layer[j]->ins->size(); ++k)
+            vector<void *> inputs(layer[j]->ins.size());
+            for (size_t k = 0; k < layer[j]->ins.size(); ++k)
             {
-                inputs[k] = nodes[layer[j]->ins->at(k)->id];
+                inputs[k] = nodes[layer[j]->ins[k]->id];
             }
             void *res;
             switch (layer[j]->cell)
@@ -403,6 +396,7 @@ void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, uint32_t timeout
         }
     }
 
+    
     int i = 0;
     std::vector<void *> args(layers.back().size(), NULL);
     for (auto &output : layers.back())
