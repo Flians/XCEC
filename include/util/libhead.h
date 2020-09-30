@@ -245,6 +245,12 @@ Value HMUX(const Value &I0, const Value &I1, const Value &S);
 // exor
 Value EXOR(const Value &, const Value &);
 
+// delete the node, return its parent
+Node* delete_node (Node *node);
+
+// merge two nodes
+void merge_node (Node *node, Node *repeat);
+
 Value calculate(Node *g);
 
 void unique_element_in_vector(vector<Node *> &v);

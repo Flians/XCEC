@@ -167,7 +167,7 @@ vector<vector<Node *>> &simplify::id_reassign_and_layered(vector<Node *> &PIs, v
     return this->layers;
 }
 
-void simplify::id_reassign(vector<vector<Node *>> &layers)
+void simplify::id_reassign()
 {
     if (layers.empty())
     {
@@ -175,11 +175,29 @@ void simplify::id_reassign(vector<vector<Node *>> &layers)
         return;
     }
     int id = 0;
-    for (size_t i = 0; i < layers.size(); ++i)
+    size_t num_layer = layers.size();
+    for (size_t i = 0; i < num_layer; ++i)
     {
-        for (size_t j = 0; j < layers[i].size(); ++j)
+        long last = layers[i].size() - 1;
+        for (long j = 0; j <= last; ++j)
         {
+            while (j <= last && !layers[i][last])
+            {
+                --last;
+            }
+            if (j > last)
+                break;
+            if (!layers[i][j]) {
+                if(j <= last) {
+                    layers[i][j] = layers[i][last];
+                    layers[i][last] = nullptr;
+                }
+            }
             layers[i][j]->id = id++;
+        }
+        layers[i].resize(last + 1);
+        if (layers[i].empty()) {
+            layers.erase(layers.begin() + (i--));
         }
     }
     init_id = id;
@@ -409,4 +427,72 @@ void simplify::reduce_repeat_nodes(vector<vector<Node *>> &layers)
     vector<Roaring>().swap(nbrs);
 
     std::cout << "The number of INV, BUF, and others reduction is " << reduce << std::endl;
+}
+
+
+int simplify::merge_nodes_between_networks()
+{
+    if (layers.empty())
+    {
+        cout << "The layers is empty in simplify.reduce_repeat_nodes!" << endl;
+        return 0;
+    }
+    vector<pair<int,int>> position(init_id, {0,0});
+    vector<Node*> all_node(init_id, nullptr);
+    size_t num_layer = layers.size();
+    for (size_t i = 0; i < num_layer; ++i)
+    {
+        size_t num_node = layers[i].size();
+        for (size_t j = 0; j < num_node; ++j)
+        {
+            position[layers[i][j]->id] = {i,j};
+            all_node[layers[i][j]->id] = layers[i][j];
+        }
+    }
+    int reduce = 0;
+    for (size_t i = 1; i < num_layer - 1; ++i) {
+        size_t num_node = layers[i].size();
+        for (size_t j = 0; j < num_node; ++j) {
+            if (!layers[i][j] || !layers[i][j]->ins) {
+                continue;
+            }
+            Roaring same_id;
+            bool flag = false;
+            size_t num_npi = layers[i][j]->ins->size();
+            for (size_t k = 0; k < num_npi; ++k) {
+                Roaring tmp;
+                for (auto &iout: layers[i][j]->ins[k]->outs) {
+                    if (iout && iout->cell == layers[i][j]->cell) {
+                        if (iout->ins.size() != num_npi) {
+                            error_fout("The number of inputs of the same type of node is different in simplify.merge_nodes_between_networks");
+                        }
+                        tmp.add(iout->id);
+                    }
+                }
+                if (flag) {
+                    same_id &= tmp;
+                } else {
+                    same_id = tmp;
+                    flag = true;
+                }
+            }
+            Roaring::const_iterator it = same_id.begin();
+            while (it != same_id.end())
+            {
+                if (all_node[it.i.current_value] && it.i.current_value != layers[i][j]->id) {
+                    merge_node(layers[i][j], all_node[it.i.current_value]);
+                    all_node[it.i.current_value] = nullptr;
+                    layers[position[it.i.current_value].first][position[it.i.current_value].second] = nullptr;
+                    ++reduce;
+                }
+                ++it;
+            }
+        }
+    }
+    vector<Node*>().swap(all_node);
+    vector<pair<int,int>>().swap(position);
+    // reassign the id for all nodes
+    this->id_reassign();
+    std::cout << "The number of INV, BUF, and others reduction is " << reduce << std::endl;
+    return reduce;
 }

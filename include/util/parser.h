@@ -11,8 +11,6 @@ private:
     std::unordered_map<std::string, int> map_PIs;
     std::unordered_map<std::string, int> map_POs;
 
-    void clean_wires();
-
 public:
     vector<Node *> PIs;
     vector<Node *> POs;
@@ -35,6 +33,12 @@ public:
 
     // parse the verilog files, and return the PIs and POs of the miter
     void parse(const string &path_golden, const string &path_revised);
+
+    // delete all wires
+    void clean_wires();
+
+    // clean the spl
+    void clean_buf();
 
     // print the graph
     void printG(vector<Node *> *);

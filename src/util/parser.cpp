@@ -15,7 +15,8 @@ parser::~parser()
     vector<Node *>().swap(this->PIs);
     vector<Node *>().swap(this->POs);
     vector<Node *>().swap(this->constants);
-    this->clean_wires();
+    this->wires_golden.clear();
+    this->wires_revised.clear();
     this->map_PIs.clear();
     this->map_POs.clear();
     cout << "The parser is destroyed!" << endl;
@@ -34,12 +35,6 @@ vector<Node *> &parser::get_POs()
 vector<Node *> &parser::get_constants()
 {
     return this->constants;
-}
-
-void parser::clean_wires()
-{
-    this->wires_golden.clear();
-    this->wires_revised.clear();
 }
 
 void parser::parse_verilog(stringstream &in)
@@ -396,9 +391,6 @@ void parser::parse(ifstream &golden, ifstream &revised)
     buffer.clear();
     f_input.clear();
 
-    // clear the wires
-    this->clean_wires();
-
     // merge PIs and constants
     for (auto &con : this->constants)
     {
@@ -417,6 +409,50 @@ void parser::parse(const string &path_golden, const string &path_revised)
     golden.close();
     revised.close();
     cout << "The parsing process is over!" << endl;
+}
+
+void parser::clean_wires()
+{
+    for (auto &item : this->wires_golden) {
+        delete_node(item.second);
+    }
+
+    for (auto &item : this->wires_revised) {
+        delete_node(item.second);
+    }
+    this->wires_golden.clear();
+    this->wires_revised.clear();
+}
+
+void parser::clean_buf()
+{
+    if (this->PIs.empty())
+        return;
+    stack<Node *> record;
+    vector<bool> vis(init_id, 0);
+    for (auto &pi : this->PIs) {
+        record.push(pi);
+        vis[pi->id] = 1;
+    }
+    while (!record.empty()) {
+        Node *cur = record.top();
+        record.pop();
+        if (!cur || !cur->outs)
+        {
+            continue;
+        }
+        if (cur->cell == BUF)
+        {
+            cur = delete_node(cur);
+        }
+        for (auto &out : *cur->outs) {
+            if (out && !vis[out->id]) {
+                record.push(out);
+                vis[out->id] = 1;
+            }
+        }
+    }
+    vector<bool>().swap(vis);
 }
 
 void parser::printG(vector<Node *> *nodes)
