@@ -32,10 +32,14 @@ int main(int argc, char *argv[])
 
         /* simplify the graph */
         simplify sim;
+        startTime = clock();
         sim.id_reassign_and_layered(miter.PIs, miter.POs);
         sim.merge_nodes_between_networks(); // no considering the positions of ports for DC and HUMX
+        endTime = clock();
+        cout << "The parsing time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
 
         cec cec_;
+        startTime = clock();
         if (argc >= 5)
         {
             switch (smt_str[argv[4]])
@@ -61,7 +65,7 @@ int main(int argc, char *argv[])
         }
         close_fout();
         endTime = clock();
-        cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
+        cout << "The runtime is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
     }
     else
     {
