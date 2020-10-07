@@ -301,13 +301,15 @@ void cec::evaluate_by_stp(vector<vector<Node *>> &layers, int timeout, int max_c
     }
 
     int i = 0;
-    Expr args[layers.back().size()];
+    std::vector<Expr> args(layers.back().size());
     for (auto &output : layers.back())
     {
         args[i++] = nodes[output->id];
     }
-    stp_prover.handleQuery_Impl(stp_prover.stp_mk_and_exor(args, layers.back().size()), timeout, max_conflicts, fout);
+    // stp_prover.handleQuery_Impl(stp_prover.stp_mk_and_exor(args), timeout, max_conflicts, fout);
+    stp_prover.handleQuery_incremental(args, timeout, max_conflicts, fout);
     vector<Expr>().swap(nodes);
+    vector<Expr>().swap(args);
 }
 
 void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, int timeout, int max_conflicts)

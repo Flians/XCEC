@@ -41,12 +41,13 @@ public:
     Expr stp_mk_DC(const Expr &C, const Expr &D);
     Expr stp_mk_HMUX(const Expr &I0, const Expr &I1, const Expr &S);
     Expr stp_mk_exor(const Expr &, const Expr &);
-    Expr stp_mk_and_exor(Expr *exprs, int size);
+    Expr stp_mk_and_exor(std::vector<Expr> &);
 
     void handleQuery(const Expr &queryExpr, int timeout, int max_conflicts, FILE *fout);
     void handleQuery(const Expr &left, const Expr &right, int timeout, int max_conflicts, FILE *fout);
     void handleQuery_Impl(const Expr &left, const Expr &right, int timeout, int max_conflicts, FILE *fout);
     void handleQuery_Impl(const Expr &right, int timeout, int max_conflicts, FILE *fout);
+    void handleQuery_incremental(std::vector<Expr> &exors, int timeout, int max_conflicts, FILE *fout);
 
     /***************** test every operators **********************/
     void test();

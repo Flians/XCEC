@@ -12,6 +12,8 @@ STPProver::STPProver(/* args */)
     this->stp_undefined = vc_bvConstExprFromInt(handle, 2, 3);
     // Register a callback for errors
     vc_registerErrorHandler(errorHandler);
+    // Removes all associated expressions with vc_Destroy
+    vc_setInterfaceFlags(this->handle, EXPRDELETE, true);
 }
 
 STPProver::~STPProver()
@@ -136,9 +138,11 @@ Expr STPProver::stp_mk_exor(const Expr &A, const Expr &B)
     return vc_orExpr(this->handle, vc_eqExpr(this->handle, A, stp_x), vc_eqExpr(this->handle, A, B));
 }
 
-Expr STPProver::stp_mk_and_exor(Expr *exprs, int size)
+Expr STPProver::stp_mk_and_exor(std::vector<Expr> &exprs)
 {
-    return vc_andExprN(this->handle, exprs, size);
+    Expr arr[exprs.size()];
+    std::copy(exprs.begin(), exprs.end(), arr);
+    return vc_andExprN(this->handle, arr, exprs.size());
 }
 
 void STPProver::handleQuery(const Expr &queryExpr, int timeout, int max_conflicts, FILE *fout)
@@ -147,7 +151,7 @@ void STPProver::handleQuery(const Expr &queryExpr, int timeout, int max_conflict
     // printf("Assertions:\n");
     // vc_printAsserts(this->handle, 0);
     // int result = vc_query(this->handle, queryExpr);
-    int result = vc_query_with_timeout(this->handle, queryExpr, -1, -1);
+    int result = vc_query_with_timeout(this->handle, queryExpr, max_conflicts, timeout);
     // printf("Query:\n");
     // vc_printQuery(this->handle);
     switch (result)
@@ -185,9 +189,39 @@ void STPProver::handleQuery_Impl(const Expr &left, const Expr &right, int timeou
 }
 
 void STPProver::handleQuery_Impl(const Expr &right, int timeout, int max_conflicts, FILE *fout) {
-    Expr left[this->assert_exprs.size()];
-    std::copy(this->assert_exprs.begin(), this->assert_exprs.end(), left);
-    this->handleQuery(vc_impliesExpr(this->handle, stp_mk_and_exor(left, this->assert_exprs.size()), right), timeout, max_conflicts, fout);
+    this->handleQuery(vc_impliesExpr(this->handle, this->stp_mk_and_exor(this->assert_exprs), right), timeout, max_conflicts, fout);
+}
+
+void STPProver::handleQuery_incremental(std::vector<Expr> &exors, int timeout, int max_conflicts, FILE *fout) {
+    int result;
+    Expr variables = this->stp_mk_and_exor(this->assert_exprs);
+    for (auto &output : exors)
+    {
+        Expr item = vc_impliesExpr(this->handle, variables, output);
+        result = vc_query_with_timeout(this->handle, item, max_conflicts, timeout);
+        if (result == 0 || result == 2) {
+            break;
+        }
+    }
+    switch (result)
+    {
+    case 3:
+        printf("Timeout.\n");
+    case 1:
+        fprintf(fout, "EQ\n");
+        break;
+    case 2:
+        printf("Could not answer query\n");
+    case 0:
+        fprintf(fout, "NEQ\n");
+        for (auto &pi : this->in_exprs)
+        {
+            fprintf(fout, "%s %d\n", exprString(pi), getBVUnsigned(vc_getCounterExample(this->handle, pi)));
+        }
+        break;
+    default:
+        printf("Unhandled error\n");
+    }
 }
 
 
