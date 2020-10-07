@@ -403,7 +403,8 @@ void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, uint32_t timeout
     {
         args[i++] = nodes[output->id];
     }
-    ble_prover->handleQuery_Impl(ble_prover->prover_mk_and_exor(args), timeout, max_conflicts, fout);
+    // ble_prover->handleQuery_Impl(ble_prover->prover_mk_and_exor(args), timeout, max_conflicts, fout);
+    ble_prover->handleQuery_incremental(args, timeout, max_conflicts, fout);
     vector<void *>().swap(nodes);
     vector<void *>().swap(args);
     delete ble_prover;
