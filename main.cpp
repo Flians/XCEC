@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
         endTime = clock();
         cout << "The parsing time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
 
-        int timeout = 1000;
+        int timeout = 100;
         int max_conflicts = -1;
         cec cec_;
         startTime = clock();

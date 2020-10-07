@@ -1,8 +1,8 @@
 The parsing process is over!
-The parsing time is: 2.06669 S
+The parsing time is: 2.03715 S
 The number of INV, BUF, and others reduction is 4128
-The parsing time is: 2.58521 S
-The prover is stp
-Timeout.
-The runtime is: 120.314 S
+The parsing time is: 3.63096 S
+The prover is z3
+>>> unknown <<<
+The runtime is: 105.019 S
 The parser is destroyed!
