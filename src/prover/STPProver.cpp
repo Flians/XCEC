@@ -145,6 +145,10 @@ Expr STPProver::stp_mk_and_exor(std::vector<Expr> &exprs)
     return vc_andExprN(this->handle, arr, exprs.size());
 }
 
+int STPProver::handleQuery(const Expr &queryExpr, int timeout, int max_conflicts) {
+    return vc_query_with_timeout(this->handle, queryExpr, max_conflicts, timeout);
+}
+
 void STPProver::handleQuery(const Expr &queryExpr, int timeout, int max_conflicts, FILE *fout)
 {
     // Print the assertions
@@ -177,6 +181,10 @@ void STPProver::handleQuery(const Expr &queryExpr, int timeout, int max_conflict
         printf("Unhandled error\n");
     }
     vc_DeleteExpr(queryExpr);
+}
+
+int handleQuery(const Expr &left, const Expr &right, int timeout, int max_conflicts) {
+    return this->handleQuery(vc_eqExpr(this->handle, left, right), timeout, max_conflicts);
 }
 
 void STPProver::handleQuery(const Expr &left, const Expr &right, int timeout, int max_conflicts, FILE *fout)

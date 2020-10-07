@@ -43,7 +43,9 @@ public:
     Expr stp_mk_exor(const Expr &, const Expr &);
     Expr stp_mk_and_exor(std::vector<Expr> &);
 
+    int handleQuery(const Expr &queryExpr, int timeout, int max_conflicts);
     void handleQuery(const Expr &queryExpr, int timeout, int max_conflicts, FILE *fout);
+    int handleQuery(const Expr &left, const Expr &right, int timeout, int max_conflicts);
     void handleQuery(const Expr &left, const Expr &right, int timeout, int max_conflicts, FILE *fout);
     void handleQuery_Impl(const Expr &left, const Expr &right, int timeout, int max_conflicts, FILE *fout);
     void handleQuery_Impl(const Expr &right, int timeout, int max_conflicts, FILE *fout);
