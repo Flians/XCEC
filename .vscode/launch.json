@@ -10,9 +10,9 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/XCEC",
             "args": [
-                "./test/cases/case0/gf.v",
-                "./test/cases/case0/rf.v",
-                "./test/output/output_case0.txt",
+                "./test/cases/case25/gf.v",
+                "./test/cases/case25/rf.v",
+                "./test/output/output_case25.txt",
                 "boolector"
             ],
             "stopAtEntry": false,

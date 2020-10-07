@@ -12,7 +12,7 @@ Z3Prover::Z3Prover(int timeout)
     cfg = Z3_mk_config();
     Z3_set_param_value(cfg, "model", "true");
     Z3_set_param_value(cfg, "proof", "true");
-    Z3_set_param_value(cfg, "timeout", to_string(timeout).c_str());
+    Z3_set_param_value(cfg, "timeout", to_string(timeout*1000).c_str());
 
     logic = Z3_mk_context(cfg);
     Z3_set_error_handler(logic, error_handler);
@@ -426,7 +426,7 @@ void Z3Prover::check(const Z3_ast &left, const Z3_ast &right, FILE *fout)
  */
 z3::params Z3Prover::config_z3(z3::context &logic, string &priority, int timeout)
 {
-    // z3::set_param("timeout", timeout);
+    z3::set_param("timeout", timeout*1000);
     z3::params z3_param(logic);
     // http://smtlib.cs.uiowa.edu/logics-all.shtml
     logic.set("logic", "QF_BV");
@@ -435,7 +435,7 @@ z3::params Z3Prover::config_z3(z3::context &logic, string &priority, int timeout
     //z3_param.set(":opt.dump_models", true);
     // z3_param.set(":opt.pb.compile_equality", true);
     // z3_param.set(":opt.priority", priority.c_str());
-    z3_param.set("timeout", timeout);
+    z3_param.set("timeout", static_cast<unsigned>(timeout*1000));
 
     return z3_param;
 }

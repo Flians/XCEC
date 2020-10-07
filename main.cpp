@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
             {
             case Z3:
                 printf("The prover is %s\n", argv[4]);
-                cec_.evaluate_by_z3(sim.get_layers(), timeout * 1000, max_conflicts);
+                cec_.evaluate_by_z3(sim.get_layers(), timeout, max_conflicts);
                 break;
             case BOOLECTOR:
                 printf("The prover is %s\n", argv[4]);
