@@ -193,12 +193,13 @@ void STPProver::handleQuery_Impl(const Expr &right, int timeout, int max_conflic
 }
 
 void STPProver::handleQuery_incremental(std::vector<Expr> &exors, int timeout, int max_conflicts, FILE *fout) {
+    for (auto &assert_var : this->assert_exprs) {
+        vc_assertFormula(this->handle, assert_var);
+    }
     int result;
-    Expr variables = this->stp_mk_and_exor(this->assert_exprs);
     for (auto &output : exors)
     {
-        Expr item = vc_impliesExpr(this->handle, variables, output);
-        result = vc_query_with_timeout(this->handle, item, max_conflicts, timeout);
+        result = vc_query_with_timeout(this->handle, output, max_conflicts, timeout);
         if (result == 0 || result == 2) {
             break;
         }

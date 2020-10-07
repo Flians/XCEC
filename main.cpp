@@ -40,6 +40,14 @@ int main(int argc, char *argv[])
 
         int timeout = 100;
         int max_conflicts = -1;
+        bool is_incremental = false;
+        if (argc >= 6 && argv[5][0] == 'i') {
+            is_incremental = true;
+        }
+        if (argc >= 8) {
+            timeout = atoi(argv[6]);
+            max_conflicts = atoi(argv[7]);
+        }
         cec cec_;
         startTime = clock();
         if (argc >= 5)
@@ -48,22 +56,22 @@ int main(int argc, char *argv[])
             {
             case Z3:
                 printf("The prover is %s\n", argv[4]);
-                cec_.evaluate_by_z3(sim.get_layers(), timeout, max_conflicts);
+                cec_.evaluate_by_z3(sim.get_layers(), timeout, max_conflicts, is_incremental);
                 break;
             case BOOLECTOR:
                 printf("The prover is %s\n", argv[4]);
-                cec_.evaluate_by_boolector(sim.get_layers(), timeout, max_conflicts);
+                cec_.evaluate_by_boolector(sim.get_layers(), timeout, max_conflicts, is_incremental);
                 break;
             default:
                 printf("The prover is stp\n");
-                cec_.evaluate_by_stp(sim.get_layers(), timeout, max_conflicts);
+                cec_.evaluate_by_stp(sim.get_layers(), timeout, max_conflicts, is_incremental);
                 break;
             }
         }
         else
         {
             printf("The prover is stp\n");
-            cec_.evaluate_by_stp(sim.get_layers(), timeout, max_conflicts);
+            cec_.evaluate_by_stp(sim.get_layers(), 1000, -1, false);
         }
         close_fout();
         endTime = clock();
@@ -71,7 +79,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("Please input three parameters, like \"./XCEC <golden.v> <revised.v> <output>\".");
+        printf("Please input at least three parameters, like \"./XCEC <golden.v> <revised.v> <output> <i/u> <timeout(-1 unlimited) max_conflicts(-1 unlimited)>\".");
     }
     return 0;
 }

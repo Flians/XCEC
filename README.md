@@ -48,6 +48,10 @@ make
 
 ## run
 
+`./XCEC <golden.v> <revised.v> <output> <i/u> <timeout(-1 unlimited) max_conflicts(-1 unlimited)>`
+
+example:
+
 ``` shell
 cd build
 ./XCEC ../test/case2/gf.v ../test/case2/rf.v ../output/output_2.txt

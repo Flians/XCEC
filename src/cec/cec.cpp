@@ -117,7 +117,7 @@ void cec::evaluate_from_POs_to_PIs(vector<Node *> *POs)
 {
 }
 
-void cec::evaluate_by_z3(vector<vector<Node *>> &layers, int timeout, int max_conflicts)
+void cec::evaluate_by_z3(vector<vector<Node *>> &layers, int timeout, int max_conflicts, bool is_incremental)
 {
     Z3Prover z3_prover(timeout);
     // z3_prover.test();
@@ -214,7 +214,7 @@ void cec::evaluate_by_z3(vector<vector<Node *>> &layers, int timeout, int max_co
     z3_prover.check(result, fout);
 }
 
-void cec::evaluate_by_stp(vector<vector<Node *>> &layers, int timeout, int max_conflicts)
+void cec::evaluate_by_stp(vector<vector<Node *>> &layers, int timeout, int max_conflicts, bool is_incremental)
 {
     STPProver stp_prover;
     // stp_prover.test();
@@ -306,13 +306,16 @@ void cec::evaluate_by_stp(vector<vector<Node *>> &layers, int timeout, int max_c
     {
         args[i++] = nodes[output->id];
     }
-    // stp_prover.handleQuery_Impl(stp_prover.stp_mk_and_exor(args), timeout, max_conflicts, fout);
-    stp_prover.handleQuery_incremental(args, timeout, max_conflicts, fout);
+    if (is_incremental) {
+        stp_prover.handleQuery_incremental(args, timeout, max_conflicts, fout);
+    } else {
+        stp_prover.handleQuery_Impl(stp_prover.stp_mk_and_exor(args), timeout, max_conflicts, fout);
+    }
     vector<Expr>().swap(nodes);
     vector<Expr>().swap(args);
 }
 
-void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, int timeout, int max_conflicts)
+void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, int timeout, int max_conflicts, bool is_incremental)
 {
     Prover *ble_prover = new BoolectorProver();
 
@@ -405,8 +408,11 @@ void cec::evaluate_by_boolector(vector<vector<Node *>> &layers, int timeout, int
     {
         args[i++] = nodes[output->id];
     }
-    ble_prover->handleQuery_Impl(ble_prover->prover_mk_and_exor(args), timeout, max_conflicts, fout);
-    // ble_prover->handleQuery_incremental(args, timeout, max_conflicts, fout);
+    if (is_incremental) {
+        ble_prover->handleQuery_incremental(args, timeout, max_conflicts, fout);
+    } else {
+        ble_prover->handleQuery_Impl(ble_prover->prover_mk_and_exor(args), timeout, max_conflicts, fout);
+    }
     vector<void *>().swap(nodes);
     vector<void *>().swap(args);
     delete ble_prover;
