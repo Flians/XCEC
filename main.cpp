@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
         int max_conflicts = -1;
         bool is_incremental = false;
         if (argc >= 6 && argv[5][0] == 'i') {
+            printf("The prover is incremental.\n");
             is_incremental = true;
         }
         if (argc >= 8) {
