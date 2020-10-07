@@ -25,12 +25,14 @@ public:
     void evaluate_from_PIs_to_POs(vector<Node *> *PIs);
     // evaluate from POs to PIs
     void evaluate_from_POs_to_PIs(vector<Node *> *POs);
-    // evaluate using z3, timeout is millisecond
+    // evaluate using z3, timeout is second
     void evaluate_by_z3(vector<vector<Node *> > &layers, int timeout, int max_conflicts, bool is_incremental);
     // evaluate using stp, timeout is second
     void evaluate_by_stp(vector<vector<Node *> > &layers, int timeout, int max_conflicts, bool is_incremental);
     // evaluate using boolector, timeout is second
     void evaluate_by_boolector(vector<vector<Node *> > &layers, int timeout, int max_conflicts, bool is_incremental);
+    // iccad using stp, timeout is second
+    void iccad_by_stp(vector<vector<Node *> > &layers, int left_time, int max_conflicts);
 };
 
 #endif

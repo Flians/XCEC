@@ -225,6 +225,42 @@ void STPProver::handleQuery_incremental(std::vector<Expr> &exors, int timeout, i
     }
 }
 
+void STPProver::handleQuery_iccad(std::vector<Expr> &exors, int left_time, int max_conflicts, FILE *fout) {
+    for (auto &assert_var : this->assert_exprs) {
+        vc_assertFormula(this->handle, assert_var);
+    }
+    int result;
+    for (auto &output : exors)
+    {
+        int timeout = left_time/exors.size();
+        result = vc_query_with_timeout(this->handle, output, max_conflicts, timeout);
+        if (result == 0 || result == 2) {
+            break;
+        } else {
+            left_time -= timeout;
+        }
+    }
+    switch (result)
+    {
+    case 3:
+        printf("Timeout.\n");
+    case 1:
+        fprintf(fout, "EQ\n");
+        break;
+    case 2:
+        printf("Could not answer query\n");
+    case 0:
+        fprintf(fout, "NEQ\n");
+        for (auto &pi : this->in_exprs)
+        {
+            fprintf(fout, "%s %d\n", exprString(pi), getBVUnsigned(vc_getCounterExample(this->handle, pi)));
+        }
+        break;
+    default:
+        printf("Unhandled error\n");
+    }
+}
+
 
 /***************** test every operators **********************/
 void STPProver::test()

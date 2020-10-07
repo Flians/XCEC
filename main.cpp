@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 {
     if (argc >= 4)
     {
-        clock_t startTime, endTime;
+        clock_t startTime, endTime, parseTime, simplifyTime;
         startTime = clock();
         init_fout(argv[3]);
         /* parse Verilog files */
@@ -28,7 +28,8 @@ int main(int argc, char *argv[])
         miter.clean_wires();
         miter.clean_buf();
         endTime = clock();
-        cout << "The parsing time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
+        parseTime = endTime - startTime;
+        cout << "The parsing time is: " << (double)(parseTime) / CLOCKS_PER_SEC << " S" << endl;
 
         /* simplify the graph */
         simplify sim;
@@ -36,7 +37,8 @@ int main(int argc, char *argv[])
         sim.id_reassign_and_layered(miter.PIs, miter.POs);
         sim.merge_nodes_between_networks(); // no considering the positions of ports for DC and HUMX
         endTime = clock();
-        cout << "The parsing time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
+        simplifyTime = endTime - startTime;
+        cout << "The simplifying time is: " << (double)(simplifyTime) / CLOCKS_PER_SEC << " S" << endl;
 
         int timeout = 100;
         int max_conflicts = -1;
@@ -71,8 +73,8 @@ int main(int argc, char *argv[])
         }
         else
         {
-            cout << "The prover is stp." << endl;
-            cec_.evaluate_by_stp(sim.get_layers(), 1000, -1, false);
+            cout << "The prover is stp for iccad." << endl;
+            cec_.iccad_by_stp(sim.get_layers(), 2400 - (parseTime + simplifyTime)/CLOCKS_PER_SEC, -1);
         }
         close_fout();
         endTime = clock();

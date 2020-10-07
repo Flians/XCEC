@@ -48,6 +48,7 @@ public:
     void handleQuery_Impl(const Expr &left, const Expr &right, int timeout, int max_conflicts, FILE *fout);
     void handleQuery_Impl(const Expr &right, int timeout, int max_conflicts, FILE *fout);
     void handleQuery_incremental(std::vector<Expr> &exors, int timeout, int max_conflicts, FILE *fout);
+    void handleQuery_iccad(std::vector<Expr> &exors, int left_time, int max_conflicts, FILE *fout);
 
     /***************** test every operators **********************/
     void test();
