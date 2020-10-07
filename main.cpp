@@ -38,6 +38,8 @@ int main(int argc, char *argv[])
         endTime = clock();
         cout << "The parsing time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " S" << endl;
 
+        int timeout = 1000;
+        int max_conflicts = -1;
         cec cec_;
         startTime = clock();
         if (argc >= 5)
@@ -46,22 +48,22 @@ int main(int argc, char *argv[])
             {
             case Z3:
                 printf("The prover is %s\n", argv[4]);
-                cec_.evaluate_by_z3(sim.get_layers(), 1000000, 10000);
+                cec_.evaluate_by_z3(sim.get_layers(), timeout * 1000, max_conflicts);
                 break;
             case BOOLECTOR:
                 printf("The prover is %s\n", argv[4]);
-                cec_.evaluate_by_boolector(sim.get_layers(), 1000, 10000);
+                cec_.evaluate_by_boolector(sim.get_layers(), timeout, max_conflicts);
                 break;
             default:
                 printf("The prover is stp\n");
-                cec_.evaluate_by_stp(sim.get_layers(), 1000, 10000);
+                cec_.evaluate_by_stp(sim.get_layers(), timeout, max_conflicts);
                 break;
             }
         }
         else
         {
             printf("The prover is stp\n");
-            cec_.evaluate_by_stp(sim.get_layers(), 1000, 10000);
+            cec_.evaluate_by_stp(sim.get_layers(), timeout, max_conflicts);
         }
         close_fout();
         endTime = clock();

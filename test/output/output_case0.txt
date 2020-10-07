@@ -1,4 +1,4 @@
 NEQ
-a 3
-b 3
-in 3
+a  1
+b  0
+in  0

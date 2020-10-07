@@ -5,7 +5,7 @@
  * 
  * @param timeout millisecond
  */
-Z3Prover::Z3Prover(unsigned timeout)
+Z3Prover::Z3Prover(int timeout)
 {
     // init z3
     Z3_config cfg;
@@ -424,9 +424,9 @@ void Z3Prover::check(const Z3_ast &left, const Z3_ast &right, FILE *fout)
  * @param priority: pareto, box, lex
  * @param timeout millisecond
  */
-z3::params Z3Prover::config_z3(z3::context &logic, string &priority, unsigned timeout)
+z3::params Z3Prover::config_z3(z3::context &logic, string &priority, int timeout)
 {
-    z3::set_param("timeout", (int)timeout);
+    // z3::set_param("timeout", timeout);
     z3::params z3_param(logic);
     // http://smtlib.cs.uiowa.edu/logics-all.shtml
     logic.set("logic", "QF_BV");
@@ -435,7 +435,7 @@ z3::params Z3Prover::config_z3(z3::context &logic, string &priority, unsigned ti
     //z3_param.set(":opt.dump_models", true);
     // z3_param.set(":opt.pb.compile_equality", true);
     // z3_param.set(":opt.priority", priority.c_str());
-    z3_param.set("timeout", static_cast<unsigned>(timeout));
+    z3_param.set("timeout", timeout);
 
     return z3_param;
 }

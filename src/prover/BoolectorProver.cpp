@@ -41,7 +41,7 @@ void *BoolectorProver::prover_mk_variable(const std::string &name)
 {
     BoolectorNode *var = boolector_var((Btor *)this->handle, this->bv_sort, name.c_str());
     BoolectorNode *t_assert = boolector_ult((Btor *)this->handle, var, (BoolectorNode *)this->prover_x);
-    // boolector_assert((Btor *)this->handle, t_assert);
+    boolector_assert((Btor *)this->handle, t_assert);
     this->exprs.insert(var);
     this->assert_exprs.emplace_back(t_assert);
     this->in_exprs.emplace_back(var);
@@ -150,7 +150,7 @@ void *BoolectorProver::prover_mk_and_exor(std::vector<void *> &exors)
     return res;
 }
 
-void BoolectorProver::handleQuery(void *const &queryExpr, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
+void BoolectorProver::handleQuery(void *const &queryExpr, int timeout, int max_conflicts, FILE *fout)
 {
     BoolectorNode *formula = boolector_not((Btor *)this->handle, (BoolectorNode *)queryExpr);
     boolector_assert((Btor *)this->handle, formula);
@@ -178,33 +178,33 @@ void BoolectorProver::handleQuery(void *const &queryExpr, uint32_t timeout, uint
     boolector_release((Btor *)this->handle, formula);
 }
 
-void BoolectorProver::handleQuery_EQ(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
+void BoolectorProver::handleQuery_EQ(void *const &left, void *const &right, int timeout, int max_conflicts, FILE *fout)
 {
     BoolectorNode *t_eq = boolector_eq((Btor *)this->handle, (BoolectorNode *)left, (BoolectorNode *)right);
     this->handleQuery(t_eq, timeout, max_conflicts, fout);
     boolector_release((Btor *)this->handle, t_eq);
 }
 
-void BoolectorProver::handleQuery_Impl(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
+void BoolectorProver::handleQuery_Impl(void *const &left, void *const &right, int timeout, int max_conflicts, FILE *fout)
 {
     BoolectorNode *t_eq = boolector_implies((Btor *)this->handle, (BoolectorNode *)left, (BoolectorNode *)right);
     this->handleQuery(t_eq, timeout, max_conflicts, fout);
     boolector_release((Btor *)this->handle, t_eq);
 }
 
-void BoolectorProver::handleQuery_Impl(void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
+void BoolectorProver::handleQuery_Impl(void *const &right, int timeout, int max_conflicts, FILE *fout)
 {
     BoolectorNode *t_eq = boolector_implies((Btor *)this->handle, (BoolectorNode *)prover_mk_and_exor(this->assert_exprs), (BoolectorNode *)right);
     this->handleQuery(t_eq, timeout, max_conflicts, fout);
     boolector_release((Btor *)this->handle, t_eq);
 }
 
-void BoolectorProver::handleQuery_incremental(std::vector<void *> &exors, uint32_t timeout, uint32_t max_conflicts, FILE *fout) {
+void BoolectorProver::handleQuery_incremental(std::vector<void *> &exors, int timeout, int max_conflicts, FILE *fout) {
     int result;
-    BoolectorNode *prover_true = boolector_true((Btor *)this->handle);
+    BoolectorNode *prover_false = boolector_false((Btor *)this->handle);
     for (auto &output : exors)
     {
-        BoolectorNode *t_eq = boolector_eq((Btor *)this->handle, (BoolectorNode *)output, prover_true);
+        BoolectorNode *t_eq = boolector_eq((Btor *)this->handle, (BoolectorNode *)output, prover_false);
         this->exprs.insert(t_eq);
         boolector_assert((Btor *)this->handle, t_eq);
         result = boolector_limited_sat((Btor *)this->handle, timeout, max_conflicts);
@@ -232,7 +232,7 @@ void BoolectorProver::handleQuery_incremental(std::vector<void *> &exors, uint32
     default:
         printf("Unhandled error\n");
     }
-    boolector_release((Btor *)this->handle, prover_true);
+    boolector_release((Btor *)this->handle, prover_false);
 }
 
 /***************** test every operators **********************/

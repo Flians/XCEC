@@ -26,11 +26,11 @@ public:
     // evaluate from POs to PIs
     void evaluate_from_POs_to_PIs(vector<Node *> *POs);
     // evaluate using z3, timeout is millisecond
-    void evaluate_by_z3(vector<vector<Node *> > &layers, unsigned timeout, uint32_t max_conflicts);
+    void evaluate_by_z3(vector<vector<Node *> > &layers, int timeout, int max_conflicts);
     // evaluate using stp, timeout is second
-    void evaluate_by_stp(vector<vector<Node *> > &layers, uint32_t timeout, uint32_t max_conflicts);
+    void evaluate_by_stp(vector<vector<Node *> > &layers, int timeout, int max_conflicts);
     // evaluate using boolector, timeout is second
-    void evaluate_by_boolector(vector<vector<Node *> > &layers, uint32_t timeout, uint32_t max_conflicts);
+    void evaluate_by_boolector(vector<vector<Node *> > &layers, int timeout, int max_conflicts);
 };
 
 #endif

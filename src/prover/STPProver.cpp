@@ -141,13 +141,13 @@ Expr STPProver::stp_mk_and_exor(Expr *exprs, int size)
     return vc_andExprN(this->handle, exprs, size);
 }
 
-void STPProver::handleQuery(const Expr &queryExpr, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
+void STPProver::handleQuery(const Expr &queryExpr, int timeout, int max_conflicts, FILE *fout)
 {
     // Print the assertions
     // printf("Assertions:\n");
     // vc_printAsserts(this->handle, 0);
     // int result = vc_query(this->handle, queryExpr);
-    int result = vc_query_with_timeout(this->handle, queryExpr, max_conflicts, timeout);
+    int result = vc_query_with_timeout(this->handle, queryExpr, -1, -1);
     // printf("Query:\n");
     // vc_printQuery(this->handle);
     switch (result)
@@ -175,16 +175,16 @@ void STPProver::handleQuery(const Expr &queryExpr, uint32_t timeout, uint32_t ma
     vc_DeleteExpr(queryExpr);
 }
 
-void STPProver::handleQuery(const Expr &left, const Expr &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout)
+void STPProver::handleQuery(const Expr &left, const Expr &right, int timeout, int max_conflicts, FILE *fout)
 {
     this->handleQuery(vc_eqExpr(this->handle, left, right), timeout, max_conflicts, fout);
 }
 
-void STPProver::handleQuery_Impl(const Expr &left, const Expr &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout) {
+void STPProver::handleQuery_Impl(const Expr &left, const Expr &right, int timeout, int max_conflicts, FILE *fout) {
     this->handleQuery(vc_impliesExpr(this->handle, left, right), timeout, max_conflicts, fout);
 }
 
-void STPProver::handleQuery_Impl(const Expr &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout) {
+void STPProver::handleQuery_Impl(const Expr &right, int timeout, int max_conflicts, FILE *fout) {
     Expr left[this->assert_exprs.size()];
     std::copy(this->assert_exprs.begin(), this->assert_exprs.end(), left);
     this->handleQuery(vc_impliesExpr(this->handle, stp_mk_and_exor(left, this->assert_exprs.size()), right), timeout, max_conflicts, fout);

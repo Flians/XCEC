@@ -26,7 +26,7 @@ public:
     * 
     * @param timeout millisecond
     */
-   Z3Prover(unsigned timeout);
+   Z3Prover(int timeout);
    ~Z3Prover();
 
    Z3_context &get_context();
@@ -88,7 +88,7 @@ public:
     * @param priority: pareto, box, lex
     * @param timeout millisecond
     */
-   z3::params config_z3(z3::context &logic, string &priority, unsigned timeout);
+   z3::params config_z3(z3::context &logic, string &priority, int timeout);
 
    /***************** test every operators **********************/
    void check_without_sol(const Z3_ast &expr, FILE *fout);

@@ -99,11 +99,11 @@ public:
     virtual void *prover_mk_exor(void *const &, void *const &) = 0;
     virtual void *prover_mk_and_exor(std::vector<void *> &exprs) = 0;
 
-    virtual void handleQuery(void *const &queryExpr, uint32_t timeout, uint32_t max_conflicts, FILE *fout) = 0;
-    virtual void handleQuery_EQ(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout) = 0;
-    virtual void handleQuery_Impl(void *const &left, void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout) = 0;
-    virtual void handleQuery_Impl(void *const &right, uint32_t timeout, uint32_t max_conflicts, FILE *fout) = 0;
-    virtual void handleQuery_incremental(std::vector<void *> &exors, uint32_t timeout, uint32_t max_conflicts, FILE *fout) = 0;
+    virtual void handleQuery(void *const &queryExpr, int timeout, int max_conflicts, FILE *fout) = 0;
+    virtual void handleQuery_EQ(void *const &left, void *const &right, int timeout, int max_conflicts, FILE *fout) = 0;
+    virtual void handleQuery_Impl(void *const &left, void *const &right, int timeout, int max_conflicts, FILE *fout) = 0;
+    virtual void handleQuery_Impl(void *const &right, int timeout, int max_conflicts, FILE *fout) = 0;
+    virtual void handleQuery_incremental(std::vector<void *> &exors, int timeout, int max_conflicts, FILE *fout) = 0;
 
     /***************** test every operators **********************/
     virtual void test()
