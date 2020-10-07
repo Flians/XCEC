@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
         int max_conflicts = -1;
         bool is_incremental = false;
         if (argc >= 6 && argv[5][0] == 'i') {
-            printf("The prover is incremental.\n");
+            cout << "The prover is incremental." << endl;
             is_incremental = true;
         }
         if (argc >= 8) {
@@ -56,22 +56,22 @@ int main(int argc, char *argv[])
             switch (smt_str[argv[4]])
             {
             case Z3:
-                printf("The prover is %s\n", argv[4]);
+                cout << "The prover is " << argv[4] << endl;
                 cec_.evaluate_by_z3(sim.get_layers(), timeout, max_conflicts, is_incremental);
                 break;
             case BOOLECTOR:
-                printf("The prover is %s\n", argv[4]);
+                cout << "The prover is " << argv[4] << endl;
                 cec_.evaluate_by_boolector(sim.get_layers(), timeout, max_conflicts, is_incremental);
                 break;
             default:
-                printf("The prover is stp\n");
+                cout << "The prover is stp." << endl;
                 cec_.evaluate_by_stp(sim.get_layers(), timeout, max_conflicts, is_incremental);
                 break;
             }
         }
         else
         {
-            printf("The prover is stp\n");
+            cout << "The prover is stp." << endl;
             cec_.evaluate_by_stp(sim.get_layers(), 1000, -1, false);
         }
         close_fout();
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("Please input at least three parameters, like \"./XCEC <golden.v> <revised.v> <output> <i/u> <timeout(-1 unlimited) max_conflicts(-1 unlimited)>\".");
+        cout << "Please input at least three parameters, like \"./XCEC <golden.v> <revised.v> <output> <i/u> <timeout(-1 unlimited) max_conflicts(-1 unlimited)>\"." << endl;
     }
     return 0;
 }
