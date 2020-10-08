@@ -43,14 +43,14 @@ int main(int argc, char *argv[])
         int timeout = 1600 - (parseTime + simplifyTime)/CLOCKS_PER_SEC;
         int max_conflicts = -1;
         bool is_incremental = false;
+        if (argc >= 8) {
+            timeout = atoi(argv[6]);
+            max_conflicts = atoi(argv[7]);
+        }
         if (argc >= 6 && argv[5][0] == 'i') {
             cout << "The prover is incremental." << endl;
             is_incremental = true;
             timeout /= miter.POs.size();
-        }
-        if (argc >= 8) {
-            timeout = atoi(argv[6]);
-            max_conflicts = atoi(argv[7]);
         }
         cec cec_;
         startTime = clock();
