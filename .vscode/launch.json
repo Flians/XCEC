@@ -13,7 +13,8 @@
                 "./test/cases/case25/gf.v",
                 "./test/cases/case25/rf.v",
                 "./test/output/output_case25.txt",
-                "boolector"
+                "stp",
+                "i"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
