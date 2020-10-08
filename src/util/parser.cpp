@@ -346,12 +346,13 @@ void parser::clean_buf()
                     vis[in->id] = 1;
                 }
             }
-            if (cur->cell == IN) {
-                this->PIs.erase(find(this->PIs.begin(), this->PIs.end(), cur));
-                cout << "delete the primary input: " << cur->name << endl;
+            if (cur->cell != IN) {
+                delete cur;
+                cur = nullptr;
+            } else {
+                // this->PIs.erase(find(this->PIs.begin(), this->PIs.end(), cur));
+                cout << "The useless primary input: " << cur->name << endl;
             }
-            delete cur;
-            cur = nullptr;
         }
     }
     vector<bool>().swap(vis);

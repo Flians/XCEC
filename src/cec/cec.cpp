@@ -300,7 +300,7 @@ void cec::evaluate_by_stp(vector<vector<Node *>> &layers, int timeout, int max_c
         }
     }
 
-    int i = layers.back().size();
+    size_t i = layers.back().size();
     std::vector<Expr> args(i);
     for (auto &output : layers.back())
     {
