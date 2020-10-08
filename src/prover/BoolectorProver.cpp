@@ -200,7 +200,7 @@ void BoolectorProver::handleQuery_Impl(void *const &right, int timeout, int max_
 }
 
 void BoolectorProver::handleQuery_incremental(std::vector<void *> &exors, int timeout, int max_conflicts, FILE *fout) {
-    int result;
+    int result = BOOLECTOR_UNKNOWN;
     BoolectorNode *prover_false = boolector_false((Btor *)this->handle);
     for (auto &output : exors)
     {

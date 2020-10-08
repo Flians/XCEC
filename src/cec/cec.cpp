@@ -306,6 +306,7 @@ void cec::evaluate_by_stp(vector<vector<Node *>> &layers, int timeout, int max_c
     {
         args[i++] = nodes[output->id];
     }
+    swap(args.front(), args.back());
     if (is_incremental) {
         stp_prover.handleQuery_incremental(args, timeout, max_conflicts, fout);
     } else {

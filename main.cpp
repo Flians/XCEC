@@ -35,12 +35,12 @@ int main(int argc, char *argv[])
         simplify sim;
         startTime = clock();
         sim.id_reassign_and_layered(miter.PIs, miter.POs);
-        sim.merge_nodes_between_networks(); // no considering the positions of ports for DC and HUMX
+        sim.merge_nodes_between_networks();
         endTime = clock();
         simplifyTime = endTime - startTime;
         cout << "The simplifying time is: " << (double)(simplifyTime) / CLOCKS_PER_SEC << " S" << endl;
 
-        int timeout = 100;
+        int timeout = 1000;
         int max_conflicts = -1;
         bool is_incremental = false;
         if (argc >= 6 && argv[5][0] == 'i') {
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         else
         {
             cout << "The prover is stp for iccad." << endl;
-            cec_.evaluate_by_stp(sim.get_layers(), (1600 - (parseTime + simplifyTime)/CLOCKS_PER_SEC)/miter.POs.size(), -1, true);
+            cec_.evaluate_by_stp(sim.get_layers(), (1600 - (parseTime + simplifyTime)/CLOCKS_PER_SEC)/miter.POs.size(), -1, false);
         }
         close_fout();
         endTime = clock();

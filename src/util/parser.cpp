@@ -302,6 +302,7 @@ void parser::clean_buf()
     if (this->PIs.empty())
         return;
     stack<Node *> record;
+    stack<Node *> record_empty_out;
     vector<bool> vis(init_id, 0);
     for (auto &pi : this->PIs)
     {
@@ -312,8 +313,12 @@ void parser::clean_buf()
     {
         Node *cur = record.top();
         record.pop();
-        if (!cur || cur->outs.empty())
+        if (!cur || cur->cell == _EXOR)
         {
+            continue;
+        }
+        if (cur->outs.empty()) {
+            record_empty_out.push(cur);
             continue;
         }
         if (cur->cell == BUF)
@@ -327,6 +332,26 @@ void parser::clean_buf()
                 record.push(out);
                 vis[out->id] = 1;
             }
+        }
+    }
+    // delete all nodes whose outputs are empty.
+    std::fill(vis.begin(), vis.end(), 0);
+    while (!record_empty_out.empty()) {
+        Node *cur = record_empty_out.top();
+        record_empty_out.pop();
+        if (cur->outs.empty()) {
+            for (auto &in : cur->ins) {
+                if (in->outs.size() == 1 && !vis[in->id]) {
+                    record_empty_out.push(in);
+                    vis[in->id] = 1;
+                }
+            }
+            if (cur->cell == IN) {
+                this->PIs.erase(find(this->PIs.begin(), this->PIs.end(), cur));
+                cout << "delete the primary input: " << cur->name << endl;
+            }
+            delete cur;
+            cur = nullptr;
         }
     }
     vector<bool>().swap(vis);
