@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         else
         {
             cout << "The prover is stp for iccad." << endl;
-            cec_.iccad_by_stp(sim.get_layers(), 2400 - (parseTime + simplifyTime)/CLOCKS_PER_SEC, -1);
+            cec_.evaluate_by_stp(sim.get_layers(), (1600 - (parseTime + simplifyTime)/CLOCKS_PER_SEC)/miter.POs.size(), -1, true);
         }
         close_fout();
         endTime = clock();
