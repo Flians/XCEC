@@ -40,12 +40,13 @@ int main(int argc, char *argv[])
         simplifyTime = endTime - startTime;
         cout << "The simplifying time is: " << (double)(simplifyTime) / CLOCKS_PER_SEC << " S" << endl;
 
-        int timeout = 1000;
+        int timeout = 1600 - (parseTime + simplifyTime)/CLOCKS_PER_SEC;
         int max_conflicts = -1;
         bool is_incremental = false;
         if (argc >= 6 && argv[5][0] == 'i') {
             cout << "The prover is incremental." << endl;
             is_incremental = true;
+            timeout /= miter.POs.size();
         }
         if (argc >= 8) {
             timeout = atoi(argv[6]);
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
         else
         {
             cout << "The prover is stp for iccad." << endl;
-            cec_.evaluate_by_stp(sim.get_layers(), (1600 - (parseTime + simplifyTime)/CLOCKS_PER_SEC)/miter.POs.size(), -1, false);
+            cec_.evaluate_by_stp(sim.get_layers(), timeout, -1, false);
         }
         close_fout();
         endTime = clock();
