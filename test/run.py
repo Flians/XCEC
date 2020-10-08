@@ -12,8 +12,8 @@ def test_XCEC(exePath, smt='stp', increment = False, root='./', output='./output
         os.mkdir(os.path.join(root, 'log'))
     for i, dir in enumerate(files):
         with open(os.path.join(root, 'log/'+dir+'.txt'), 'w', encoding='utf8') as log:
-            cmd = [exePath, os.path.join(root, 'cases', dir, 'gf.v'), os.path.join(
-                root, 'cases', dir, 'rf.v'), os.path.join(output, 'output_' + dir + '.txt'), smt, 'i' if increment else 'u']
+            cmd = [exePath, os.path.join(root, 'cases', dir, 'gf.v'), os.path.join(root, 'cases', dir, 'rf.v'), 
+                os.path.join(output, 'output_' + dir + '.txt'), smt, 'i' if increment else 'u']
             p = subprocess.Popen(cmd, shell=False, bufsize=0,
                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             while p.poll() is None:
