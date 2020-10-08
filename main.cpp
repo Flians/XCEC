@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
         simplifyTime = endTime - startTime;
         cout << "The simplifying time is: " << (double)(simplifyTime) / CLOCKS_PER_SEC << " S" << endl;
 
-        int timeout = 1600 - (parseTime + simplifyTime)/CLOCKS_PER_SEC;
+        int timeout = 1200 - (parseTime + simplifyTime)/CLOCKS_PER_SEC;
         int max_conflicts = -1;
         bool is_incremental = false;
         if (argc >= 8) {
